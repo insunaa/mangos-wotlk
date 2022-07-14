@@ -193,18 +193,20 @@ bool NpcSpellClick_npc_obedienceCrystal(Player* pPlayer, Creature* pClickedCreat
     {
         CreatureList understudies;
         bool castSuccess = false;
+        bool chainSuccess = false;
         GetCreatureListWithEntryInGrid(understudies, pClickedCreature, NPC_DEATHKNIGHT_UNDERSTUDY, 60.f);
         for (auto understudy : understudies)
         {
-            if (understudy->HasCharmer())
-                continue;
             if (!castSuccess)
             {
                 pPlayer->CastSpell(nullptr, uiSpellId, TRIGGERED_OLD_TRIGGERED);
                 castSuccess = true;
             }
-            if (understudy->IsFriend(pPlayer))
+            if (!chainSuccess && understudy->IsFriend(pPlayer))
+            {
                 pClickedCreature->CastSpell(understudy, SPELL_OBEDIENCE_CHAINS, TRIGGERED_OLD_TRIGGERED);
+                chainSuccess = true;
+            }
         }
         return true;
     }

@@ -243,6 +243,7 @@ class instance_naxxramas : public ScriptedInstance
         void OnPlayerEnter(Player* pPlayer) override;
         void OnCreatureCreate(Creature* pCreature) override;
         void OnObjectCreate(GameObject* pGo) override;
+        void OnCreatureRespawn(Creature* pCreature) override;
 
         void OnPlayerDeath(Player* pPlayer) override;
         void OnCreatureDeath(Creature* pCreature) override;
