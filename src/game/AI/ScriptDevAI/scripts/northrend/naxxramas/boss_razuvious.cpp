@@ -181,7 +181,10 @@ struct npc_obedienceCrystalAI : public Scripted_NoMovementAI
 {
     npc_obedienceCrystalAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { }
 
-    void Reset() override { }
+    void Reset() override
+    {
+        m_creature->RemoveAllCooldowns();
+    }
 };
 
 bool NpcSpellClick_npc_obedienceCrystal(Player* pPlayer, Creature* pClickedCreature, uint32 uiSpellId)

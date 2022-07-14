@@ -84,6 +84,9 @@ void instance_naxxramas::OnPlayerEnter(Player* pPlayer)
     pPlayer->SummonCreature(NPC_SAPPHIRON, aSapphPositions[0], aSapphPositions[1], aSapphPositions[2], aSapphPositions[3], TEMPSPAWN_DEAD_DESPAWN, 0);
 }
 
+
+const float BUFF_FACTOR = 1.1f;
+
 void instance_naxxramas::OnCreatureCreate(Creature* pCreature)
 {
     switch (pCreature->GetEntry())
@@ -108,8 +111,17 @@ void instance_naxxramas::OnCreatureCreate(Creature* pCreature)
         case NPC_TESLA_COIL:        m_lThadTeslaCoilList.push_back(pCreature->GetObjectGuid()); break;
     }
 
-    const float BUFF_FACTOR = 1.1f;
+    pCreature->SetMaxHealth(pCreature->GetMaxHealth()* BUFF_FACTOR);
+    pCreature->GetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE);
+    pCreature->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, pCreature->GetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE)* BUFF_FACTOR);
+    pCreature->SetBaseWeaponDamage(RANGED_ATTACK, MINDAMAGE, pCreature->GetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE)* BUFF_FACTOR);
+    pCreature->SetBaseWeaponDamage(RANGED_ATTACK, MAXDAMAGE, pCreature->GetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE)* BUFF_FACTOR);
+    pCreature->SetBaseWeaponDamage(OFF_ATTACK, MINDAMAGE, pCreature->GetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE)* BUFF_FACTOR);
+    pCreature->SetBaseWeaponDamage(OFF_ATTACK, MAXDAMAGE, pCreature->GetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE)* BUFF_FACTOR);
+}
 
+void OnCreatureRespawn(Creature* pCreature)
+{
     pCreature->SetMaxHealth(pCreature->GetMaxHealth()* BUFF_FACTOR);
     pCreature->GetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE);
     pCreature->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, pCreature->GetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE)* BUFF_FACTOR);
