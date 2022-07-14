@@ -317,7 +317,7 @@ bool GossipSelect_npc_vengeance_greeter(Player* player, Creature* creature, uint
                 {
                     amount += ReputationMgr::PointsInRank[r];
                 }
-                player->GetReputationMgr().SetReputation(faction, 0);
+                player->GetReputationMgr().SetReputation(faction, amount);
             }
             if (player->GetTeam() == ALLIANCE)
             {
