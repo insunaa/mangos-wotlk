@@ -15,6 +15,7 @@
 #include "Globals/ObjectMgr.h"
 #include "GameEvents/GameEventMgr.h"
 #include "Globals/SharedDefines.h"
+#include "Platform/Define.h"
 #include "Server/DBCStores.h"
 #include "Server/DBCStructure.h"
 #include "World/WorldState.h"
@@ -143,6 +144,11 @@ struct npc_vengeance_greeterAI : public ScriptedAI
                         pet->GivePetLevel(tarGetLevel);
                         pet->SavePetToDB(PET_SAVE_AS_CURRENT, player);
                     }
+                }
+                const std::vector<uint32> petSpells = {6991, 1515, 982, 883, 2641};
+                for (uint32 spell : petSpells)
+                {
+                    player->learnSpell(spell, true);
                 }
             }
         }
@@ -503,7 +509,7 @@ const std::vector<uint32> Lvl80BiS_DruidBalance         = { 37180, 40680, 37673,
 const std::vector<uint32> Lvl80BiS_DruidResto           = { 43751, 43822, 37149, 42023, 37673, 41610, 37361, 37643, 37791, 44202, 37694, 37192, 37657, 40685, 37360, 38366 };
 const std::vector<uint32> Lvl80BiS_Rogue                = { 37293, 40678, 37139, 43566, 39558, 44203, 39560, 40694, 37644, 44297, 37642, 40586, 42987, 40684, 37856, 37667, 37191, 37693 };
 const std::vector<uint32> Lvl80BiS_Mage                 = { 37294, 40680, 37673, 41610, 43778, 43780, 37361, 40696, 37854, 44202, 40585, 37694, 40682, 37873, 37360, 37177, 43253, 40585, 43253 };
-const std::vector<uint32> Lvl80BiS_Hunter               = { 37188, 40678, 37679, 43406, 43734, 39579, 44203, 40692, 37669, 44297, 42642, 40586, 44253, 40684, 37693, 44193, 37191, 44448 };
+const std::vector<uint32> Lvl80BiS_Hunter               = { 37188, 40678, 37679, 43406, 39582, 39579, 44203, 40692, 37669, 44297, 42642, 40586, 44253, 40684, 37693, 44193, 37191, 44448 };
 const std::vector<uint32> Lvl80BiS_Warlock              = { 37684, 40680, 37673, 41610, 43790, 37361, 39500, 40696, 37854, 44202, 43253, 37694, 37873, 40682, 37360, 37177, 37721, 40698 };
 const std::vector<uint32> Lvl80BiS_DeathknightBlood     = { 41387, 40679, 37635, 37728, 39623, 37620, 39624, 40689, 43500, 44201, 37784, 42643, 37220, 36993, 41257, 40822 };
 const std::vector<uint32> Lvl80BiS_DeathknightFrost     = { 41386, 42645, 44195, 37647, 39617, 41355, 39618, 40694, 37193, 43402, 44935, 37642, 42987, 40684, 41383, 44250, 40715 };
@@ -876,8 +882,9 @@ struct npc_enlistment_officerAI : public ScriptedAI
             pet->CastPetAuras(true);
             pet->CastOwnerTalentAuras();
             pet->UpdateAllStats();
+            pet->SetFreeTalentPoints(16);
 
-            pet->SetPower(POWER_HAPPINESS, HAPPINESS_LEVEL_SIZE * 2); // Content
+            pet->SetPower(POWER_HAPPINESS, HAPPINESS_LEVEL_SIZE * 3); // Content
 
             // caster have pet now
             player->SetPet(pet);
