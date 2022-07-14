@@ -185,7 +185,7 @@ bool NpcSpellClick_npc_obedienceCrystal(Player* pPlayer, Creature* pClickedCreat
 {
     if (pClickedCreature->GetEntry() == NPC_OBEDIENCE_CRYSTAL)
     {
-        pPlayer->CastSpell(pPlayer, uiSpellId, TRIGGERED_OLD_TRIGGERED);
+        pPlayer->CastSpell(nullptr, uiSpellId, TRIGGERED_OLD_TRIGGERED);
         return true;
     }
 
