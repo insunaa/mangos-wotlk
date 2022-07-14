@@ -187,8 +187,8 @@ bool NpcSpellClick_npc_obedienceCrystal(Player* pPlayer, Creature* pClickedCreat
 {
     if (pClickedCreature->GetEntry() == NPC_OBEDIENCE_CRYSTAL)
     {
-        pPlayer->CastSpell(nullptr, uiSpellId, TRIGGERED_OLD_TRIGGERED);
-        Creature* understudy = GetClosestCreatureWithEntry(pClickedCreature, NPC_DEATHKNIGHT_UNDERSTUDY, 30.f);
+        Creature* understudy = GetClosestCreatureWithEntry(pClickedCreature, NPC_DEATHKNIGHT_UNDERSTUDY, 50.f);
+        pPlayer->CastSpell(understudy, uiSpellId, TRIGGERED_OLD_TRIGGERED);
         pClickedCreature->CastSpell(understudy, SPELL_OBEDIENCE_CHAINS, TRIGGERED_OLD_TRIGGERED);
         return true;
     }
