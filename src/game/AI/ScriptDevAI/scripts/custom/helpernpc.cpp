@@ -15,6 +15,8 @@
 #include "Globals/ObjectMgr.h"
 #include "GameEvents/GameEventMgr.h"
 #include "Globals/SharedDefines.h"
+#include "Server/DBCStores.h"
+#include "Server/DBCStructure.h"
 #include "World/WorldState.h"
 
 enum
@@ -303,6 +305,20 @@ bool GossipSelect_npc_vengeance_greeter(Player* player, Creature* creature, uint
             vengeanceGreeterAI->BoostPlayer(player, 80);
             player->CastSpell(player, SPELL_TELEPORT_VISUAL, TRIGGERED_OLD_TRIGGERED);
             // Teleport Player To Shattrath City
+            //player->GetReputationMgr().ModifyReputation(const FactionEntry *factionEntry, int32 standing)
+            std::vector<const FactionEntry*> factions;
+            factions.push_back(sFactionStore.LookupEntry(1091));
+            factions.push_back(sFactionStore.LookupEntry(1106));
+            factions.push_back(sFactionStore.LookupEntry(1090));
+            for (auto& faction : factions)
+            {
+                int64 amount = -42000;
+                for (int r = 0; r < MAX_REPUTATION_RANK; ++r)
+                {
+                    amount += ReputationMgr::PointsInRank[r];
+                }
+                player->GetReputationMgr().SetReputation(faction, 0);
+            }
             if (player->GetTeam() == ALLIANCE)
             {
                 player->TeleportTo(teleLocs[2].map, teleLocs[2].x, teleLocs[2].y, teleLocs[2].z, teleLocs[2].o);
