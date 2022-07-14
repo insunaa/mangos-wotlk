@@ -24,6 +24,7 @@ EndScriptData */
 #include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/include/sc_creature.h"
+#include "AI/ScriptDevAI/include/sc_grid_searchers.h"
 #include "Entities/Unit.h"
 #include "Spells/SpellDefines.h"
 #include "naxxramas.h"
@@ -187,9 +188,21 @@ bool NpcSpellClick_npc_obedienceCrystal(Player* pPlayer, Creature* pClickedCreat
 {
     if (pClickedCreature->GetEntry() == NPC_OBEDIENCE_CRYSTAL)
     {
-        Creature* understudy = GetClosestCreatureWithEntry(pClickedCreature, NPC_DEATHKNIGHT_UNDERSTUDY, 50.f);
-        pPlayer->CastSpell(understudy, uiSpellId, TRIGGERED_OLD_TRIGGERED);
-        pClickedCreature->CastSpell(understudy, SPELL_OBEDIENCE_CHAINS, TRIGGERED_OLD_TRIGGERED);
+        CreatureList understudies;
+        bool castSuccess = false;
+        GetCreatureListWithEntryInGrid(understudies, pClickedCreature, NPC_DEATHKNIGHT_UNDERSTUDY, 60.f);
+        for (auto understudy : understudies)
+        {
+            if (understudy->HasCharmer())
+                continue;
+            if (!castSuccess)
+            {
+                pPlayer->CastSpell(nullptr, uiSpellId, TRIGGERED_OLD_TRIGGERED);
+                castSuccess = true;
+            }
+            if (understudy->HasCharmer())
+                pClickedCreature->CastSpell(understudy, SPELL_OBEDIENCE_CHAINS, TRIGGERED_OLD_TRIGGERED);
+        }
         return true;
     }
 
