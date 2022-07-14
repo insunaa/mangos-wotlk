@@ -153,7 +153,7 @@ struct npc_vengeance_greeterAI : public ScriptedAI
         case 60:
             player->CastSpell(player, SPELL_JOURNEYMAN_RIDING, TRIGGERED_OLD_TRIGGERED);
             break;
-        case 70:
+        case 80:
             player->CastSpell(player, SPELL_ARTISAN_RIDING, TRIGGERED_OLD_TRIGGERED);
             player->CastSpell(player, SPELL_MASTER_FIRST_AID, TRIGGERED_OLD_TRIGGERED);
             player->learnSpell(SPELL_HEAVY_NETHER_BAND, false);
@@ -182,7 +182,7 @@ struct npc_vengeance_greeterAI : public ScriptedAI
         }
         else {
             // Onyxia Hide Backpack x4
-            if (!player->HasItemCount(17966, 4)) player->StoreNewItemInBestSlots(17966, 4);
+            if (!player->HasItemCount(23162, 4)) player->StoreNewItemInBestSlots(17966, 4);
 
             // Epic Ground Mount
             uint32 groundMount = GetStarterEpicMountForRace(player);
