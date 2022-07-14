@@ -2121,6 +2121,7 @@ struct npc_target_dummyAI : public Scripted_NoMovementAI
         m_uiEvadeTimer = 0;
         SetCombatMovement(false);
         SetReactState(REACT_PASSIVE);
+        SetDeathPrevention(true);
     }
 
     void Aggro(Unit* who) override
