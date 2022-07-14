@@ -50,9 +50,9 @@ struct CustomTeleportLocation
 };
 static const CustomTeleportLocation teleLocs[] =
 {
-    {0, -11792.108398f, -3226.608154f, -29.721224f, 2.613495f, 0},  // Dark Portal - Alliance
+    {571, 3668.719971f, -1262.459961f, 243.621994f, 4.785f, 65},    // Naxxramas
     {0, -11774.694336f, -3184.537598f, -28.923182f, 2.749808f, 0},  // Dark Portal - Horde
-    {530, -1982.2641f, 5073.6987f, 7.388187f, 1.227539f, 3703},     // Shattrath City - Alliance
+    {571, 5804.149902f, 624.770996f, 647.767029f, 1.64f, 4395},     // Dalaran
     {530, -1992.693726f, 5078.106934f, 7.165706f, 0.944797f, 3703}, // Shattrath City - Horde
 
     {0, -8931.93f, -132.83f, 82.88f, 3.26f, 0},                     // Northshire (Human)
@@ -211,11 +211,11 @@ bool GossipHello_npc_vengeance_greeter(Player* player, Creature* creature)
         if (player->GetLevel() < 60)
             player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_INTERACT_1, "|cFF00008BBoost to level 60|r", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3, "Are you sure?", 0, false);
         else {
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TAXI, "Teleport to Shattrath City", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TAXI, "Teleport to Blasted Lands (Dark Portal)", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 6);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TAXI, "Teleport to Dalaran", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TAXI, "Teleport to Naxxramas", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 6);
         }
-        if (player->GetLevel() < 70)
-            player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_INTERACT_1, "|cFF006400Boost to level 70|r", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4, "Are you sure?", 0, false);
+        if (player->GetLevel() < 80)
+            player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_INTERACT_1, "|cFF006400Boost to level 80|r", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4, "Are you sure?", 0, false);
     }
     else
     {
@@ -230,8 +230,8 @@ bool GossipHello_npc_vengeance_greeter(Player* player, Creature* creature)
             if (player->GetTeam() == HORDE)
                 minLevel = 20;
 
-            if (player->GetLevel() >= minLevel && player->GetLevel() <= 57)
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "I want to go straight to Outland. |cFF006400[INSTANT LEVEL 58]|r", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            //if (player->GetLevel() >= minLevel && player->GetLevel() <= 57)
+            //    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "I want to go straight to Outland. |cFF006400[INSTANT LEVEL 58]|r", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
         }
     }
 
@@ -245,7 +245,7 @@ bool GossipSelect_npc_vengeance_greeter(Player* player, Creature* creature, uint
     {
         switch (action)
         {
-        case 100:
+        /*case 100:
             player->PrepareGossipMenu(creature, GOSSIP_MENU_CONTACT);
             player->SendPreparedGossip(creature);
             break;
@@ -264,23 +264,23 @@ bool GossipSelect_npc_vengeance_greeter(Player* player, Creature* creature, uint
         case 104:
             player->PrepareGossipMenu(creature, GOSSIP_MENU_CHEATING);
             player->SendPreparedGossip(creature);
-            break;
+            break;*/
         case GOSSIP_ACTION_INFO_DEF + 1:
             player->PrepareGossipMenu(creature, GOSSIP_MENU_BOOST_CONFIRM);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "I'm ready. Take me to the front! |cFF006400[INSTANT LEVEL 58]|r", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "I'm ready. Take me to the front! |cFF006400[INSTANT LEVEL 80]|r", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
             player->SendPreparedGossip(creature);
             break;
         case GOSSIP_ACTION_INFO_DEF + 2:
         {
             player->CLOSE_GOSSIP_MENU();
-            vengeanceGreeterAI->BoostPlayer(player, 58);
+            vengeanceGreeterAI->BoostPlayer(player, 80);
             player->CastSpell(player, SPELL_TELEPORT_VISUAL, TRIGGERED_OLD_TRIGGERED);
             // Teleport Player to Dark Portal
-            if (player->GetTeam() == ALLIANCE)
-                player->TeleportTo(teleLocs[0].map, teleLocs[0].x, teleLocs[0].y, teleLocs[0].z, teleLocs[0].o);
-            else
-                player->TeleportTo(teleLocs[1].map, teleLocs[1].x, teleLocs[1].y, teleLocs[1].z, teleLocs[1].o);
-            break;
+            //if (player->GetTeam() == ALLIANCE)
+                player->TeleportTo(teleLocs[2].map, teleLocs[2].x, teleLocs[2].y, teleLocs[2].z, teleLocs[2].o);
+            //else
+            //    player->TeleportTo(teleLocs[1].map, teleLocs[1].x, teleLocs[1].y, teleLocs[1].z, teleLocs[1].o);
+            //break;
         }
         case GOSSIP_ACTION_INFO_DEF + 3:
         {
@@ -297,7 +297,7 @@ bool GossipSelect_npc_vengeance_greeter(Player* player, Creature* creature, uint
         case GOSSIP_ACTION_INFO_DEF + 4:
         {
             player->CLOSE_GOSSIP_MENU();
-            vengeanceGreeterAI->BoostPlayer(player, 70);
+            vengeanceGreeterAI->BoostPlayer(player, 80);
             player->CastSpell(player, SPELL_TELEPORT_VISUAL, TRIGGERED_OLD_TRIGGERED);
             // Teleport Player To Shattrath City
             if (player->GetTeam() == ALLIANCE)
@@ -467,24 +467,24 @@ const std::vector<uint32> Lvl60BiS_Mage                 = { 22498, 23057, 22983,
 const std::vector<uint32> Lvl60BiS_Hunter               = { 22438, 23053, 22439, 23045, 22436, 22443, 22437, 22441, 22442, 22440, 23067, 22961, 23041, 19406, 22816, 22802, 22812 };
 const std::vector<uint32> Lvl60BiS_Warlock              = { 22506, 23057, 22507, 23050, 22504, 21186, 23070, 21585, 22730, 22508, 21709, 23025, 19379, 23046, 22807, 23049, 22820 };
 
-const std::vector<uint32> Lvl70BiS_ShamanResto          = { 32524, 31016, 30873, 32528, 32238, 32275, 31012, 31019, 32370, 31022, 32258, 30869, 32500, 30882, 32496, 30619, 32344, 30023 };
-const std::vector<uint32> Lvl70BiS_ShamanEnhancement    = { 32323, 34912, 32510, 32497, 32335, 32234, 32376, 30900, 32260, 31024, 32346, 30864, 32946, 32945, 28830, 32505, 32332, 27815 };
-const std::vector<uint32> Lvl70BiS_ShamanElemental      = { 32331, 31017, 32242, 32527, 32247, 31008, 31014, 31020, 32349, 31023, 30044, 32259, 34009, 30872, 32483, 30626, 32374, 32330 };
-const std::vector<uint32> Lvl70BiS_PriestShadow         = { 32590, 31065, 32239, 32527, 32247, 31061, 31064, 30916, 30666, 31070, 32256, 30870, 32237, 30872, 32343, 32483, 28789, 32374 };
-const std::vector<uint32> Lvl70BiS_PriestDiscHoly       = { 32524, 31066, 32609, 32528, 32238, 31060, 31063, 30912, 32370, 31069, 30895, 30871, 32500, 30911, 32363, 32496, 29376, 32344 };
-const std::vector<uint32> Lvl70BiS_PaladinHoly          = { 32524, 30992, 32243, 32528, 32238, 30983, 30988, 30994, 32370, 30996, 30897, 30862, 32500, 30882, 32496, 29376, 28592 };
-const std::vector<uint32> Lvl70BiS_PaladinRetribution   = { 32323, 30990, 32345, 32497, 32335, 32278, 32373, 32341, 32591, 30866, 30032, 30057, 33503, 32332, 28830, 32505 };
-const std::vector<uint32> Lvl70BiS_PaladinProtection    = { 32331, 30991, 32245, 30083, 29297, 30985, 30987, 30995, 32362, 30998, 32342, 32279, 34009, 30909, 31856, 28789, 30620, 32368 };
-const std::vector<uint32> Lvl70BiS_WarriorFuryArms      = { 32323, 30975, 32345, 32497, 32335, 32278, 32373, 32341, 32260, 30979, 30032, 30861, 32369, 30881, 30105, 32505, 28830, 32348 };
-const std::vector<uint32> Lvl70BiS_WarriorProtection    = { 34010, 30976, 32268, 32261, 29297, 30970, 32521, 30978, 32362, 30980, 32333, 32232, 32254, 32375, 32325, 30620, 32501 };
-const std::vector<uint32> Lvl70BiS_DruidFeralCat        = { 32323, 32252, 32366, 32497, 32266, 32347, 32235, 31044, 32260, 31048, 30106, 32324, 32257, 28830, 32505, 30883 };
-const std::vector<uint32> Lvl70BiS_DruidFeralBear       = { 28660, 31042, 32593, 29279, 28792, 31034, 31039, 31044, 32362, 31048, 30879, 32324, 32658, 30620, 30021, 33509 };
-const std::vector<uint32> Lvl70BiS_DruidBalance         = { 32331, 31043, 32352, 32527, 32247, 31035, 31040, 31046, 32349, 31049, 30914, 32351, 32237, 30872, 32483, 30626, 32374, 27518 };
-const std::vector<uint32> Lvl70BiS_DruidResto           = { 32337, 31041, 30886, 32528, 29309, 31032, 31037, 31045, 32370, 31047, 32339, 30868, 32500, 30911, 32496, 29376, 32344, 30051 };
-const std::vector<uint32> Lvl70BiS_Rogue                = { 32323, 31028, 32366, 32497, 32266, 31026, 32235, 31029, 32260, 31030, 30879, 32324, 32369, 30881, 32269, 32326, 28830, 32505 };
-const std::vector<uint32> Lvl70BiS_Mage                 = { 32331, 31057, 32239, 32527, 32247, 31055, 32525, 31058, 30015, 31059, 30888, 30870, 30910, 30872, 29982, 32483, 27683, 32374 };
-const std::vector<uint32> Lvl70BiS_Hunter               = { 32323, 31004, 30880, 29301, 32497, 31001, 32376, 31005, 32260, 31006, 32346, 32251, 32369, 32236, 30906, 28830, 32505, 32248, 18714 };
-const std::vector<uint32> Lvl70BiS_Warlock              = { 32590, 31052, 30050, 32527, 32247, 31050, 32525, 31053, 32349, 31054, 32256, 29918, 30910, 30872, 32343, 32483, 27683, 32374 };
+const std::vector<uint32> Lvl80BiS_ShamanResto          = { 32524, 31016, 30873, 32528, 32238, 32275, 31012, 31019, 32370, 31022, 32258, 30869, 32500, 30882, 32496, 30619, 32344, 30023 };
+const std::vector<uint32> Lvl80BiS_ShamanEnhancement    = { 32323, 34912, 32510, 32497, 32335, 32234, 32376, 30900, 32260, 31024, 32346, 30864, 32946, 32945, 28830, 32505, 32332, 27815 };
+const std::vector<uint32> Lvl80BiS_ShamanElemental      = { 32331, 31017, 32242, 32527, 32247, 31008, 31014, 31020, 32349, 31023, 30044, 32259, 34009, 30872, 32483, 30626, 32374, 32330 };
+const std::vector<uint32> Lvl80BiS_PriestShadow         = { 32590, 31065, 32239, 32527, 32247, 31061, 31064, 30916, 30666, 31070, 32256, 30870, 32237, 30872, 32343, 32483, 28789, 32374 };
+const std::vector<uint32> Lvl80BiS_PriestDiscHoly       = { 32524, 31066, 32609, 32528, 32238, 31060, 31063, 30912, 32370, 31069, 30895, 30871, 32500, 30911, 32363, 32496, 29376, 32344 };
+const std::vector<uint32> Lvl80BiS_PaladinHoly          = { 32524, 30992, 32243, 32528, 32238, 30983, 30988, 30994, 32370, 30996, 30897, 30862, 32500, 30882, 32496, 29376, 28592 };
+const std::vector<uint32> Lvl80BiS_PaladinRetribution   = { 32323, 30990, 32345, 32497, 32335, 32278, 32373, 32341, 32591, 30866, 30032, 30057, 33503, 32332, 28830, 32505 };
+const std::vector<uint32> Lvl80BiS_PaladinProtection    = { 32331, 30991, 32245, 30083, 29297, 30985, 30987, 30995, 32362, 30998, 32342, 32279, 34009, 30909, 31856, 28789, 30620, 32368 };
+const std::vector<uint32> Lvl80BiS_WarriorFuryArms      = { 32323, 30975, 32345, 32497, 32335, 32278, 32373, 32341, 32260, 30979, 30032, 30861, 32369, 30881, 30105, 32505, 28830, 32348 };
+const std::vector<uint32> Lvl80BiS_WarriorProtection    = { 34010, 30976, 32268, 32261, 29297, 30970, 32521, 30978, 32362, 30980, 32333, 32232, 32254, 32375, 32325, 30620, 32501 };
+const std::vector<uint32> Lvl80BiS_DruidFeralCat        = { 32323, 32252, 32366, 32497, 32266, 32347, 32235, 31044, 32260, 31048, 30106, 32324, 32257, 28830, 32505, 30883 };
+const std::vector<uint32> Lvl80BiS_DruidFeralBear       = { 28660, 31042, 32593, 29279, 28792, 31034, 31039, 31044, 32362, 31048, 30879, 32324, 32658, 30620, 30021, 33509 };
+const std::vector<uint32> Lvl80BiS_DruidBalance         = { 32331, 31043, 32352, 32527, 32247, 31035, 31040, 31046, 32349, 31049, 30914, 32351, 32237, 30872, 32483, 30626, 32374, 27518 };
+const std::vector<uint32> Lvl80BiS_DruidResto           = { 32337, 31041, 30886, 32528, 29309, 31032, 31037, 31045, 32370, 31047, 32339, 30868, 32500, 30911, 32496, 29376, 32344, 30051 };
+const std::vector<uint32> Lvl80BiS_Rogue                = { 32323, 31028, 32366, 32497, 32266, 31026, 32235, 31029, 32260, 31030, 30879, 32324, 32369, 30881, 32269, 32326, 28830, 32505 };
+const std::vector<uint32> Lvl80BiS_Mage                 = { 32331, 31057, 32239, 32527, 32247, 31055, 32525, 31058, 30015, 31059, 30888, 30870, 30910, 30872, 29982, 32483, 27683, 32374 };
+const std::vector<uint32> Lvl80BiS_Hunter               = { 32323, 31004, 30880, 29301, 32497, 31001, 32376, 31005, 32260, 31006, 32346, 32251, 32369, 32236, 30906, 28830, 32505, 32248, 18714 };
+const std::vector<uint32> Lvl80BiS_Warlock              = { 32590, 31052, 30050, 32527, 32247, 31050, 32525, 31053, 32349, 31054, 32256, 29918, 30910, 30872, 32343, 32483, 27683, 32374 };
 
 // Instant 58
 //                                                          ring1   ring2   neck
@@ -670,25 +670,25 @@ struct npc_enlistment_officerAI : public ScriptedAI
         FullGearListBiS60.insert(std::end(FullGearListBiS60), std::begin(Lvl60BiS_Hunter), std::end(Lvl60BiS_Hunter));
         FullGearListBiS60.insert(std::end(FullGearListBiS60), std::begin(Lvl60BiS_Warlock), std::end(Lvl60BiS_Warlock));
 
-        FullGearListBiS70.clear();
-        FullGearListBiS70.insert(std::end(FullGearListBiS70), std::begin(Lvl70BiS_ShamanResto), std::end(Lvl70BiS_ShamanResto));
-        FullGearListBiS70.insert(std::end(FullGearListBiS70), std::begin(Lvl70BiS_ShamanEnhancement), std::end(Lvl70BiS_ShamanEnhancement));
-        FullGearListBiS70.insert(std::end(FullGearListBiS70), std::begin(Lvl70BiS_ShamanElemental), std::end(Lvl70BiS_ShamanElemental));
-        FullGearListBiS70.insert(std::end(FullGearListBiS70), std::begin(Lvl70BiS_PriestShadow), std::end(Lvl70BiS_PriestShadow));
-        FullGearListBiS70.insert(std::end(FullGearListBiS70), std::begin(Lvl70BiS_PriestDiscHoly), std::end(Lvl70BiS_PriestDiscHoly));
-        FullGearListBiS70.insert(std::end(FullGearListBiS70), std::begin(Lvl70BiS_PaladinHoly), std::end(Lvl70BiS_PaladinHoly));
-        FullGearListBiS70.insert(std::end(FullGearListBiS70), std::begin(Lvl70BiS_PaladinRetribution), std::end(Lvl70BiS_PaladinRetribution));
-        FullGearListBiS70.insert(std::end(FullGearListBiS70), std::begin(Lvl70BiS_PaladinProtection), std::end(Lvl70BiS_PaladinProtection));
-        FullGearListBiS70.insert(std::end(FullGearListBiS70), std::begin(Lvl70BiS_WarriorFuryArms), std::end(Lvl70BiS_WarriorFuryArms));
-        FullGearListBiS70.insert(std::end(FullGearListBiS70), std::begin(Lvl70BiS_WarriorProtection), std::end(Lvl70BiS_WarriorProtection));
-        FullGearListBiS70.insert(std::end(FullGearListBiS70), std::begin(Lvl70BiS_DruidFeralCat), std::end(Lvl70BiS_DruidFeralCat));
-        FullGearListBiS70.insert(std::end(FullGearListBiS70), std::begin(Lvl70BiS_DruidFeralBear), std::end(Lvl70BiS_DruidFeralBear));
-        FullGearListBiS70.insert(std::end(FullGearListBiS70), std::begin(Lvl70BiS_DruidBalance), std::end(Lvl70BiS_DruidBalance));
-        FullGearListBiS70.insert(std::end(FullGearListBiS70), std::begin(Lvl70BiS_DruidResto), std::end(Lvl70BiS_DruidResto));
-        FullGearListBiS70.insert(std::end(FullGearListBiS70), std::begin(Lvl70BiS_Rogue), std::end(Lvl70BiS_Rogue));
-        FullGearListBiS70.insert(std::end(FullGearListBiS70), std::begin(Lvl70BiS_Mage), std::end(Lvl70BiS_Mage));
-        FullGearListBiS70.insert(std::end(FullGearListBiS70), std::begin(Lvl70BiS_Hunter), std::end(Lvl70BiS_Hunter));
-        FullGearListBiS70.insert(std::end(FullGearListBiS70), std::begin(Lvl70BiS_Warlock), std::end(Lvl70BiS_Warlock));
+        FullGearListBiS80.clear();
+        FullGearListBiS80.insert(std::end(FullGearListBiS80), std::begin(Lvl80BiS_ShamanResto), std::end(Lvl80BiS_ShamanResto));
+        FullGearListBiS80.insert(std::end(FullGearListBiS80), std::begin(Lvl80BiS_ShamanEnhancement), std::end(Lvl80BiS_ShamanEnhancement));
+        FullGearListBiS80.insert(std::end(FullGearListBiS80), std::begin(Lvl80BiS_ShamanElemental), std::end(Lvl80BiS_ShamanElemental));
+        FullGearListBiS80.insert(std::end(FullGearListBiS80), std::begin(Lvl80BiS_PriestShadow), std::end(Lvl80BiS_PriestShadow));
+        FullGearListBiS80.insert(std::end(FullGearListBiS80), std::begin(Lvl80BiS_PriestDiscHoly), std::end(Lvl80BiS_PriestDiscHoly));
+        FullGearListBiS80.insert(std::end(FullGearListBiS80), std::begin(Lvl80BiS_PaladinHoly), std::end(Lvl80BiS_PaladinHoly));
+        FullGearListBiS80.insert(std::end(FullGearListBiS80), std::begin(Lvl80BiS_PaladinRetribution), std::end(Lvl80BiS_PaladinRetribution));
+        FullGearListBiS80.insert(std::end(FullGearListBiS80), std::begin(Lvl80BiS_PaladinProtection), std::end(Lvl80BiS_PaladinProtection));
+        FullGearListBiS80.insert(std::end(FullGearListBiS80), std::begin(Lvl80BiS_WarriorFuryArms), std::end(Lvl80BiS_WarriorFuryArms));
+        FullGearListBiS80.insert(std::end(FullGearListBiS80), std::begin(Lvl80BiS_WarriorProtection), std::end(Lvl80BiS_WarriorProtection));
+        FullGearListBiS80.insert(std::end(FullGearListBiS80), std::begin(Lvl80BiS_DruidFeralCat), std::end(Lvl80BiS_DruidFeralCat));
+        FullGearListBiS80.insert(std::end(FullGearListBiS80), std::begin(Lvl80BiS_DruidFeralBear), std::end(Lvl80BiS_DruidFeralBear));
+        FullGearListBiS80.insert(std::end(FullGearListBiS80), std::begin(Lvl80BiS_DruidBalance), std::end(Lvl80BiS_DruidBalance));
+        FullGearListBiS80.insert(std::end(FullGearListBiS80), std::begin(Lvl80BiS_DruidResto), std::end(Lvl80BiS_DruidResto));
+        FullGearListBiS80.insert(std::end(FullGearListBiS80), std::begin(Lvl80BiS_Rogue), std::end(Lvl80BiS_Rogue));
+        FullGearListBiS80.insert(std::end(FullGearListBiS80), std::begin(Lvl80BiS_Mage), std::end(Lvl80BiS_Mage));
+        FullGearListBiS80.insert(std::end(FullGearListBiS80), std::begin(Lvl80BiS_Hunter), std::end(Lvl80BiS_Hunter));
+        FullGearListBiS80.insert(std::end(FullGearListBiS80), std::begin(Lvl80BiS_Warlock), std::end(Lvl80BiS_Warlock));
     }
 
     bool m_bCanGreet;
@@ -697,7 +697,7 @@ struct npc_enlistment_officerAI : public ScriptedAI
     std::vector<uint32> FullGearList;
     std::vector<uint32> FullGearListInstant58;
     std::vector<uint32> FullGearListBiS60;
-    std::vector<uint32> FullGearListBiS70;
+    std::vector<uint32> FullGearListBiS80;
 
     void Reset() override
     {
@@ -708,12 +708,12 @@ struct npc_enlistment_officerAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (m_uiGreetTimer < uiDiff)
+        /*if (m_uiGreetTimer < uiDiff)
         {
             m_bCanGreet = true;
         }
         else
-            m_uiGreetTimer -= uiDiff;
+            m_uiGreetTimer -= uiDiff;*/
     }
 
     void MoveInLineOfSight(Unit* pWho) override
@@ -1396,27 +1396,27 @@ bool GossipHello_npc_enlistment_officer(Player* player, Creature* creature)
 
         player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TRAINER, "Train talent spell ranks", GOSSIP_SENDER_MAIN, GOSSIP_OPTION_TRAINER);
 
-        if (creature->GetEntry() == NPC_MASTER_PROVISIONER)
+        if (creature->GetEntry() == NPC_MASTER_PROVISIONER ||  true)
         {
-            if (player->GetLevel() >= 60)
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_BATTLE, "|cFF0008E8Full \"best in slot\" gear - Classic|r", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2000);
-            if (player->GetLevel() == 70)
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_BATTLE, "|cFF0008E8Full \"best in slot\" gear - TBC|r", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3000);
+            /*if (player->GetLevel() >= 60)
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_BATTLE, "|cFF0008E8Full \"best in slot\" gear - Classic|r", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2000);*/
+            if (player->GetLevel() == 80)
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_BATTLE, "|cFF0008E8Full \"best in slot\" gear - WotLK|r", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3000);
 
             if (enlistmentOfficerAI->HasStarterSet(player, enlistmentOfficerAI->FullGearListBiS60))
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_BATTLE, "|cFF8B0000Remove all level 60 BiS gear.|r", GOSSIP_SENDER_MAIN, 93);
-            if (enlistmentOfficerAI->HasStarterSet(player, enlistmentOfficerAI->FullGearListBiS70))
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_BATTLE, "|cFF8B0000Remove all level 70 BiS gear.|r", GOSSIP_SENDER_MAIN, 94);
+            if (enlistmentOfficerAI->HasStarterSet(player, enlistmentOfficerAI->FullGearListBiS80))
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_BATTLE, "|cFF8B0000Remove all level 80 BiS gear.|r", GOSSIP_SENDER_MAIN, 94);
 
             if (enlistmentOfficerAI->HasStarterSet(player, enlistmentOfficerAI->FullGearList))
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_BATTLE, "|cFF8B0000Remove all custom uncommon gear.|r", GOSSIP_SENDER_MAIN, 95);
-            else if (player->GetLevel() == 70)
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_BATTLE, "Build starter set of uncommon quality level 70 gear with custom stat modifiers", GOSSIP_SENDER_MAIN, 99);
+//            else if (player->GetLevel() == 70)
+//                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_BATTLE, "Build starter set of uncommon quality level 70 gear with custom stat modifiers", GOSSIP_SENDER_MAIN, 99);
 
             uint32 groundMount = enlistmentOfficerAI->GetStarterEpicMountForRace(player);
             // Flying Mount - Swift Blue Gryphon / Swift Red Wind Rider
             uint32 flyingMount = player->GetTeam() == ALLIANCE ? 25473 : 25477;
-            if ((!player->HasItemCount(groundMount, 1) || !player->HasItemCount(flyingMount, 1)) && player->GetLevel() == 70)
+            if ((!player->HasItemCount(groundMount, 1) || !player->HasItemCount(flyingMount, 1)) && player->GetLevel() >= 70)
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_INTERACT_1, "I seem to be missing my mount. Can you give me one?", GOSSIP_SENDER_MAIN, 96);
 
             if (creature->GetMapId() == 530)
@@ -1444,7 +1444,7 @@ bool GossipHello_npc_enlistment_officer(Player* player, Creature* creature)
 
         player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Basic Supplies", GOSSIP_SENDER_MAIN, GOSSIP_OPTION_VENDOR);
 
-        if (player->GetLevel() <= 60 || creature->GetEntry() == NPC_MASTER_PROVISIONER)
+        if (player->GetLevel() <= 80 || creature->GetEntry() == NPC_MASTER_PROVISIONER)
         {
             player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_CHAT, "Unlearn Talents", GOSSIP_SENDER_MAIN, 500, "Are you sure?", 0, false);
 
@@ -1463,7 +1463,7 @@ bool GossipHello_npc_enlistment_officer(Player* player, Creature* creature)
             player->SEND_GOSSIP_MENU(GOSSIP_TEXT_REFUSE_LOW_70, creature->GetObjectGuid());
         else if (creature->GetEntry() == NPC_ALLIANCE_OFFICER || creature->GetEntry() == NPC_HORDE_OFFICER)
             player->SEND_GOSSIP_MENU(GOSSIP_TEXT_ENLIST_GREET, creature->GetObjectGuid());
-        else if (creature->GetEntry() == NPC_MASTER_PROVISIONER)
+        else
         {
             if (player->GetMoney() < 100000000)
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "I need money!", GOSSIP_SENDER_MAIN, 600);
@@ -1560,25 +1560,25 @@ bool GossipSelect_npc_enlistment_officer(Player* player, Creature* creature, uin
                 break;
             }
         }
-        // Teleport - Blasted Lands (Dark Portal)
+        // Teleport - Naxxramas (Dragonblight)
         else if (action == 90)
         {
             player->CLOSE_GOSSIP_MENU();
             player->CastSpell(player, SPELL_TELEPORT_VISUAL, TRIGGERED_OLD_TRIGGERED);
-            if (player->GetTeam() == ALLIANCE)
-                player->TeleportTo(teleLocs[0].map, teleLocs[0].x, teleLocs[0].y, teleLocs[0].z, teleLocs[0].o);
-            else
-                player->TeleportTo(teleLocs[1].map, teleLocs[1].x, teleLocs[1].y, teleLocs[1].z, teleLocs[1].o);
+            //if (player->GetTeam() == ALLIANCE)
+            player->TeleportTo(teleLocs[0].map, teleLocs[0].x, teleLocs[0].y, teleLocs[0].z, teleLocs[0].o);
+            //else
+            //    player->TeleportTo(teleLocs[1].map, teleLocs[1].x, teleLocs[1].y, teleLocs[1].z, teleLocs[1].o);
         }
-        // Teleport - Shattrath City
+        // Teleport - Dalaran
         else if (action == 91)
         {
             player->CLOSE_GOSSIP_MENU();
             player->CastSpell(player, SPELL_TELEPORT_VISUAL, TRIGGERED_OLD_TRIGGERED);
-            if (player->GetTeam() == ALLIANCE)
+            //if (player->GetTeam() == ALLIANCE)
                 player->TeleportTo(teleLocs[2].map, teleLocs[2].x, teleLocs[2].y, teleLocs[2].z, teleLocs[2].o);
-            else
-                player->TeleportTo(teleLocs[3].map, teleLocs[3].x, teleLocs[3].y, teleLocs[3].z, teleLocs[3].o);
+            //else
+            //    player->TeleportTo(teleLocs[3].map, teleLocs[3].x, teleLocs[3].y, teleLocs[3].z, teleLocs[3].o);
         }
 
         // Remove Starter Set - Instant 58
@@ -1596,7 +1596,7 @@ bool GossipSelect_npc_enlistment_officer(Player* player, Creature* creature, uin
         // Remove Starter Set - BiS 70
         else if (action == 94)
         {
-            enlistmentOfficerAI->RemoveStarterSet(player, enlistmentOfficerAI->FullGearListBiS70);
+            enlistmentOfficerAI->RemoveStarterSet(player, enlistmentOfficerAI->FullGearListBiS80);
             player->CLOSE_GOSSIP_MENU();
         }
         // Remove Starter Set - Custom 70 Uncommon
@@ -1609,7 +1609,7 @@ bool GossipSelect_npc_enlistment_officer(Player* player, Creature* creature, uin
         // Add Starter Mount
         else if (action == 96)
         {
-            if (creature->GetEntry() == NPC_MASTER_PROVISIONER) {
+            if (true || creature->GetEntry() == NPC_MASTER_PROVISIONER) {
                 uint32 groundMount = enlistmentOfficerAI->GetStarterEpicMountForRace(player);
                 if (!player->HasItemCount(groundMount, 1)) player->StoreNewItemInBestSlots(groundMount, 1);
 
@@ -1636,7 +1636,7 @@ bool GossipSelect_npc_enlistment_officer(Player* player, Creature* creature, uin
         }
 
         // Choose Instant 70 Starter Set
-        else if (action == 99 && creature->GetEntry() == NPC_MASTER_PROVISIONER)
+        else if (action == 99 || creature->GetEntry() == NPC_MASTER_PROVISIONER)
         {
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "<- Back to Main Menu", GOSSIP_SENDER_MAIN, 29);
             switch (player->getClass())
@@ -1966,19 +1966,19 @@ bool GossipSelect_npc_enlistment_officer(Player* player, Creature* creature, uin
             switch (player->getClass())
             {
             case CLASS_ROGUE:
-                enlistmentOfficerAI->GivePlayerItems(player, Lvl70BiS_Rogue);
+                enlistmentOfficerAI->GivePlayerItems(player, Lvl80BiS_Rogue);
                 player->CLOSE_GOSSIP_MENU();
                 break;
             case CLASS_MAGE:
-                enlistmentOfficerAI->GivePlayerItems(player, Lvl70BiS_Mage);
+                enlistmentOfficerAI->GivePlayerItems(player, Lvl80BiS_Mage);
                 player->CLOSE_GOSSIP_MENU();
                 break;
             case CLASS_HUNTER:
-                enlistmentOfficerAI->GivePlayerItems(player, Lvl70BiS_Hunter);
+                enlistmentOfficerAI->GivePlayerItems(player, Lvl80BiS_Hunter);
                 player->CLOSE_GOSSIP_MENU();
                 break;
             case CLASS_WARLOCK:
-                enlistmentOfficerAI->GivePlayerItems(player, Lvl70BiS_Warlock);
+                enlistmentOfficerAI->GivePlayerItems(player, Lvl80BiS_Warlock);
                 player->CLOSE_GOSSIP_MENU();
                 break;
             case CLASS_SHAMAN:
@@ -2021,33 +2021,33 @@ bool GossipSelect_npc_enlistment_officer(Player* player, Creature* creature, uin
 
         // TBC Full Best in Slot (Spec Selected)
         // Shaman - Restoration
-        case GOSSIP_ACTION_INFO_DEF + 3001: enlistmentOfficerAI->GivePlayerItems(player, Lvl70BiS_ShamanResto); player->GetPlayerMenu()->CloseGossip(); break;
+        case GOSSIP_ACTION_INFO_DEF + 3001: enlistmentOfficerAI->GivePlayerItems(player, Lvl80BiS_ShamanResto); player->GetPlayerMenu()->CloseGossip(); break;
         // Shaman - Enhancement
-        case GOSSIP_ACTION_INFO_DEF + 3002: enlistmentOfficerAI->GivePlayerItems(player, Lvl70BiS_ShamanEnhancement); player->GetPlayerMenu()->CloseGossip(); break;
+        case GOSSIP_ACTION_INFO_DEF + 3002: enlistmentOfficerAI->GivePlayerItems(player, Lvl80BiS_ShamanEnhancement); player->GetPlayerMenu()->CloseGossip(); break;
         // Shaman - Elemental
-        case GOSSIP_ACTION_INFO_DEF + 3003: enlistmentOfficerAI->GivePlayerItems(player, Lvl70BiS_ShamanElemental); player->GetPlayerMenu()->CloseGossip(); break;
+        case GOSSIP_ACTION_INFO_DEF + 3003: enlistmentOfficerAI->GivePlayerItems(player, Lvl80BiS_ShamanElemental); player->GetPlayerMenu()->CloseGossip(); break;
         // Priest - Shadow
-        case GOSSIP_ACTION_INFO_DEF + 3004: enlistmentOfficerAI->GivePlayerItems(player, Lvl70BiS_PriestShadow); player->GetPlayerMenu()->CloseGossip(); break;
+        case GOSSIP_ACTION_INFO_DEF + 3004: enlistmentOfficerAI->GivePlayerItems(player, Lvl80BiS_PriestShadow); player->GetPlayerMenu()->CloseGossip(); break;
         // Priest - Discipline/Holy
-        case GOSSIP_ACTION_INFO_DEF + 3005: enlistmentOfficerAI->GivePlayerItems(player, Lvl70BiS_PriestDiscHoly); player->GetPlayerMenu()->CloseGossip(); break;
+        case GOSSIP_ACTION_INFO_DEF + 3005: enlistmentOfficerAI->GivePlayerItems(player, Lvl80BiS_PriestDiscHoly); player->GetPlayerMenu()->CloseGossip(); break;
         // Paladin - Holy
-        case GOSSIP_ACTION_INFO_DEF + 3006: enlistmentOfficerAI->GivePlayerItems(player, Lvl70BiS_PaladinHoly); player->GetPlayerMenu()->CloseGossip(); break;
+        case GOSSIP_ACTION_INFO_DEF + 3006: enlistmentOfficerAI->GivePlayerItems(player, Lvl80BiS_PaladinHoly); player->GetPlayerMenu()->CloseGossip(); break;
         // Paladin - Retribution
-        case GOSSIP_ACTION_INFO_DEF + 3007: enlistmentOfficerAI->GivePlayerItems(player, Lvl70BiS_PaladinRetribution); player->GetPlayerMenu()->CloseGossip(); break;
+        case GOSSIP_ACTION_INFO_DEF + 3007: enlistmentOfficerAI->GivePlayerItems(player, Lvl80BiS_PaladinRetribution); player->GetPlayerMenu()->CloseGossip(); break;
         // Paladin - Protection
-        case GOSSIP_ACTION_INFO_DEF + 3008: enlistmentOfficerAI->GivePlayerItems(player, Lvl70BiS_PaladinProtection); player->GetPlayerMenu()->CloseGossip(); break;
+        case GOSSIP_ACTION_INFO_DEF + 3008: enlistmentOfficerAI->GivePlayerItems(player, Lvl80BiS_PaladinProtection); player->GetPlayerMenu()->CloseGossip(); break;
         // Warrior - Fury/Arms
-        case GOSSIP_ACTION_INFO_DEF + 3009: enlistmentOfficerAI->GivePlayerItems(player, Lvl70BiS_WarriorFuryArms); player->GetPlayerMenu()->CloseGossip(); break;
+        case GOSSIP_ACTION_INFO_DEF + 3009: enlistmentOfficerAI->GivePlayerItems(player, Lvl80BiS_WarriorFuryArms); player->GetPlayerMenu()->CloseGossip(); break;
         // Warrior - Protection
-        case GOSSIP_ACTION_INFO_DEF + 3010: enlistmentOfficerAI->GivePlayerItems(player, Lvl70BiS_WarriorProtection); player->GetPlayerMenu()->CloseGossip(); break;
+        case GOSSIP_ACTION_INFO_DEF + 3010: enlistmentOfficerAI->GivePlayerItems(player, Lvl80BiS_WarriorProtection); player->GetPlayerMenu()->CloseGossip(); break;
         // Druid - Feral (Cat/DPS)
-        case GOSSIP_ACTION_INFO_DEF + 3011: enlistmentOfficerAI->GivePlayerItems(player, Lvl70BiS_DruidFeralCat); player->GetPlayerMenu()->CloseGossip(); break;
+        case GOSSIP_ACTION_INFO_DEF + 3011: enlistmentOfficerAI->GivePlayerItems(player, Lvl80BiS_DruidFeralCat); player->GetPlayerMenu()->CloseGossip(); break;
         // Druid - Feral (Bear/Tank)
-        case GOSSIP_ACTION_INFO_DEF + 3012: enlistmentOfficerAI->GivePlayerItems(player, Lvl70BiS_DruidFeralBear); player->GetPlayerMenu()->CloseGossip(); break;
+        case GOSSIP_ACTION_INFO_DEF + 3012: enlistmentOfficerAI->GivePlayerItems(player, Lvl80BiS_DruidFeralBear); player->GetPlayerMenu()->CloseGossip(); break;
         // Druid - Balance
-        case GOSSIP_ACTION_INFO_DEF + 3013: enlistmentOfficerAI->GivePlayerItems(player, Lvl70BiS_DruidBalance); player->GetPlayerMenu()->CloseGossip(); break;
+        case GOSSIP_ACTION_INFO_DEF + 3013: enlistmentOfficerAI->GivePlayerItems(player, Lvl80BiS_DruidBalance); player->GetPlayerMenu()->CloseGossip(); break;
         // Druid - Restoration
-        case GOSSIP_ACTION_INFO_DEF + 3014: enlistmentOfficerAI->GivePlayerItems(player, Lvl70BiS_DruidResto); player->GetPlayerMenu()->CloseGossip(); break;
+        case GOSSIP_ACTION_INFO_DEF + 3014: enlistmentOfficerAI->GivePlayerItems(player, Lvl80BiS_DruidResto); player->GetPlayerMenu()->CloseGossip(); break;
     }
     }
 
