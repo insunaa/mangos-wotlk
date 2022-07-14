@@ -111,13 +111,13 @@ void instance_naxxramas::OnCreatureCreate(Creature* pCreature)
         case NPC_TESLA_COIL:        m_lThadTeslaCoilList.push_back(pCreature->GetObjectGuid()); break;
     }
 
-    pCreature->SetMaxHealth(pCreature->GetMaxHealth()* BUFF_FACTOR);
+    /*pCreature->SetMaxHealth(pCreature->GetMaxHealth()* BUFF_FACTOR);
     pCreature->GetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE);
     pCreature->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, pCreature->GetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE)* BUFF_FACTOR);
     pCreature->SetBaseWeaponDamage(RANGED_ATTACK, MINDAMAGE, pCreature->GetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE)* BUFF_FACTOR);
     pCreature->SetBaseWeaponDamage(RANGED_ATTACK, MAXDAMAGE, pCreature->GetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE)* BUFF_FACTOR);
     pCreature->SetBaseWeaponDamage(OFF_ATTACK, MINDAMAGE, pCreature->GetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE)* BUFF_FACTOR);
-    pCreature->SetBaseWeaponDamage(OFF_ATTACK, MAXDAMAGE, pCreature->GetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE)* BUFF_FACTOR);
+    pCreature->SetBaseWeaponDamage(OFF_ATTACK, MAXDAMAGE, pCreature->GetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE)* BUFF_FACTOR);*/
 }
 
 void instance_naxxramas::OnCreatureRespawn(Creature* pCreature)
