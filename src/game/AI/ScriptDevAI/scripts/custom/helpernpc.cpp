@@ -307,8 +307,8 @@ bool GossipSelect_npc_vengeance_greeter(Player* player, Creature* creature, uint
             }
             else
             {
-                player->TeleportTo(teleLocs[3].map, teleLocs[3].x, teleLocs[3].y, teleLocs[3].z, teleLocs[3].o);
-                player->SetHomebindToLocation(WorldLocation(teleLocs[3].map, teleLocs[3].x, teleLocs[3].y, teleLocs[3].z, teleLocs[3].o), teleLocs[3].area);
+                player->TeleportTo(teleLocs[2].map, teleLocs[2].x, teleLocs[2].y, teleLocs[2].z, teleLocs[2].o);
+                player->SetHomebindToLocation(WorldLocation(teleLocs[2].map, teleLocs[2].x, teleLocs[2].y, teleLocs[2].z, teleLocs[2].o), teleLocs[2].area);
             }
             break;
         }
