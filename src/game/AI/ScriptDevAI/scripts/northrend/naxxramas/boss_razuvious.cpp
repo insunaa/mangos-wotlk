@@ -25,6 +25,7 @@ EndScriptData */
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/include/sc_creature.h"
 #include "Entities/Unit.h"
+#include "Spells/SpellDefines.h"
 #include "naxxramas.h"
 
 enum
@@ -46,6 +47,7 @@ enum
     SPELL_JAGGED_KNIFE       = 55550,
     SPELL_HOPELESS           = 29125,
     SPELL_FORCED_OBEDIENCE   = 55479,
+    SPELL_OBEDIENCE_CHAINS   = 55520,
 };
 
 struct boss_razuviousAI : public ScriptedAI
@@ -186,6 +188,8 @@ bool NpcSpellClick_npc_obedienceCrystal(Player* pPlayer, Creature* pClickedCreat
     if (pClickedCreature->GetEntry() == NPC_OBEDIENCE_CRYSTAL)
     {
         pPlayer->CastSpell(nullptr, uiSpellId, TRIGGERED_OLD_TRIGGERED);
+        Creature* understudy = GetClosestCreatureWithEntry(pClickedCreature, NPC_DEATHKNIGHT_UNDERSTUDY, 30.f);
+        pClickedCreature->CastSpell(understudy, SPELL_OBEDIENCE_CHAINS, TRIGGERED_OLD_TRIGGERED);
         return true;
     }
 
