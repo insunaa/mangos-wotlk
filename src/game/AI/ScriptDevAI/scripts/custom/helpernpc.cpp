@@ -9,9 +9,12 @@
 #include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "AI/ScriptDevAI/include/sc_gossip.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "Entities/GossipDef.h"
+#include "Entities/Object.h"
 #include "Entities/Unit.h"
 #include "Globals/ObjectMgr.h"
 #include "GameEvents/GameEventMgr.h"
+#include "Globals/SharedDefines.h"
 #include "World/WorldState.h"
 
 enum
@@ -467,24 +470,27 @@ const std::vector<uint32> Lvl60BiS_Mage                 = { 22498, 23057, 22983,
 const std::vector<uint32> Lvl60BiS_Hunter               = { 22438, 23053, 22439, 23045, 22436, 22443, 22437, 22441, 22442, 22440, 23067, 22961, 23041, 19406, 22816, 22802, 22812 };
 const std::vector<uint32> Lvl60BiS_Warlock              = { 22506, 23057, 22507, 23050, 22504, 21186, 23070, 21585, 22730, 22508, 21709, 23025, 19379, 23046, 22807, 23049, 22820 };
 
-const std::vector<uint32> Lvl80BiS_ShamanResto          = { 32524, 31016, 30873, 32528, 32238, 32275, 31012, 31019, 32370, 31022, 32258, 30869, 32500, 30882, 32496, 30619, 32344, 30023 };
-const std::vector<uint32> Lvl80BiS_ShamanEnhancement    = { 32323, 34912, 32510, 32497, 32335, 32234, 32376, 30900, 32260, 31024, 32346, 30864, 32946, 32945, 28830, 32505, 32332, 27815 };
-const std::vector<uint32> Lvl80BiS_ShamanElemental      = { 32331, 31017, 32242, 32527, 32247, 31008, 31014, 31020, 32349, 31023, 30044, 32259, 34009, 30872, 32483, 30626, 32374, 32330 };
-const std::vector<uint32> Lvl80BiS_PriestShadow         = { 32590, 31065, 32239, 32527, 32247, 31061, 31064, 30916, 30666, 31070, 32256, 30870, 32237, 30872, 32343, 32483, 28789, 32374 };
-const std::vector<uint32> Lvl80BiS_PriestDiscHoly       = { 32524, 31066, 32609, 32528, 32238, 31060, 31063, 30912, 32370, 31069, 30895, 30871, 32500, 30911, 32363, 32496, 29376, 32344 };
-const std::vector<uint32> Lvl80BiS_PaladinHoly          = { 32524, 30992, 32243, 32528, 32238, 30983, 30988, 30994, 32370, 30996, 30897, 30862, 32500, 30882, 32496, 29376, 28592 };
-const std::vector<uint32> Lvl80BiS_PaladinRetribution   = { 32323, 30990, 32345, 32497, 32335, 32278, 32373, 32341, 32591, 30866, 30032, 30057, 33503, 32332, 28830, 32505 };
-const std::vector<uint32> Lvl80BiS_PaladinProtection    = { 32331, 30991, 32245, 30083, 29297, 30985, 30987, 30995, 32362, 30998, 32342, 32279, 34009, 30909, 31856, 28789, 30620, 32368 };
-const std::vector<uint32> Lvl80BiS_WarriorFuryArms      = { 32323, 30975, 32345, 32497, 32335, 32278, 32373, 32341, 32260, 30979, 30032, 30861, 32369, 30881, 30105, 32505, 28830, 32348 };
-const std::vector<uint32> Lvl80BiS_WarriorProtection    = { 34010, 30976, 32268, 32261, 29297, 30970, 32521, 30978, 32362, 30980, 32333, 32232, 32254, 32375, 32325, 30620, 32501 };
-const std::vector<uint32> Lvl80BiS_DruidFeralCat        = { 32323, 32252, 32366, 32497, 32266, 32347, 32235, 31044, 32260, 31048, 30106, 32324, 32257, 28830, 32505, 30883 };
-const std::vector<uint32> Lvl80BiS_DruidFeralBear       = { 28660, 31042, 32593, 29279, 28792, 31034, 31039, 31044, 32362, 31048, 30879, 32324, 32658, 30620, 30021, 33509 };
-const std::vector<uint32> Lvl80BiS_DruidBalance         = { 32331, 31043, 32352, 32527, 32247, 31035, 31040, 31046, 32349, 31049, 30914, 32351, 32237, 30872, 32483, 30626, 32374, 27518 };
-const std::vector<uint32> Lvl80BiS_DruidResto           = { 32337, 31041, 30886, 32528, 29309, 31032, 31037, 31045, 32370, 31047, 32339, 30868, 32500, 30911, 32496, 29376, 32344, 30051 };
-const std::vector<uint32> Lvl80BiS_Rogue                = { 32323, 31028, 32366, 32497, 32266, 31026, 32235, 31029, 32260, 31030, 30879, 32324, 32369, 30881, 32269, 32326, 28830, 32505 };
-const std::vector<uint32> Lvl80BiS_Mage                 = { 32331, 31057, 32239, 32527, 32247, 31055, 32525, 31058, 30015, 31059, 30888, 30870, 30910, 30872, 29982, 32483, 27683, 32374 };
-const std::vector<uint32> Lvl80BiS_Hunter               = { 32323, 31004, 30880, 29301, 32497, 31001, 32376, 31005, 32260, 31006, 32346, 32251, 32369, 32236, 30906, 28830, 32505, 32248, 18714 };
-const std::vector<uint32> Lvl80BiS_Warlock              = { 32590, 31052, 30050, 32527, 32247, 31050, 32525, 31053, 32349, 31054, 32256, 29918, 30910, 30872, 32343, 32483, 27683, 32374 };
+const std::vector<uint32> Lvl80BiS_ShamanResto          = { 37180, 40681, 37673, 41610, 39588, 37788, 39591, 40693, 37791, 44202, 40585, 37694, 37657, 40685, 37169, 37718, 38368 };
+const std::vector<uint32> Lvl80BiS_ShamanEnhancement    = { 37293, 40678, 37373, 41610, 39597, 37170, 39601, 40694, 37221, 44297, 43251, 40586, 37166, 37390, 41384, 40704, 40708 };
+const std::vector<uint32> Lvl80BiS_ShamanElemental      = { 37180, 37595, 37673, 41610, 39592, 37788, 39593, 40696, 37791, 44202, 37694, 40585, 37873, 40682, 41384, 40698, 38361 };
+const std::vector<uint32> Lvl80BiS_PriestShadow         = { 37684, 40680, 37673, 41610, 43792, 37361, 43783, 40696, 37854, 44202, 40585, 43253, 40682, 37873, 41384, 40698, 37177 };
+const std::vector<uint32> Lvl80BiS_PriestDiscHoly       = { 37294, 40681, 37196, 41609, 39515, 37361, 39519, 40697, 37189, 44202, 44283, 42644, 40685, 42988, 37169, 44210, 37238, 42647, 37673, 41610, 42102, 42113, 44302, 37854, 40585, 37694, 37657, 37360, 37619 };
+const std::vector<uint32> Lvl80BiS_PaladinHoly          = { 62271, 50368, 40681, 50338, 37655, 41609, 37258, 27123, 37623, 40691, 37362, 44202, 44283, 40585, 44255, 40685, 37169, 40700, 40705 };
+const std::vector<uint32> Lvl80BiS_PaladinRetribution   = { 40613, 40610, 41386, 40678, 44195, 37647, 41355, 40694, 37193, 44306, 44935, 37642, 42987, 37166, 37852, 38362 };
+const std::vector<uint32> Lvl80BiS_PaladinProtection    = { 40613, 40610, 41387, 40679, 37635, 37728, 37620, 40689, 43500, 44201, 42643, 37784, 37220, 36993, 37401, 43085, 40707 };
+const std::vector<uint32> Lvl80BiS_WarriorFuryArms      = { 41386, 40678, 44195, 37647, 39606, 41355, 39609, 40694, 37193, 44306, 42642, 44935, 42987, 40684, 37852, 37191, 44203, 37642 };
+const std::vector<uint32> Lvl80BiS_WarriorProtection    = { 41387, 40679, 37635, 37728, 43740, 37620, 39622, 40689, 43500, 44201, 42643, 37784, 36993, 37220, 37401, 40701, 41168 };
+const std::vector<uint32> Lvl80BiS_DruidFeralCat        = { 37293, 40615, 40612, 40678, 37139, 43406, 44203, 40694, 37644, 44297, 40586, 42642, 44253, 40684, 37883, 40713 };
+const std::vector<uint32> Lvl80BiS_DruidFeralBear       = { 40615, 40612, 37293, 42646, 37139, 37084, 37183, 37194, 37644, 44297, 37784, 42643, 37220, 44253, 37883, 37573 };
+const std::vector<uint32> Lvl80BiS_DruidBalance         = { 37180, 40680, 37673, 41610, 40615, 40612, 37884, 40696, 37791, 44202, 40585, 43253, 37873, 40682, 41384, 40698, 40712 };
+const std::vector<uint32> Lvl80BiS_DruidResto           = { 40615, 40612, 37149, 42023, 37673, 41610, 37361, 37643, 37791, 44202, 37694, 37192, 37657, 40685, 37360, 38366 };
+const std::vector<uint32> Lvl80BiS_Rogue                = { 37293, 40678, 37139, 43566, 39558, 44203, 39560, 40694, 37644, 44297, 37642, 40586, 42987, 40684, 37856, 37667, 37191, 37693 };
+const std::vector<uint32> Lvl80BiS_Mage                 = { 37294, 40680, 37673, 41610, 40615, 40612, 37361, 40696, 37854, 44202, 40585, 37694, 40682, 37873, 37360, 37177, 43253, 40585, 43253 };
+const std::vector<uint32> Lvl80BiS_Hunter               = { 37188, 40678, 37679, 43406, 40614, 40611, 44203, 40692, 37669, 44297, 42642, 40586, 44253, 40684, 37693, 44193, 37191, 44448 };
+const std::vector<uint32> Lvl80BiS_Warlock              = { 37684, 40680, 37673, 41610, 43790, 37361, 39500, 40696, 37854, 44202, 43253, 37694, 37873, 40682, 37360, 37177, 37721, 40698 };
+const std::vector<uint32> Lvl80BiS_DeathknightBlood     = { 41387, 40679, 37635, 37728, 40612, 37620, 40615, 40689, 43500, 44201, 37784, 42643, 37220, 36993, 41257, 40822 };
+const std::vector<uint32> Lvl80BiS_DeathknightFrost     = { 41386, 42645, 44195, 37647, 40612, 41355, 40615, 40694, 37193, 43402, 44935, 37642, 42987, 40684, 41383, 44250, 40715 };
+const std::vector<uint32> Lvl80BiS_DeathknightUnholy    = { 41386, 42645, 37627, 37647, 40612, 41355, 40615, 40688, 37193, 43402, 44935, 43251, 42987, 37390, 41383, 40703, 40867 };
 
 // Instant 58
 //                                                          ring1   ring2   neck
@@ -689,6 +695,9 @@ struct npc_enlistment_officerAI : public ScriptedAI
         FullGearListBiS80.insert(std::end(FullGearListBiS80), std::begin(Lvl80BiS_Mage), std::end(Lvl80BiS_Mage));
         FullGearListBiS80.insert(std::end(FullGearListBiS80), std::begin(Lvl80BiS_Hunter), std::end(Lvl80BiS_Hunter));
         FullGearListBiS80.insert(std::end(FullGearListBiS80), std::begin(Lvl80BiS_Warlock), std::end(Lvl80BiS_Warlock));
+        FullGearListBiS80.insert(std::end(FullGearListBiS80), std::begin(Lvl80BiS_DeathknightBlood), std::end(Lvl80BiS_DeathknightBlood));
+        FullGearListBiS80.insert(std::end(FullGearListBiS80), std::begin(Lvl80BiS_DeathknightFrost), std::end(Lvl80BiS_DeathknightFrost));
+        FullGearListBiS80.insert(std::end(FullGearListBiS80), std::begin(Lvl80BiS_DeathknightUnholy), std::end(Lvl80BiS_DeathknightUnholy));
     }
 
     bool m_bCanGreet;
@@ -2015,6 +2024,12 @@ bool GossipSelect_npc_enlistment_officer(Player* player, Creature* creature, uin
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_INTERACT_1, "Restoration", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3014);
                 player->SendPreparedGossip(creature);
                 break;
+            case CLASS_DEATH_KNIGHT:
+                player->PrepareGossipMenu(creature, GOSSIP_TEXT_PICK_SPEC);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_INTERACT_1, "Blood", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 7000);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_INTERACT_1, "Frost", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 7001);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_INTERACT_1, "Unholy", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 7002);
+                player->SendPreparedGossip(creature);
             }
             break;
         }
@@ -2048,6 +2063,12 @@ bool GossipSelect_npc_enlistment_officer(Player* player, Creature* creature, uin
         case GOSSIP_ACTION_INFO_DEF + 3013: enlistmentOfficerAI->GivePlayerItems(player, Lvl80BiS_DruidBalance); player->GetPlayerMenu()->CloseGossip(); break;
         // Druid - Restoration
         case GOSSIP_ACTION_INFO_DEF + 3014: enlistmentOfficerAI->GivePlayerItems(player, Lvl80BiS_DruidResto); player->GetPlayerMenu()->CloseGossip(); break;
+        // Deathknight - Blood
+        case GOSSIP_ACTION_INFO_DEF + 7000: enlistmentOfficerAI->GivePlayerItems(player, Lvl80BiS_DeathknightBlood); player->GetPlayerMenu()->CloseGossip(); break;
+        // Deathknight - Blood
+        case GOSSIP_ACTION_INFO_DEF + 7001: enlistmentOfficerAI->GivePlayerItems(player, Lvl80BiS_DeathknightFrost); player->GetPlayerMenu()->CloseGossip(); break;
+        // Deathknight - Blood
+        case GOSSIP_ACTION_INFO_DEF + 7002: enlistmentOfficerAI->GivePlayerItems(player, Lvl80BiS_DeathknightUnholy); player->GetPlayerMenu()->CloseGossip(); break;
     }
     }
 
