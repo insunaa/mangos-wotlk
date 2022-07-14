@@ -1708,6 +1708,7 @@ class Player : public Unit
         void removeSpell(uint32 spell_id, bool disabled = false, bool learn_low_rank = true, bool sendUpdate = true);
         void resetSpells();
         void learnDefaultSpells();
+        void learnClassLevelSpells(bool includeHighLevelQuestRewards);
         void learnQuestRewardedSpells();
         void learnQuestRewardedSpells(Quest const* quest);
         void learnSpellHighRank(uint32 spellid);
@@ -1866,6 +1867,7 @@ class Player : public Unit
         void SendPetBar();
         void StartCinematic();
         void StopCinematic();
+        void EnchantItem(uint32 spellId, uint8 slot);
         bool UpdateSkill(uint16 id, uint16 diff);
         bool UpdateSkillPro(uint16 id, int32 Chance, uint16 diff);
 

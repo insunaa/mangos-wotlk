@@ -21527,6 +21527,106 @@ void Player::learnDefaultSpells()
     }
 }
 
+void Player::learnClassLevelSpells(bool includeHighLevelQuestRewards)
+{
+    ChrClassesEntry const* clsEntry = sChrClassesStore.LookupEntry(getClass());
+    if (!clsEntry)
+        return;
+    uint32 family = clsEntry->spellfamily;
+
+    // special cases which aren't sourced from trainers and normally require quests to obtain - added here for convenience
+    ObjectMgr::QuestMap const& qTemplates = sObjectMgr.GetQuestTemplates();
+    for (const auto& qTemplate : qTemplates)
+    {
+        Quest const* quest = qTemplate.second;
+        if (!quest)
+            continue;
+
+        // only class quests player could do
+        if (quest->GetRequiredClasses() == 0 || !SatisfyQuestClass(quest, false) || !SatisfyQuestRace(quest, false) || !SatisfyQuestLevel(quest, false))
+            continue;
+
+        // custom filter for scripting purposes
+        if (!includeHighLevelQuestRewards && quest->GetMinLevel() >= 60)
+            continue;
+
+        learnQuestRewardedSpells(quest);
+    }
+
+    std::set<TrainerSpell> const& trainerSpells = sObjectMgr.GetTrainerSpells();
+    for (const auto& tSpell : trainerSpells)
+    {
+        SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(tSpell.spell);
+        if (!spellInfo)
+            continue;
+
+        uint32 reqLevel = 0;
+        if (!IsSpellFitByClassAndRace(tSpell.spell, &reqLevel))
+            continue;
+
+        reqLevel = tSpell.isProvidedReqLevel ? tSpell.reqLevel : std::max(reqLevel, tSpell.reqLevel);
+
+        TrainerSpellState state = GetTrainerSpellState(&tSpell, reqLevel);
+        if (state == TRAINER_SPELL_RED)
+            continue;
+
+        if (tSpell.conditionId && !sObjectMgr.IsConditionSatisfied(tSpell.conditionId, this, GetMap(), this, CONDITION_FROM_TRAINER))
+            continue;
+
+        // skip other spell families (minus a few exceptions)
+        if (spellInfo->SpellFamilyName != family)
+        {
+            SkillLineAbilityMapBounds bounds = sSpellMgr.GetSkillLineAbilityMapBoundsBySpellId(tSpell.spell);
+            if (bounds.first == bounds.second)
+                continue;
+
+            SkillLineAbilityEntry const* skillInfo = bounds.first->second;
+            if (!skillInfo)
+                continue;
+
+            switch (skillInfo->skillId)
+            {
+                case SKILL_SUBTLETY:
+                case SKILL_BEAST_MASTERY:
+                case SKILL_SURVIVAL:
+                case SKILL_DEFENSE:
+                case SKILL_DUAL_WIELD:
+                case SKILL_FERAL_COMBAT:
+                case SKILL_PROTECTION:
+                case SKILL_PLATE_MAIL:
+                case SKILL_DEMONOLOGY:
+                case SKILL_ENHANCEMENT:
+                case SKILL_MAIL:
+                case SKILL_HOLY2:
+                case SKILL_LOCKPICKING:
+                    break;
+                default:
+                    // do not skip skills available to this class
+                    if (spellInfo->Effect[0] == SPELL_EFFECT_WEAPON &&
+                        spellInfo->Effect[1] == SPELL_EFFECT_PROFICIENCY)
+                        break;
+
+                    continue;
+            }
+        }
+
+        // skip wrong class/race skills
+        if (!IsSpellFitByClassAndRace(tSpell.spell))
+            continue;
+
+        // skip spells with first rank learned as talent (and all talents then also)
+        uint32 first_rank = sSpellMgr.GetFirstSpellInChain(tSpell.spell);
+        if (GetTalentSpellCost(first_rank) > 0)
+            continue;
+
+        // skip broken spells
+        if (!SpellMgr::IsSpellValid(spellInfo, this, false))
+            continue;
+
+        learnSpell(tSpell.spell, false);
+    }
+}
+
 void Player::learnQuestRewardedSpells(Quest const* quest)
 {
     uint32 spell_id = quest->GetRewSpellCast();
@@ -25243,6 +25343,43 @@ void Player::StopCinematic()
 
     m_cinematicMgr->EndCinematic();
     m_cinematicMgr.reset(nullptr);
+}
+
+void Player::EnchantItem(uint32 spellId, uint8 slot)
+{
+    Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+
+    if (spellId == 0)
+        return;
+
+    if (!pItem)
+        return;
+
+    // Special cases for shields
+    if (pItem->GetProto()->Class == ITEM_CLASS_ARMOR && pItem->GetProto()->SubClass == ITEM_SUBCLASS_ARMOR_SHIELD)
+    {
+        if (spellId != 44383 && spellId != 34009 && spellId != 27945 && spellId != 27947 && spellId != 27946 && spellId != 20016 && spellId != 11224 && spellId != 13464 && spellId != 23530)
+            return;
+    }
+
+    if (pItem->GetEntry() == 33681 || pItem->GetEntry() == 33736 || pItem->GetEntry() == 34033)
+        return;
+
+    SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
+    if (!spellInfo)
+        return;
+
+    uint32 enchantid = spellInfo->EffectMiscValue[0];
+    if (!enchantid)
+        return;
+
+    if (!((1 << pItem->GetProto()->SubClass) & spellInfo->EquippedItemSubClassMask) &&
+        !((1 << pItem->GetProto()->InventoryType) & spellInfo->EquippedItemInventoryTypeMask))
+        return;
+
+    ApplyEnchantment(pItem, PERM_ENCHANTMENT_SLOT, false);
+    pItem->SetEnchantment(PERM_ENCHANTMENT_SLOT, enchantid, 0, 0);
+    ApplyEnchantment(pItem, PERM_ENCHANTMENT_SLOT, true);
 }
 
 void Player::SetRandomBattlegroundWinner(bool isWinner)

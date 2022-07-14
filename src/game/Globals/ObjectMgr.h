@@ -1105,6 +1105,19 @@ class ObjectMgr
             return &iter->second;
         }
 
+        std::set<TrainerSpell> const GetTrainerSpells()
+        {
+            std::set<TrainerSpell> trainerSpells;
+            for (auto& SpellList : m_mCacheTrainerSpellMap)
+            {
+                for (auto& Spell : SpellList.second.spellList)
+                {
+                    trainerSpells.emplace(Spell.second);
+                }
+            }
+            return trainerSpells;
+        }
+
         VendorItemData const* GetNpcVendorItemList(uint32 entry) const
         {
             CacheVendorItemMap::const_iterator  iter = m_mCacheVendorItemMap.find(entry);

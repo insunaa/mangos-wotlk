@@ -502,6 +502,8 @@ extern void AddSC_boss_terokk();
 extern void AddSC_OutlandWorldScript();
 extern void AddSC_zangarmarsh();
 
+extern void AddSC_custom_vengeance_helpers();
+
 void AddScripts()
 {
     // battlegrounds
@@ -1001,4 +1003,6 @@ void AddScripts()
     AddSC_boss_terokk();
     AddSC_OutlandWorldScript();
     AddSC_zangarmarsh();
+
+    AddSC_custom_vengeance_helpers();
 }
