@@ -203,4 +203,5 @@ void AddSC_boss_razuvious()
     pNewScript->Name = "npc_obedienceCrystal";
     pNewScript->GetAI = &GetNewAIInstance<npc_obedienceCrystalAI>;
     pNewScript->pNpcSpellClick = &NpcSpellClick_npc_obedienceCrystal;
+    pNewScript->RegisterSelf();
 }
