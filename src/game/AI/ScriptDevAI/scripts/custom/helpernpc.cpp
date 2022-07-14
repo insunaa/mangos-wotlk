@@ -148,7 +148,7 @@ struct npc_vengeance_greeterAI : public ScriptedAI
                 const std::vector<uint32> petSpells = {6991, 1515, 982, 883, 2641};
                 for (uint32 spell : petSpells)
                 {
-                    player->learnSpell(spell, true);
+                    player->learnSpell(spell, false);
                 }
             }
         }
