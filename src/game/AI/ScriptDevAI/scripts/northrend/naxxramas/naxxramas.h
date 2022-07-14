@@ -94,6 +94,8 @@ enum
     NPC_MR_BIGGLESWORTH         = 16998,
     NPC_LIVING_POISON           = 16027,
 
+    NPC_OBEDIENCE_CRYSTAL       = 29912,
+
     // Gothik
     NPC_GOTHIK                  = 16060,
     NPC_SUB_BOSS_TRIGGER        = 16137,                    // summon locations

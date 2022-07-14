@@ -21,7 +21,10 @@ SDComment: TODO: Timers and sounds need confirmation - orb handling for normal-m
 SDCategory: Naxxramas
 EndScriptData */
 
+#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "AI/ScriptDevAI/include/sc_creature.h"
+#include "Entities/Unit.h"
 #include "naxxramas.h"
 
 enum
@@ -41,7 +44,8 @@ enum
     SPELL_DISRUPTING_SHOUT   = 55543,
     SPELL_DISRUPTING_SHOUT_H = 29107,
     SPELL_JAGGED_KNIFE       = 55550,
-    SPELL_HOPELESS           = 29125
+    SPELL_HOPELESS           = 29125,
+    SPELL_FORCED_OBEDIENCE   = 55479,
 };
 
 struct boss_razuviousAI : public ScriptedAI
@@ -170,10 +174,33 @@ UnitAI* GetAI_boss_razuvious(Creature* pCreature)
     return new boss_razuviousAI(pCreature);
 }
 
+struct npc_obedienceCrystalAI : public Scripted_NoMovementAI
+{
+    npc_obedienceCrystalAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { }
+
+    void Reset() override { }
+};
+
+bool NpcSpellClick_npc_obedienceCrystal(Player* pPlayer, Creature* pClickedCreature, uint32 uiSpellId)
+{
+    if (pClickedCreature->GetEntry() == NPC_OBEDIENCE_CRYSTAL)
+    {
+        pPlayer->CastSpell(pPlayer, uiSpellId, TRIGGERED_OLD_TRIGGERED);
+        return true;
+    }
+
+    return true;
+}
+
 void AddSC_boss_razuvious()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_razuvious";
     pNewScript->GetAI = &GetAI_boss_razuvious;
     pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_obedienceCrystal";
+    pNewScript->GetAI = GetNewAIInstance<&npc_obedienceCrystalAI>();
+    pNewScript->pNpcSpellClick = &NpcSpellClick_npc_obedienceCrystal;
 }
