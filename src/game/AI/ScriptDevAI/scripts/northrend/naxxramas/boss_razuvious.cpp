@@ -200,7 +200,7 @@ bool NpcSpellClick_npc_obedienceCrystal(Player* pPlayer, Creature* pClickedCreat
                 pPlayer->CastSpell(nullptr, uiSpellId, TRIGGERED_OLD_TRIGGERED);
                 castSuccess = true;
             }
-            if (understudy->HasCharmer())
+            if (understudy->IsFriend(pPlayer))
                 pClickedCreature->CastSpell(understudy, SPELL_OBEDIENCE_CHAINS, TRIGGERED_OLD_TRIGGERED);
         }
         return true;
