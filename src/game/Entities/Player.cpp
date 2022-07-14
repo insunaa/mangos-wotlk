@@ -21527,7 +21527,7 @@ void Player::learnDefaultSpells()
     }
 }
 
-void Player::learnClassLevelSpells(bool includeHighLevelQuestRewards)
+/*void Player::learnClassLevelSpells(bool includeHighLevelQuestRewards)
 {
     ChrClassesEntry const* clsEntry = sChrClassesStore.LookupEntry(getClass());
     if (!clsEntry)
@@ -21625,7 +21625,7 @@ void Player::learnClassLevelSpells(bool includeHighLevelQuestRewards)
 
         learnSpell(tSpell.spell, false);
     }
-}
+}*/
 
 void Player::learnQuestRewardedSpells(Quest const* quest)
 {

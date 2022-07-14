@@ -1105,18 +1105,19 @@ class ObjectMgr
             return &iter->second;
         }
 
-        std::set<TrainerSpell> const GetTrainerSpells()
+/*        std::set<TrainerSpell> const GetTrainerSpells()
         {
             std::set<TrainerSpell> trainerSpells;
             for (auto& SpellList : m_mCacheTrainerSpellMap)
             {
                 for (auto& Spell : SpellList.second.spellList)
                 {
-                    trainerSpells.emplace(Spell.second);
+                    trainerSpells.insert(trainerSpells.end(), Spell.second);
+                    //trainerSpells.emplace(Spell.second);
                 }
             }
             return trainerSpells;
-        }
+        }*/
 
         VendorItemData const* GetNpcVendorItemList(uint32 entry) const
         {

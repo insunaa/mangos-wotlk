@@ -1708,7 +1708,7 @@ class Player : public Unit
         void removeSpell(uint32 spell_id, bool disabled = false, bool learn_low_rank = true, bool sendUpdate = true);
         void resetSpells();
         void learnDefaultSpells();
-        void learnClassLevelSpells(bool includeHighLevelQuestRewards);
+//        void learnClassLevelSpells(bool includeHighLevelQuestRewards);
         void learnQuestRewardedSpells();
         void learnQuestRewardedSpells(Quest const* quest);
         void learnSpellHighRank(uint32 spellid);

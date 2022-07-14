@@ -126,7 +126,7 @@ struct npc_vengeance_greeterAI : public ScriptedAI
         {
             player->GiveLevel(tarGetLevel);
             player->SetUInt32Value(PLAYER_XP, 0);
-            player->learnClassLevelSpells(false);
+//            player->learnClassLevelSpells(false);
             player->UpdateSkillsForLevel(true);
 
             if (player->getClass() == CLASS_HUNTER)
