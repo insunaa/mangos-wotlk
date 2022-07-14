@@ -317,6 +317,7 @@ bool GossipSelect_npc_vengeance_greeter(Player* player, Creature* creature, uint
             factions.push_back(sFactionStore.LookupEntry(1106));
             factions.push_back(sFactionStore.LookupEntry(1090));
             factions.push_back(sFactionStore.LookupEntry(1119));
+            factions.push_back(sFactionStore.LookupEntry(1098));
             for (auto& faction : factions)
             {
                 int64 amount = -42000;
