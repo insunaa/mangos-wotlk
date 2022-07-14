@@ -205,7 +205,7 @@ struct npc_vengeance_greeterAI : public ScriptedAI
 
 bool GossipHello_npc_vengeance_greeter(Player* player, Creature* creature)
 {
-    if (creature->GetEntry() == NPC_TEST_REALM_OVERLORD)
+    if (true || creature->GetEntry() == NPC_TEST_REALM_OVERLORD)
     {
         player->PrepareGossipMenu(creature, GOSSIP_MENU_OVERLORD_MAIN);
         if (player->GetLevel() < 60)
@@ -1419,13 +1419,13 @@ bool GossipHello_npc_enlistment_officer(Player* player, Creature* creature)
             if ((!player->HasItemCount(groundMount, 1) || !player->HasItemCount(flyingMount, 1)) && player->GetLevel() >= 70)
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_INTERACT_1, "I seem to be missing my mount. Can you give me one?", GOSSIP_SENDER_MAIN, 96);
 
-            if (creature->GetMapId() == 530)
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TAXI, "Teleport to Blasted Lands (Dark Portal)", GOSSIP_SENDER_MAIN, 90);
+            if (creature->GetMapId() == 571)
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TAXI, "Teleport to Naxxramas", GOSSIP_SENDER_MAIN, 90);
             else
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TAXI, "Teleport to Shattrath City", GOSSIP_SENDER_MAIN, 91);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TAXI, "Teleport to Dalaran", GOSSIP_SENDER_MAIN, 91);
 
-            if (player->GetLevel() < 70)
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TAXI, "Teleport to Test Realm Overlord (Starting Area)", GOSSIP_SENDER_MAIN, 89);
+            //if (player->GetLevel() < 70)
+            //    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TAXI, "Teleport to Test Realm Overlord (Starting Area)", GOSSIP_SENDER_MAIN, 89);
         }
         else
         {
