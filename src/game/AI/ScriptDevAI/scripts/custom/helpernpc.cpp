@@ -184,7 +184,7 @@ struct npc_vengeance_greeterAI : public ScriptedAI
         }
         else {
             // Onyxia Hide Backpack x4
-            if (!player->HasItemCount(23162, 4)) player->StoreNewItemInBestSlots(17966, 4);
+            if (!player->HasItemCount(23162, 4)) player->StoreNewItemInBestSlots(23162, 4);
 
             // Epic Ground Mount
             uint32 groundMount = GetStarterEpicMountForRace(player);
@@ -192,7 +192,7 @@ struct npc_vengeance_greeterAI : public ScriptedAI
 
             // Flying Mount - Swift Blue Gryphon / Swift Red Wind Rider
             uint32 flyingMount = player->GetTeam() == ALLIANCE ? 25473 : 25477;
-            if (tarGetLevel == 70 && !player->HasItemCount(flyingMount, 1)) player->StoreNewItemInBestSlots(flyingMount, 1);
+            if (tarGetLevel >= 70 && !player->HasItemCount(flyingMount, 1)) player->StoreNewItemInBestSlots(flyingMount, 1);
         }
 
         // give shamans their totems
@@ -310,6 +310,7 @@ bool GossipSelect_npc_vengeance_greeter(Player* player, Creature* creature, uint
             factions.push_back(sFactionStore.LookupEntry(1091));
             factions.push_back(sFactionStore.LookupEntry(1106));
             factions.push_back(sFactionStore.LookupEntry(1090));
+            factions.push_back(sFactionStore.LookupEntry(1119));
             for (auto& faction : factions)
             {
                 int64 amount = -42000;
@@ -492,21 +493,21 @@ const std::vector<uint32> Lvl80BiS_ShamanElemental      = { 37180, 37595, 37673,
 const std::vector<uint32> Lvl80BiS_PriestShadow         = { 37684, 40680, 37673, 41610, 43792, 37361, 43783, 40696, 37854, 44202, 40585, 43253, 40682, 37873, 41384, 40698, 37177 };
 const std::vector<uint32> Lvl80BiS_PriestDiscHoly       = { 37294, 40681, 37196, 41609, 39515, 37361, 39519, 40697, 37189, 44202, 44283, 42644, 40685, 42988, 37169, 44210, 37238, 42647, 37673, 41610, 42102, 42113, 44302, 37854, 40585, 37694, 37657, 37360, 37619 };
 const std::vector<uint32> Lvl80BiS_PaladinHoly          = { 62271, 50368, 40681, 50338, 37655, 41609, 37258, 27123, 37623, 40691, 37362, 44202, 44283, 40585, 44255, 40685, 37169, 40700, 40705 };
-const std::vector<uint32> Lvl80BiS_PaladinRetribution   = { 40613, 40610, 41386, 40678, 44195, 37647, 41355, 40694, 37193, 44306, 44935, 37642, 42987, 37166, 37852, 38362 };
-const std::vector<uint32> Lvl80BiS_PaladinProtection    = { 40613, 40610, 41387, 40679, 37635, 37728, 37620, 40689, 43500, 44201, 42643, 37784, 37220, 36993, 37401, 43085, 40707 };
+const std::vector<uint32> Lvl80BiS_PaladinRetribution   = { 39633, 39634, 41386, 40678, 44195, 37647, 41355, 40694, 37193, 44306, 44935, 37642, 42987, 37166, 37852, 38362 };
+const std::vector<uint32> Lvl80BiS_PaladinProtection    = { 39639, 39638, 41387, 40679, 37635, 37728, 37620, 40689, 43500, 44201, 42643, 37784, 37220, 36993, 37401, 43085, 40707 };
 const std::vector<uint32> Lvl80BiS_WarriorFuryArms      = { 41386, 40678, 44195, 37647, 39606, 41355, 39609, 40694, 37193, 44306, 42642, 44935, 42987, 40684, 37852, 37191, 44203, 37642 };
 const std::vector<uint32> Lvl80BiS_WarriorProtection    = { 41387, 40679, 37635, 37728, 43740, 37620, 39622, 40689, 43500, 44201, 42643, 37784, 36993, 37220, 37401, 40701, 41168 };
-const std::vector<uint32> Lvl80BiS_DruidFeralCat        = { 37293, 40615, 40612, 40678, 37139, 43406, 44203, 40694, 37644, 44297, 40586, 42642, 44253, 40684, 37883, 40713 };
-const std::vector<uint32> Lvl80BiS_DruidFeralBear       = { 40615, 40612, 37293, 42646, 37139, 37084, 37183, 37194, 37644, 44297, 37784, 42643, 37220, 44253, 37883, 37573 };
-const std::vector<uint32> Lvl80BiS_DruidBalance         = { 37180, 40680, 37673, 41610, 40615, 40612, 37884, 40696, 37791, 44202, 40585, 43253, 37873, 40682, 41384, 40698, 40712 };
-const std::vector<uint32> Lvl80BiS_DruidResto           = { 40615, 40612, 37149, 42023, 37673, 41610, 37361, 37643, 37791, 44202, 37694, 37192, 37657, 40685, 37360, 38366 };
+const std::vector<uint32> Lvl80BiS_DruidFeralCat        = { 37293, 39560, 39558, 40678, 37139, 43406, 44203, 40694, 37644, 44297, 40586, 42642, 44253, 40684, 37883, 40713 };
+const std::vector<uint32> Lvl80BiS_DruidFeralBear       = { 39557, 39554, 37293, 42646, 37139, 37084, 37183, 37194, 37644, 44297, 37784, 42643, 37220, 44253, 37883, 37573 };
+const std::vector<uint32> Lvl80BiS_DruidBalance         = { 37180, 40680, 37673, 41610, 39544, 39547, 37884, 40696, 37791, 44202, 40585, 43253, 37873, 40682, 41384, 40698, 40712 };
+const std::vector<uint32> Lvl80BiS_DruidResto           = { 43751, 43822, 37149, 42023, 37673, 41610, 37361, 37643, 37791, 44202, 37694, 37192, 37657, 40685, 37360, 38366 };
 const std::vector<uint32> Lvl80BiS_Rogue                = { 37293, 40678, 37139, 43566, 39558, 44203, 39560, 40694, 37644, 44297, 37642, 40586, 42987, 40684, 37856, 37667, 37191, 37693 };
-const std::vector<uint32> Lvl80BiS_Mage                 = { 37294, 40680, 37673, 41610, 40615, 40612, 37361, 40696, 37854, 44202, 40585, 37694, 40682, 37873, 37360, 37177, 43253, 40585, 43253 };
-const std::vector<uint32> Lvl80BiS_Hunter               = { 37188, 40678, 37679, 43406, 40614, 40611, 44203, 40692, 37669, 44297, 42642, 40586, 44253, 40684, 37693, 44193, 37191, 44448 };
+const std::vector<uint32> Lvl80BiS_Mage                 = { 37294, 40680, 37673, 41610, 43778, 43780, 37361, 40696, 37854, 44202, 40585, 37694, 40682, 37873, 37360, 37177, 43253, 40585, 43253 };
+const std::vector<uint32> Lvl80BiS_Hunter               = { 37188, 40678, 37679, 43406, 43734, 39579, 44203, 40692, 37669, 44297, 42642, 40586, 44253, 40684, 37693, 44193, 37191, 44448 };
 const std::vector<uint32> Lvl80BiS_Warlock              = { 37684, 40680, 37673, 41610, 43790, 37361, 39500, 40696, 37854, 44202, 43253, 37694, 37873, 40682, 37360, 37177, 37721, 40698 };
-const std::vector<uint32> Lvl80BiS_DeathknightBlood     = { 41387, 40679, 37635, 37728, 40612, 37620, 40615, 40689, 43500, 44201, 37784, 42643, 37220, 36993, 41257, 40822 };
-const std::vector<uint32> Lvl80BiS_DeathknightFrost     = { 41386, 42645, 44195, 37647, 40612, 41355, 40615, 40694, 37193, 43402, 44935, 37642, 42987, 40684, 41383, 44250, 40715 };
-const std::vector<uint32> Lvl80BiS_DeathknightUnholy    = { 41386, 42645, 37627, 37647, 40612, 41355, 40615, 40688, 37193, 43402, 44935, 43251, 42987, 37390, 41383, 40703, 40867 };
+const std::vector<uint32> Lvl80BiS_DeathknightBlood     = { 41387, 40679, 37635, 37728, 39623, 37620, 39624, 40689, 43500, 44201, 37784, 42643, 37220, 36993, 41257, 40822 };
+const std::vector<uint32> Lvl80BiS_DeathknightFrost     = { 41386, 42645, 44195, 37647, 39617, 41355, 39618, 40694, 37193, 43402, 44935, 37642, 42987, 40684, 41383, 44250, 40715 };
+const std::vector<uint32> Lvl80BiS_DeathknightUnholy    = { 41386, 42645, 37627, 37647, 39617, 41355, 39618, 40688, 37193, 43402, 44935, 43251, 42987, 37390, 41383, 40703, 40867 };
 
 // Instant 58
 //                                                          ring1   ring2   neck
