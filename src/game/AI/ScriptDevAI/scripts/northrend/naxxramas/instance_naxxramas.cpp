@@ -934,7 +934,7 @@ struct npc_living_poisonAI : public ScriptedAI
     // Any time a player comes close to the Living Poison, it will explode and kill itself while doing heavy AoE damage to the player
     void MoveInLineOfSight(Unit* who) override
     {
-        if (m_creature->GetDistance2d(who->GetPositionX(), who->GetPositionY(), DIST_CALC_BOUNDING_RADIUS) > 4.0f)
+        if (!who->IsPlayer() || m_creature->GetDistance2d(who->GetPositionX(), who->GetPositionY(), DIST_CALC_BOUNDING_RADIUS) > 4.0f)
             return;
 
         DoCastSpellIfCan(m_creature, SPELL_EXPLODE, CAST_TRIGGERED);
