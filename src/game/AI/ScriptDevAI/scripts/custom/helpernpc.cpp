@@ -190,10 +190,19 @@ struct npc_vengeance_greeterAI : public ScriptedAI
                         pet->SavePetToDB(PET_SAVE_AS_CURRENT, player);
                     }
                 }
-                const std::vector<uint32> petSpells = {6991, 1515, 982, 883, 2641};
-                for (uint32 spell : petSpells)
+                std::vector<uint32> hunterStartQuests = 
                 {
-                    player->learnSpellHighRank(spell);
+                    6071,
+                    6063,
+                    6101,
+                    6102,
+                    6103,
+                };
+                for (auto quest : hunterStartQuests)
+                {
+                    player->CompleteQuest(quest);
+                    Quest const* qInfo = sObjectMgr.GetQuestTemplate(quest);
+                    player->RewardQuest(qInfo, 0, player);
                 }
             }
             if (player->getClass() == CLASS_DEATH_KNIGHT)
