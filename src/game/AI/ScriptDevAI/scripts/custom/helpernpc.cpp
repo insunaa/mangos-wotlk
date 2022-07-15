@@ -1723,7 +1723,7 @@ bool GossipSelect_npc_enlistment_officer(Player* player, Creature* creature, uin
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Tailoring", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 8014);
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "First Aid", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 8015);
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Inscription", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 8016);
-            player->SEND_GOSSIP_MENU(0, creature->GetObjectGuid());
+            player->SEND_GOSSIP_MENU(GOSSIP_TEXT_ENLIST_GREET, creature->GetObjectGuid());
             
         }
             //player->GetSession()->SendTrainerList(creature->GetObjectGuid());
