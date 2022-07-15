@@ -66,6 +66,7 @@ struct RaiseDeadDk : public SpellScript
 
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
+        sLog.outError("TargetListSize: %d, EffIdx: %d", spell->GetTargetList().size(), effIdx);
         if (effIdx == EFFECT_INDEX_2) // reagent consuming version
             if (spell->GetTargetList().size() > 1) // more than caster is hit
                 return;
