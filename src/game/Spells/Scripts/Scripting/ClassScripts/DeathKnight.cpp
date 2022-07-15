@@ -68,6 +68,11 @@ struct RaiseDeadDk : public SpellScript
         return true;
     }
 
+    void OnInit(Spell*) override
+    {
+        sLog.outError("SpellScript called at least on init");
+    }
+
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
         sLog.outError("TargetListSize: %d, EffIdx: %d", spell->GetTargetList().size(), effIdx);
