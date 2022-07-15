@@ -48,10 +48,6 @@ struct RaiseDeadDk : public SpellScript
 {
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex eff) const override
     {
-        sLog.outError("Spell %s, Index: %d, target: %s", "Test", eff, target->GetName());
-        if (target->GetObjectGuid() == spell->GetCaster()->GetObjectGuid())
-            return true;
-
         if (eff == EFFECT_INDEX_1)
         {
             Unit* caster = spell->GetCaster();
@@ -68,14 +64,8 @@ struct RaiseDeadDk : public SpellScript
         return true;
     }
 
-    void OnInit(Spell*) override
-    {
-        sLog.outError("SpellScript called at least on init");
-    }
-
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
-        sLog.outError("TargetListSize: %d, EffIdx: %d", spell->GetTargetList().size(), effIdx);
         if (effIdx == EFFECT_INDEX_2) // reagent consuming version
             if (spell->GetTargetList().size() > 1) // more than caster is hit
                 return;
