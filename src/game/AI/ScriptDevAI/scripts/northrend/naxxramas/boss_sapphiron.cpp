@@ -708,7 +708,6 @@ struct PeriodicIceBolt : public AuraScript
                 data.spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(SPELL_ICEBLOCK_SUMMON); // Summon Ice Block
                 */
                 target->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FROST, false);
-                target->AddGameObject(nullptr);
                 
                 GameObject* pGameObj = new GameObject;
 
