@@ -193,7 +193,7 @@ struct npc_vengeance_greeterAI : public ScriptedAI
                 const std::vector<uint32> petSpells = {6991, 1515, 982, 883, 2641};
                 for (uint32 spell : petSpells)
                 {
-                    player->learnSpell(spell, false);
+                    player->learnSpellHighRank(spell);
                 }
             }
             if (player->getClass() == CLASS_DEATH_KNIGHT)
@@ -258,6 +258,11 @@ struct npc_vengeance_greeterAI : public ScriptedAI
                 player->CompleteQuest(finalQuest);
                 Quest const* qInfo = sObjectMgr.GetQuestTemplate(finalQuest);
                 player->RewardQuest(qInfo, 0, player);
+            }
+            if (player->getClass() == CLASS_WARRIOR)
+            {
+                player->learnSpellHighRank(71);
+                player->learnSpellHighRank(2458);
             }
         }
 
@@ -1193,7 +1198,7 @@ struct npc_enlistment_officerAI : public ScriptedAI
             if (!proto)
                 continue;
 
-            if (recipient->HasItemCount(item, (proto->InventoryType != INVTYPE_FINGER && proto->InventoryType != INVTYPE_WEAPON) ? 1 : 2))
+            if (recipient->HasItemCount(item, (proto->InventoryType != INVTYPE_FINGER && proto->InventoryType != INVTYPE_WEAPON) ? 2 : 2))
             {
                 alreadyHave = true;
                 continue;
