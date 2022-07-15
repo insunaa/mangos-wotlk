@@ -1603,7 +1603,7 @@ bool GossipSelect_npc_enlistment_officer(Player* player, Creature* creature, uin
     if (npc_enlistment_officerAI* enlistmentOfficerAI = dynamic_cast<npc_enlistment_officerAI*>(creature->AI()))
     {
         // Main Menu
-                switch (action)
+        switch (action)
         {
         case GOSSIP_ACTION_INFO_DEF + 8005:
             player->learnSpellHighRank(51311);
@@ -1708,7 +1708,7 @@ bool GossipSelect_npc_enlistment_officer(Player* player, Creature* creature, uin
         else if (action == GOSSIP_OPTION_VENDOR)
             player->GetSession()->SendListInventory(creature->GetObjectGuid());
 
-        else if (action == GOSSIP_ACTION_INFO_DEF + 8005)
+        else if (action == GOSSIP_ACTION_INFO_DEF + 8000)
         {
             player->UpdateSkillsForLevel(true);
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Jewelcrafting", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 8005);
