@@ -1666,7 +1666,7 @@ bool GossipSelect_npc_enlistment_officer(Player* player, Creature* creature, uin
             LearnSkillRecipesHelper(player, 773);
             break;
         default:
-            return false;
+            break;
         }
         if (action == 29)
             GossipHello_npc_enlistment_officer(player, creature);
