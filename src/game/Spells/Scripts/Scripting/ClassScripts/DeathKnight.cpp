@@ -48,6 +48,9 @@ struct RaiseDeadDk : public SpellScript
 {
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex eff) const override
     {
+        if (target->GetObjectGuid() == spell->GetCaster()->GetObjectGuid())
+            return true;
+
         if (eff == EFFECT_INDEX_1)
         {
             Unit* caster = spell->GetCaster();
