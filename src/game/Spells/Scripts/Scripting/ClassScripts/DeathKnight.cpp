@@ -48,6 +48,7 @@ struct RaiseDeadDk : public SpellScript
 {
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex eff) const override
     {
+        sLog.outError("Spell %s, Index: %d, target: %s", "Test", eff, target->GetName());
         if (target->GetObjectGuid() == spell->GetCaster()->GetObjectGuid())
             return true;
 
