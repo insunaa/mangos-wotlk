@@ -218,8 +218,12 @@ struct npc_vengeance_greeterAI : public ScriptedAI
                 for (auto quest : dkStartQuests)
                 {
                     player->CompleteQuest(quest);
+                    Quest const* qInfo = sObjectMgr.GetQuestTemplate(quest);
+                    player->RewardQuest(qInfo, 0, player);
                 }
                 player->CompleteQuest(finalQuest);
+                Quest const* qInfo = sObjectMgr.GetQuestTemplate(finalQuest);
+                player->RewardQuest(qInfo, 0, player);
             }
         }
 
