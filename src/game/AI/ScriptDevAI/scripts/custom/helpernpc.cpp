@@ -2322,6 +2322,7 @@ struct npc_target_dummyAI : public Scripted_NoMovementAI
         SetCombatMovement(false);
         SetReactState(REACT_PASSIVE);
         SetDeathPrevention(true);
+        SetRootSelf(true);
     }
 
     void Aggro(Unit* who) override
