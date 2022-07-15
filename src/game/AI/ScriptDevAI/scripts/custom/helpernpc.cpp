@@ -266,9 +266,9 @@ struct npc_vengeance_greeterAI : public ScriptedAI
         player->CastSpell(player, SPELL_ARTISAN_FIRST_AID, TRIGGERED_OLD_TRIGGERED);
         player->CastSpell(player, SPELL_HEAVY_RUNECLOTH_BAND, TRIGGERED_OLD_TRIGGERED);
         switch (tarGetLevel) {
-        case 60:
+        case 70:
             player->CastSpell(player, SPELL_JOURNEYMAN_RIDING, TRIGGERED_OLD_TRIGGERED);
-            break;
+            //break;
         case 80:
             player->CastSpell(player, SPELL_ARTISAN_RIDING, TRIGGERED_OLD_TRIGGERED);
             player->CastSpell(player, SPELL_MASTER_FIRST_AID, TRIGGERED_OLD_TRIGGERED);
@@ -307,7 +307,7 @@ bool GossipHello_npc_vengeance_greeter(Player* player, Creature* creature)
     {
         player->PrepareGossipMenu(creature, GOSSIP_MENU_OVERLORD_MAIN);
         if (player->GetLevel() < 60)
-            player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_INTERACT_1, "|cFF00008BBoost to level 60|r", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3, "Are you sure?", 0, false);
+            player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_INTERACT_1, "|cFF00008BBoost to level 70|r", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3, "Are you sure?", 0, false);
         else {
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TAXI, "Teleport to Dalaran", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TAXI, "Teleport to Naxxramas", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 6);
@@ -383,13 +383,14 @@ bool GossipSelect_npc_vengeance_greeter(Player* player, Creature* creature, uint
         case GOSSIP_ACTION_INFO_DEF + 3:
         {
             player->CLOSE_GOSSIP_MENU();
-            vengeanceGreeterAI->BoostPlayer(player, 60);
+            vengeanceGreeterAI->BoostPlayer(player, 70);
             player->CastSpell(player, SPELL_TELEPORT_VISUAL, TRIGGERED_OLD_TRIGGERED);
+            player->TeleportTo(teleLocs[2].map, teleLocs[2].x, teleLocs[2].y, teleLocs[2].z, teleLocs[2].o);
             // Teleport Player to Dark Portal
-            if (player->GetTeam() == ALLIANCE)
+            /*if (player->GetTeam() == ALLIANCE)
                 player->TeleportTo(teleLocs[0].map, teleLocs[0].x, teleLocs[0].y, teleLocs[0].z, teleLocs[0].o);
             else
-                player->TeleportTo(teleLocs[1].map, teleLocs[1].x, teleLocs[1].y, teleLocs[1].z, teleLocs[1].o);
+                player->TeleportTo(teleLocs[1].map, teleLocs[1].x, teleLocs[1].y, teleLocs[1].z, teleLocs[1].o);*/
             break;
         }
         case GOSSIP_ACTION_INFO_DEF + 4:
@@ -435,7 +436,7 @@ bool GossipSelect_npc_vengeance_greeter(Player* player, Creature* creature, uint
             if (player->GetTeam() == ALLIANCE)
                 player->TeleportTo(teleLocs[2].map, teleLocs[2].x, teleLocs[2].y, teleLocs[2].z, teleLocs[2].o);
             else
-                player->TeleportTo(teleLocs[3].map, teleLocs[3].x, teleLocs[3].y, teleLocs[3].z, teleLocs[3].o);
+                player->TeleportTo(teleLocs[2].map, teleLocs[2].x, teleLocs[2].y, teleLocs[2].z, teleLocs[2].o);
             break;
         }
         // Teleport Only - Dark Portal
@@ -447,7 +448,7 @@ bool GossipSelect_npc_vengeance_greeter(Player* player, Creature* creature, uint
             if (player->GetTeam() == ALLIANCE)
                 player->TeleportTo(teleLocs[0].map, teleLocs[0].x, teleLocs[0].y, teleLocs[0].z, teleLocs[0].o);
             else
-                player->TeleportTo(teleLocs[1].map, teleLocs[1].x, teleLocs[1].y, teleLocs[1].z, teleLocs[1].o);
+                player->TeleportTo(teleLocs[0].map, teleLocs[0].x, teleLocs[0].y, teleLocs[0].z, teleLocs[0].o);
             break;
         }
         }
@@ -589,7 +590,7 @@ const std::vector<uint32> Lvl80BiS_PriestDiscHoly       = { 37294, 40681, 37196,
 const std::vector<uint32> Lvl80BiS_PaladinHoly          = { 62271, 44296, 40681, 37788, 37655, 41609, 37258, 27123, 37623, 40691, 37362, 44202, 44283, 40585, 44255, 40685, 37169, 40700, 40705 };
 const std::vector<uint32> Lvl80BiS_PaladinRetribution   = { 39633, 39634, 41386, 40678, 44195, 37647, 41355, 40694, 37193, 44306, 44935, 37642, 42987, 37166, 37852, 38362 };
 const std::vector<uint32> Lvl80BiS_PaladinProtection    = { 39639, 39638, 41387, 40679, 37635, 37728, 37620, 40689, 43500, 44201, 42643, 37784, 37220, 36993, 37401, 43085, 40707 };
-const std::vector<uint32> Lvl80BiS_WarriorFuryArms      = { 41386, 40678, 44195, 37647, 39606, 41355, 39609, 40694, 37193, 44306, 42642, 44935, 42987, 40684, 37852, 37191, 44203, 37642 };
+const std::vector<uint32> Lvl80BiS_WarriorFuryArms      = { 41386, 40678, 44195, 37647, 39606, 41355, 39609, 40694, 37193, 44306, 42642, 44935, 42987, 40684, 37852, 37852, 37191, 44203, 37642 };
 const std::vector<uint32> Lvl80BiS_WarriorProtection    = { 41387, 40679, 37635, 37728, 43740, 37620, 39622, 40689, 43500, 44201, 42643, 37784, 36993, 37220, 37401, 40701, 41168 };
 const std::vector<uint32> Lvl80BiS_DruidFeralCat        = { 37293, 39560, 39558, 40678, 37139, 43406, 44203, 40694, 37644, 44297, 40586, 42642, 44253, 40684, 37883, 40713 };
 const std::vector<uint32> Lvl80BiS_DruidFeralBear       = { 39557, 39554, 37293, 42646, 37139, 37084, 37183, 37194, 37644, 44297, 37784, 42643, 37220, 44253, 37883, 37573 };
