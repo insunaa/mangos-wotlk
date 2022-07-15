@@ -242,10 +242,11 @@ struct boss_sapphironAI : public ScriptedAI
                 {
                     if (m_uiIceboltTimer < uiDiff)
                     {
-                        DoCastSpellIfCan(m_creature, SPELL_ICEBOLT);
-
-                        ++m_uiIceboltCount;
-                        m_uiIceboltTimer = 4000;
+                        if (DoCastSpellIfCan(m_creature, SPELL_ICEBOLT))
+                        {
+                            ++m_uiIceboltCount;
+                            m_uiIceboltTimer = 4000;
+                        }
                     }
                     else
                         m_uiIceboltTimer -= uiDiff;
