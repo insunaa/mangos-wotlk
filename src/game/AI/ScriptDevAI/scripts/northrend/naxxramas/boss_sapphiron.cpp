@@ -380,6 +380,8 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/base/CombatAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "Globals/SharedDefines.h"
+#include "MotionGenerators/MotionMaster.h"
 #include "Server/DBCEnums.h"
 #include "naxxramas.h"
 
@@ -413,6 +415,7 @@ enum
     SPELL_DESPAWN_ICEBLOCK_GO   = 28523,
     SPELL_SUMMON_WING_BUFFET    = 29329,
     SPELL_DESPAWN_WING_BUFFET   = 29330,            // Triggers spell 29336 (Despawn Buffet)
+    SPELL_WING_BUFFET           = 29328,
     SPELL_DESPAWN_BUFFET_EFFECT = 29336,
     SPELL_CHILL                 = 28547,
     SPELL_CHILL_H               = 55699,
@@ -534,10 +537,6 @@ struct boss_sapphironAI : public CombatAI
     {
         if (type == POINT_MOTION_TYPE && m_phase == PHASE_LIFT_OFF)
         {
-            // Summon the Wing Buffet NPC and cast the triggered aura to despawn it
-            if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_WING_BUFFET) == CAST_OK)
-                DoCastSpellIfCan(m_creature, SPELL_DESPAWN_WING_BUFFET);
-
             // Actual take off
             m_creature->HandleEmote(EMOTE_ONESHOT_LIFTOFF);
             m_creature->SetHover(true);
@@ -558,7 +557,7 @@ struct boss_sapphironAI : public CombatAI
             SetCombatMovement(false);
             SetMeleeEnabled(false);
             m_creature->SetTarget(nullptr);
-            m_creature->GetMotionMaster()->MovePoint(1, aLiftOffPosition[0], aLiftOffPosition[1], aLiftOffPosition[2]);
+            m_creature->GetMotionMaster()->MovePoint(1, aLiftOffPosition[0], aLiftOffPosition[1], aLiftOffPosition[2], FORCED_MOVEMENT_RUN);
         }
         else
             DisableTimer(SAPPHIRON_AIR_PHASE);
@@ -568,6 +567,10 @@ struct boss_sapphironAI : public CombatAI
     {
         m_creature->HandleEmote(EMOTE_ONESHOT_LAND);
         ResetTimer(SAPPHIRON_GROUND_PHASE, 2u * IN_MILLISECONDS);
+        for (auto block : ((instance_naxxramas*)m_instance)->getIceBlockGOs())
+        {
+            m_creature->GetMap()->GetGameObject(block)->ForcedDespawn();
+        }
     }
 
     void HandleGroundPhase()
@@ -699,10 +702,36 @@ struct PeriodicIceBolt : public AuraScript
     {
         if (Unit* target =  aura->GetTarget())
         {
-            if (target->IsAlive() && !target->HasAura(SPELL_ICEBOLT_IMMUNITY))
+            if (target->IsAlive() && !target->IsImmuneToSchool(sSpellTemplate.LookupEntry<SpellEntry>(SPELL_FROST_BREATH), SPELL_SCHOOL_MASK_FROST))/*!target->HasAura(SPELL_ICEBOLT_IMMUNITY))*/
             {
-                target->CastSpell(target, SPELL_ICEBOLT_IMMUNITY, TRIGGERED_OLD_TRIGGERED);     // Icebolt which causes immunity to frost dmg
+                /*target->CastSpell(target, SPELL_ICEBOLT_IMMUNITY, TRIGGERED_OLD_TRIGGERED);     // Icebolt which causes immunity to frost dmg
                 data.spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(SPELL_ICEBLOCK_SUMMON); // Summon Ice Block
+                */
+                target->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FROST, false);
+                target->AddGameObject(nullptr);
+                
+                GameObject* pGameObj = new GameObject;
+
+                float x, y, z;
+                Position targetPos = target->GetPosition();
+                x = targetPos.GetPositionX();
+                y = targetPos.GetPositionY();
+                z = targetPos.GetPositionZ();
+
+                Map* map = target->GetMap();
+
+                if (!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), GO_ICEBLOCK, map, target->GetPhaseMask(), x, y, z, target->GetOrientation()))
+                {
+                    delete pGameObj;
+                    return;
+                }
+
+                pGameObj->SetRespawnTime(0);
+                pGameObj->SetSpawnerGuid(target->GetObjectGuid());
+
+                // Wild object not have owner and check clickable by players
+                map->Add(pGameObj);
+                pGameObj->AIM_Initialize();
             }
         }
     }

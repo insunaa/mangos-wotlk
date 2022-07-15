@@ -5,6 +5,7 @@
 #ifndef DEF_NAXXRAMAS_H
 #define DEF_NAXXRAMAS_H
 
+#include <unordered_set>
 enum
 {
     MAX_ENCOUNTER               = 16,
@@ -151,6 +152,9 @@ enum
     GO_KELTHUZAD_WATERFALL_DOOR = 181225,                   // exit, open after sapphiron is dead
     GO_KELTHUZAD_EXIT_DOOR      = 181228,
 
+
+    GO_ICEBLOCK                 = 181247,
+
     // Eyes
     GO_ARAC_EYE_RAMP            = 181212,
     GO_PLAG_EYE_RAMP            = 181211,
@@ -273,6 +277,9 @@ class instance_naxxramas : public ScriptedInstance
         // thaddius
         void GetThadTeslaCreatures(GuidList& lList) const { lList = m_lThadTeslaCoilList; };
 
+        // sapphiron
+        std::unordered_set<ObjectGuid> getIceBlockGOs() { return m_alSapphironBlockGuids; };
+
         // kel
         void SetChamberCenterCoords(float fX, float fY, float fZ);
         void GetChamberCenterCoords(float& fX, float& fY, float& fZ) const
@@ -289,6 +296,7 @@ class instance_naxxramas : public ScriptedInstance
 
         std::unordered_map<ObjectGuid, GothTrigger> m_mGothTriggerMap;
         GuidList m_alHeiganTrapGuids[MAX_HEIGAN_TRAP_AREAS];
+        std::unordered_set<ObjectGuid> m_alSapphironBlockGuids;
 
         float m_fChamberCenterX;
         float m_fChamberCenterY;
