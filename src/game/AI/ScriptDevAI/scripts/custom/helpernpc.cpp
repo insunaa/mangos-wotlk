@@ -1711,6 +1711,7 @@ bool GossipSelect_npc_enlistment_officer(Player* player, Creature* creature, uin
         else if (action == GOSSIP_ACTION_INFO_DEF + 8000)
         {
             player->UpdateSkillsForLevel(true);
+            player->CLOSE_GOSSIP_MENU();
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Jewelcrafting", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 8005);
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Alchemy", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 8006);
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Blacksmithing", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 8007);
