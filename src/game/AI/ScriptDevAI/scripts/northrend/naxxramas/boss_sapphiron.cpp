@@ -380,6 +380,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/base/CombatAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "Entities/ObjectGuid.h"
 #include "Globals/SharedDefines.h"
 #include "MotionGenerators/MotionMaster.h"
 #include "Server/DBCEnums.h"
@@ -485,6 +486,8 @@ struct boss_sapphironAI : public CombatAI
         SetDeathPrevention(false);
         SetMeleeEnabled(true);
         m_creature->SetHover(false);
+        for (auto iceBlock : ((instance_naxxramas*)m_instance)->getIceBlockGOs())
+            m_creature->GetMap()->GetGameObject(iceBlock)->ForcedDespawn();
     }
 
     uint32 GetSubsequentActionTimer(uint32 action)
@@ -704,10 +707,7 @@ struct PeriodicIceBolt : public AuraScript
         {
             if (target->IsAlive() && !target->IsImmuneToSchool(sSpellTemplate.LookupEntry<SpellEntry>(SPELL_FROST_BREATH), SPELL_SCHOOL_MASK_FROST))/*!target->HasAura(SPELL_ICEBOLT_IMMUNITY))*/
             {
-                /*target->CastSpell(target, SPELL_ICEBOLT_IMMUNITY, TRIGGERED_OLD_TRIGGERED);     // Icebolt which causes immunity to frost dmg
-                data.spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(SPELL_ICEBLOCK_SUMMON); // Summon Ice Block
-                */
-                target->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FROST, false);
+                target->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FROST, true);
                 
                 GameObject* pGameObj = new GameObject;
 
@@ -719,16 +719,15 @@ struct PeriodicIceBolt : public AuraScript
 
                 Map* map = target->GetMap();
 
-                if (!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), GO_ICEBLOCK, map, target->GetPhaseMask(), x, y, z, target->GetOrientation()))
+                if (!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_DYNAMICOBJECT), GO_ICEBLOCK, map, target->GetPhaseMask(), x, y, z, target->GetOrientation()))
                 {
                     delete pGameObj;
                     return;
                 }
 
-                pGameObj->SetRespawnTime(0);
+                pGameObj->SetRespawnTime(-1);
                 pGameObj->SetSpawnerGuid(target->GetObjectGuid());
 
-                // Wild object not have owner and check clickable by players
                 map->Add(pGameObj);
                 pGameObj->AIM_Initialize();
             }
