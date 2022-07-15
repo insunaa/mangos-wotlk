@@ -72,6 +72,40 @@ static const CustomTeleportLocation teleLocs[] =
     {530, 10354.33f, -6370.34f, 36.04f, 1.92f, 0},                  // Sunstrider Isle (Blood Elf)
 };
 
+void LearnSkillRecipesHelper(Player* player, uint32 skill_id)
+{
+    uint32 classmask = player->getClassMask();
+
+    for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
+    {
+        SkillLineAbilityEntry const* skillLine = sSkillLineAbilityStore.LookupEntry(j);
+        if (!skillLine)
+            continue;
+
+        // wrong skill
+        if (skillLine->skillId != skill_id)
+            continue;
+
+        // not high rank
+        if (skillLine->forward_spellid)
+            continue;
+
+        // skip racial skills
+        if (skillLine->racemask != 0)
+            continue;
+
+        // skip wrong class skills
+        if (skillLine->classmask && (skillLine->classmask & classmask) == 0)
+            continue;
+
+        SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(skillLine->spellId);
+        if (!spellInfo || !SpellMgr::IsSpellValid(spellInfo, player, false))
+            continue;
+
+        player->learnSpell(skillLine->spellId, false);
+    }
+}
+
 struct npc_vengeance_greeterAI : public ScriptedAI
 {
     npc_vengeance_greeterAI(Creature* creature) : ScriptedAI(creature) { Reset(); }
@@ -1569,6 +1603,71 @@ bool GossipSelect_npc_enlistment_officer(Player* player, Creature* creature, uin
     if (npc_enlistment_officerAI* enlistmentOfficerAI = dynamic_cast<npc_enlistment_officerAI*>(creature->AI()))
     {
         // Main Menu
+                switch (action)
+        {
+        case GOSSIP_ACTION_INFO_DEF + 8005:
+            player->learnSpellHighRank(51311);
+            player->SetSkill(755, 450, 450);
+            LearnSkillRecipesHelper(player, 755);
+            break;
+        case GOSSIP_ACTION_INFO_DEF + 8006:
+            player->learnSpellHighRank(51304);
+            player->SetSkill(171, 450, 450);
+            LearnSkillRecipesHelper(player, 171);
+            break;
+        case GOSSIP_ACTION_INFO_DEF + 8007:
+            player->learnSpellHighRank(51300);
+            player->SetSkill(164, 450, 450);
+            LearnSkillRecipesHelper(player, 164);
+            break;
+        case GOSSIP_ACTION_INFO_DEF + 8008:
+            player->learnSpellHighRank(51313);
+            player->SetSkill(333, 450, 450);
+            LearnSkillRecipesHelper(player, 333);
+            break;
+        case GOSSIP_ACTION_INFO_DEF + 8009:
+            player->learnSpellHighRank(51306);
+            player->SetSkill(202, 450, 450);
+            LearnSkillRecipesHelper(player, 202);
+            break;
+        case GOSSIP_ACTION_INFO_DEF + 8010:
+            player->learnSpellHighRank(50300);
+            player->SetSkill(182, 450, 450);
+            LearnSkillRecipesHelper(player, 182);
+            break;
+        case GOSSIP_ACTION_INFO_DEF + 8011:
+            player->learnSpellHighRank(51302);
+            player->SetSkill(165, 450, 450);
+            LearnSkillRecipesHelper(player, 165);
+            break;
+        case GOSSIP_ACTION_INFO_DEF + 8012:
+            player->learnSpellHighRank(50310);
+            player->SetSkill(186, 450, 450);
+            LearnSkillRecipesHelper(player, 186);
+            break;
+        case GOSSIP_ACTION_INFO_DEF + 8013:
+            player->learnSpellHighRank(50305);
+            player->SetSkill(393, 450, 450);
+            LearnSkillRecipesHelper(player, 393);
+            break;
+        case GOSSIP_ACTION_INFO_DEF + 8014:
+            player->learnSpellHighRank(51309);
+            player->SetSkill(197, 450, 450);
+            LearnSkillRecipesHelper(player, 197);
+            break;
+        case GOSSIP_ACTION_INFO_DEF + 8015:
+            player->learnSpellHighRank(27028);
+            player->SetSkill(129, 450, 450);
+            LearnSkillRecipesHelper(player, 129);
+            break;
+        case GOSSIP_ACTION_INFO_DEF + 8016:
+            player->learnSpellHighRank(45363); //Inscription
+            player->SetSkill(129, 450, 450);
+            LearnSkillRecipesHelper(player, 773);
+            break;
+        default:
+            return false;
+        }
         if (action == 29)
             GossipHello_npc_enlistment_officer(player, creature);
 
@@ -1610,7 +1709,24 @@ bool GossipSelect_npc_enlistment_officer(Player* player, Creature* creature, uin
             player->GetSession()->SendListInventory(creature->GetObjectGuid());
 
         else if (action == GOSSIP_OPTION_TRAINER)
-            player->GetSession()->SendTrainerList(creature->GetObjectGuid());
+        {
+            player->UpdateSkillsForLevel(true);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Jewelcrafting", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 8005);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Alchemy", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 8006);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Blacksmithing", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 8007);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Enchanting", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 8008);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Engineering", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 8009);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Herbalism", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 8010);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Leatherworking", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 8011);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Mining", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 8012);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Skinning", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 8013);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Tailoring", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 8014);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "First Aid", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 8015);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Inscription", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 8016);
+            player->SEND_GOSSIP_MENU(39288, creature->GetObjectGuid());
+            
+        }
+            //player->GetSession()->SendTrainerList(creature->GetObjectGuid());
 
         // Teleport - Test Realm Overlord
         else if (action == 89)
