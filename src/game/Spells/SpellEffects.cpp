@@ -11207,6 +11207,9 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
     if (!ScriptMgr::CanSpellEffectStartDBScript(m_spellInfo, eff_idx))
         return;
 
+    if (m_spellInfo->Id == 46584)
+        sLog.outError("Try Spellscript for Raise Dead");
+
     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell ScriptStart spellid %u in EffectScriptEffect", m_spellInfo->Id);
     m_caster->GetMap()->ScriptsStart(sSpellScripts, m_spellInfo->Id, m_caster, unitTarget);
 }
