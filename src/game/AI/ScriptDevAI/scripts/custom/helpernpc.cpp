@@ -135,6 +135,17 @@ struct npc_vengeance_greeterAI : public ScriptedAI
 //            player->learnClassLevelSpells(false);
             player->UpdateSkillsForLevel(true);
 
+            // Onyxia Hide Backpack x4
+            if (!player->HasItemCount(23162, 4)) player->StoreNewItemInBestSlots(23162, 4);
+
+            // Epic Ground Mount
+            uint32 groundMount = GetStarterEpicMountForRace(player);
+            if (!player->HasItemCount(groundMount, 1)) player->StoreNewItemInBestSlots(groundMount, 1);
+
+            // Flying Mount - Swift Blue Gryphon / Swift Red Wind Rider
+            uint32 flyingMount = player->GetTeam() == ALLIANCE ? 25473 : 25477;
+            if (tarGetLevel >= 70 && !player->HasItemCount(flyingMount, 1)) player->StoreNewItemInBestSlots(flyingMount, 1);
+
             if (player->getClass() == CLASS_HUNTER)
             {
                 if (Pet* pet = player->GetPet())
@@ -150,6 +161,65 @@ struct npc_vengeance_greeterAI : public ScriptedAI
                 {
                     player->learnSpell(spell, false);
                 }
+            }
+            if (player->getClass() == CLASS_DEATH_KNIGHT)
+            {
+                std::vector<uint32> dkStartQuests = 
+                {
+                    12593,
+                    12619,
+                    12842,
+                    12848,
+                    12636,
+                    12641,
+                    12657,
+                    12850,
+                    12670,
+                    12678,
+                    12680,
+                    12687,
+                    12679,
+                    12733,
+                    12711,
+                    12697,
+                    12698,
+                    12700,
+                    12701,
+                    12706,
+                    12714,
+                    12849,
+                    12715,
+                    12716,
+                    12717,
+                    12718,
+                    12719,
+                    12722,
+                    12720,
+                    12723,
+                    12724,
+                    12725,
+                    12727,
+                    12738,
+                    12745,
+                    12751,
+                    12754,
+                    12755,
+                    12756,
+                    12757,
+                    12778,
+                    12779,
+                    12800,
+                    12801,
+                    13165,
+                    13166,
+                };
+                uint32 finalQuest = player->GetTeam() == ALLIANCE ? 13188 : 13189;
+
+                for (auto quest : dkStartQuests)
+                {
+                    player->CompleteQuest(quest);
+                }
+                player->CompleteQuest(finalQuest);
             }
         }
 
@@ -179,27 +249,6 @@ struct npc_vengeance_greeterAI : public ScriptedAI
         // Remove any gear the character still has from initial creation (now useless)
         for (uint32 itemEntry : Level1StartingGear)
             player->DestroyItemCount(itemEntry, 200, true, false);
-
-        if (tarGetLevel == 58) {
-            // LV Starter Bag (8 Slot) x4
-            if (!player->HasItemCount(2115, 4)) player->StoreNewItemInBestSlots(2115, 4);
-
-            // Ground Mount
-            uint32 groundMount = GetStarterMountForRace(player);
-            if (!player->HasItemCount(groundMount, 1)) player->StoreNewItemInBestSlots(groundMount, 1);
-        }
-        else {
-            // Onyxia Hide Backpack x4
-            if (!player->HasItemCount(23162, 4)) player->StoreNewItemInBestSlots(23162, 4);
-
-            // Epic Ground Mount
-            uint32 groundMount = GetStarterEpicMountForRace(player);
-            if (!player->HasItemCount(groundMount, 1)) player->StoreNewItemInBestSlots(groundMount, 1);
-
-            // Flying Mount - Swift Blue Gryphon / Swift Red Wind Rider
-            uint32 flyingMount = player->GetTeam() == ALLIANCE ? 25473 : 25477;
-            if (tarGetLevel >= 70 && !player->HasItemCount(flyingMount, 1)) player->StoreNewItemInBestSlots(flyingMount, 1);
-        }
 
         // give shamans their totems
         if (player->getClass() == CLASS_SHAMAN)
