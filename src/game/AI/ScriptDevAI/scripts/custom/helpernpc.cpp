@@ -1515,7 +1515,7 @@ bool GossipHello_npc_enlistment_officer(Player* player, Creature* creature)
             return true;
         }
 
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TRAINER, "Train talent spell ranks", GOSSIP_SENDER_MAIN, GOSSIP_OPTION_TRAINER);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TRAINER, "Train talent spell ranks", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 8000);
 
         if (creature->GetEntry() == NPC_MASTER_PROVISIONER ||  true)
         {
@@ -1708,7 +1708,7 @@ bool GossipSelect_npc_enlistment_officer(Player* player, Creature* creature, uin
         else if (action == GOSSIP_OPTION_VENDOR)
             player->GetSession()->SendListInventory(creature->GetObjectGuid());
 
-        else if (action == GOSSIP_OPTION_TRAINER)
+        else if (action == GOSSIP_ACTION_INFO_DEF + 8005)
         {
             player->UpdateSkillsForLevel(true);
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Jewelcrafting", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 8005);
