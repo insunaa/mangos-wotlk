@@ -1662,7 +1662,7 @@ bool GossipSelect_npc_enlistment_officer(Player* player, Creature* creature, uin
             break;
         case GOSSIP_ACTION_INFO_DEF + 8016:
             player->learnSpellHighRank(45363); //Inscription
-            player->SetSkill(129, 450, 450);
+            player->SetSkill(773, 450, 450);
             LearnSkillRecipesHelper(player, 773);
             break;
         default:
