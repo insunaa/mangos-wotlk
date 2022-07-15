@@ -204,6 +204,8 @@ enum
     // Timed achievement criterias
     ACHIEV_START_PATCHWERK_ID   = 10286,
     ACHIEV_START_MAEXXNA_ID     = 9891,
+
+    SPELL_EXPLODE               = 28433,                    // Used by Living Poison blobs when players come in range
 };
 
 struct GothTrigger

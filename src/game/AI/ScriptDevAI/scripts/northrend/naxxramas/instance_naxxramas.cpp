@@ -24,6 +24,7 @@ EndScriptData */
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "Entities/Unit.h"
 #include "Globals/SharedDefines.h"
+#include "Server/DBCEnums.h"
 #include "naxxramas.h"
 
 static const DialogueEntry aNaxxDialogue[] =
@@ -799,6 +800,150 @@ InstanceData* GetInstanceData_instance_naxxramas(Map* pMap)
     return new instance_naxxramas(pMap);
 }
 
+struct Location3DPoint
+{
+    float x, y, z;
+};
+
+static const Location3DPoint gargoyleResetCoords = {2963.f, -3476.f, 297.6f};
+
+enum
+{
+    SAY_GARGOYLE_NOISE      = -1533160, // %s emits a strange noise.
+
+    SPELL_STONEFORM         = 29154,
+    SPELL_STEALTH_DETECTION = 18950,
+    SPELL_STONESKIN         = 28995,
+    SPELL_ACID_VOLLEY       = 29325,
+    SPELL_ACID_VOLLEY_25    = 54714,
+};
+
+struct npc_stoneskin_gargoyleAI : public ScriptedAI
+{
+    npc_stoneskin_gargoyleAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float z)
+        {
+            return x > gargoyleResetCoords.x && y > gargoyleResetCoords.y && z > gargoyleResetCoords.z;
+        });
+        Reset();
+    }
+
+    uint32 acidVolleyTimer;
+    bool canCastVolley;
+
+    void Reset() override
+    {
+        acidVolleyTimer = 4000;
+        canCastVolley = false;
+        TryStoneForm();
+
+        DoCastSpellIfCan(m_creature, SPELL_STEALTH_DETECTION, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+    }
+
+    void TryStoneForm()
+    {
+        if (m_creature->GetDefaultMovementType() == IDLE_MOTION_TYPE)
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_STONEFORM, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT) == CAST_OK)
+            {
+                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
+                m_creature->SetImmuneToPlayer(true);
+            }
+        }
+    }
+
+    void JustReachedHome() override
+    {
+        TryStoneForm();
+    }
+
+    void MoveInLineOfSight(Unit* pWho) override
+    {
+        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE))
+        {
+            if (pWho->GetTypeId() == TYPEID_PLAYER
+                && !m_creature->IsInCombat()
+                && m_creature->IsWithinDistInMap(pWho, 17.0f)
+                && !pWho->HasAuraType(SPELL_AURA_FEIGN_DEATH)
+                && m_creature->IsWithinLOSInMap(pWho))
+            {
+                AttackStart(pWho);
+            }
+        }
+        else
+            ScriptedAI::MoveInLineOfSight(pWho);
+    }
+
+    void Aggro(Unit*) override
+    {
+        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_SPAWNING))
+        {
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
+            m_creature->SetImmuneToPlayer(false);
+        }
+
+        // All Stoneskin Gargoyles cast Acid Volley but the first one encountered
+        float respawnX, respawnY, respawnZ;
+        m_creature->GetRespawnCoord(respawnX, respawnY, respawnZ);
+        if (m_creature->GetDefaultMovementType() == IDLE_MOTION_TYPE || respawnZ < gargoyleResetCoords.z)
+            canCastVolley = true;
+    }
+
+    void UpdateAI(uint32 const diff) override
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
+            return;
+
+        // Stoneskin at 30% HP
+        if (m_creature->GetHealthPercent() < 30.0f && !m_creature->HasAura(SPELL_STONESKIN))
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_STONESKIN) == CAST_OK)
+                DoScriptText(SAY_GARGOYLE_NOISE, m_creature);
+        }
+
+        // Acid Volley
+        if (canCastVolley)
+        {
+            if (acidVolleyTimer < diff)
+            {
+                if (DoCastSpellIfCan(m_creature, m_creature->GetMap()->GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL ? SPELL_ACID_VOLLEY : SPELL_ACID_VOLLEY_25) == CAST_OK)
+                    acidVolleyTimer = 8000;
+            }
+            else
+                acidVolleyTimer -= diff;
+        }
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+/*###################
+#   npc_living_poison
+###################*/
+
+struct npc_living_poisonAI : public ScriptedAI
+{
+    npc_living_poisonAI(Creature* creature) : ScriptedAI(creature) { Reset(); }
+
+    void Reset() override
+    {
+        SetMeleeEnabled(false);
+    }
+
+    // Any time a player comes close to the Living Poison, it will explode and kill itself while doing heavy AoE damage to the player
+    void MoveInLineOfSight(Unit* who) override
+    {
+        if (m_creature->GetDistance2d(who->GetPositionX(), who->GetPositionY(), DIST_CALC_BOUNDING_RADIUS) > 4.0f)
+            return;
+
+        DoCastSpellIfCan(m_creature, SPELL_EXPLODE, CAST_TRIGGERED);
+    }
+
+    void AttackStart(Unit* /*who*/) override {}
+};
+
+
 bool AreaTrigger_at_naxxramas(Player* pPlayer, AreaTriggerEntry const* pAt)
 {
     if (pAt->id == AREATRIGGER_KELTHUZAD)
@@ -849,6 +994,16 @@ void AddSC_instance_naxxramas()
     Script* pNewScript = new Script;
     pNewScript->Name = "instance_naxxramas";
     pNewScript->GetInstanceData = &GetInstanceData_instance_naxxramas;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_stoneskin_gargoyle";
+    pNewScript->GetAI = &GetNewAIInstance<npc_stoneskin_gargoyleAI>;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_living_poison";
+    pNewScript->GetAI = &GetNewAIInstance<npc_living_poisonAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
