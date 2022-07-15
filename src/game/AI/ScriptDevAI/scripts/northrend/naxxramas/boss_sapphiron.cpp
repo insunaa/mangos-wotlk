@@ -380,6 +380,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/base/CombatAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "AI/ScriptDevAI/include/sc_grid_searchers.h"
 #include "Entities/ObjectGuid.h"
 #include "Globals/SharedDefines.h"
 #include "MotionGenerators/MotionMaster.h"
@@ -573,6 +574,12 @@ struct boss_sapphironAI : public CombatAI
         for (auto block : ((instance_naxxramas*)m_instance)->getIceBlockGOs())
         {
             m_creature->GetMap()->GetGameObject(block)->ForcedDespawn();
+        }
+        PlayerList players;
+        GetPlayerListWithEntryInWorld(players, m_creature, 100.f);
+        for (auto player : players)
+        {
+            player->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FROST, false);
         }
     }
 
