@@ -124,6 +124,7 @@ void instance_naxxramas::OnCreatureCreate(Creature* pCreature)
 void instance_naxxramas::OnCreatureRespawn(Creature* pCreature)
 {
     pCreature->SetMaxHealth(pCreature->GetMaxHealth()* BUFF_FACTOR);
+    pCreature->SetHealthPercent(100.f);
     pCreature->GetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE);
     pCreature->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, pCreature->GetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE)* BUFF_FACTOR);
     pCreature->SetBaseWeaponDamage(RANGED_ATTACK, MINDAMAGE, pCreature->GetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE)* BUFF_FACTOR);
