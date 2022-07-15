@@ -278,7 +278,7 @@ class instance_naxxramas : public ScriptedInstance
         void GetThadTeslaCreatures(GuidList& lList) const { lList = m_lThadTeslaCoilList; };
 
         // sapphiron
-        std::unordered_set<ObjectGuid> getIceBlockGOs() { return m_alSapphironBlockGuids; };
+        std::unordered_set<ObjectGuid>& getIceBlockGOs() { return m_alSapphironBlockGuids; };
 
         // kel
         void SetChamberCenterCoords(float fX, float fY, float fZ);
