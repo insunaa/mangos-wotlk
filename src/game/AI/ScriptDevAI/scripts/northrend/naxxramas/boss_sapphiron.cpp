@@ -382,6 +382,7 @@ EndScriptData */
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/include/sc_grid_searchers.h"
 #include "Entities/ObjectGuid.h"
+#include "Entities/Player.h"
 #include "Globals/SharedDefines.h"
 #include "MotionGenerators/MotionMaster.h"
 #include "Server/DBCEnums.h"
@@ -449,6 +450,8 @@ enum SapphironActions
     SAPPHIRON_ACTION_MAX,
 };
 
+std::unordered_set<ObjectGuid> localIceBlocks;
+
 static const uint32 groundPhaseActions[] = {SAPPHIRON_CLEAVE, SAPPHIRON_TAIL_SWEEP, SAPPHIRON_BLIZZARD, SAPPHIRON_LIFE_DRAIN};
 
 struct boss_sapphironAI : public CombatAI
@@ -487,8 +490,13 @@ struct boss_sapphironAI : public CombatAI
         SetDeathPrevention(false);
         SetMeleeEnabled(true);
         m_creature->SetHover(false);
-        for (auto iceBlock : ((instance_naxxramas*)m_instance)->getIceBlockGOs())
-            m_creature->GetMap()->GetGameObject(iceBlock)->ForcedDespawn();
+        auto iceBlocks = ((instance_naxxramas*)m_instance)->getIceBlockGOs();
+        if (!iceBlocks.empty())
+            for (auto iceBlock = iceBlocks.begin();iceBlock != iceBlocks.end();)
+            {
+                m_creature->GetMap()->GetGameObject(*iceBlock)->ForcedDespawn();
+                iceBlock = iceBlocks.erase(iceBlock);
+            }
     }
 
     uint32 GetSubsequentActionTimer(uint32 action)
@@ -571,16 +579,20 @@ struct boss_sapphironAI : public CombatAI
     {
         m_creature->HandleEmote(EMOTE_ONESHOT_LAND);
         ResetTimer(SAPPHIRON_GROUND_PHASE, 2u * IN_MILLISECONDS);
-        for (auto block : ((instance_naxxramas*)m_instance)->getIceBlockGOs())
-        {
-            m_creature->GetMap()->GetGameObject(block)->ForcedDespawn();
-        }
+        auto iceBlocks = ((instance_naxxramas*)m_instance)->getIceBlockGOs();
+        if (!iceBlocks.empty())
+            for (auto iceBlock = iceBlocks.begin();iceBlock != iceBlocks.end();)
+            {
+                m_creature->GetMap()->GetGameObject(*iceBlock)->ForcedDespawn();
+                iceBlock = iceBlocks.erase(iceBlock);
+            }
         PlayerList players;
         GetPlayerListWithEntryInWorld(players, m_creature, 100.f);
-        for (auto player : players)
-        {
-            player->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FROST, false);
-        }
+        if (!players.empty())
+            for (auto player : players)
+            {
+                player->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FROST, false);
+            }
     }
 
     void HandleGroundPhase()
