@@ -25,6 +25,7 @@ EndScriptData */
 #include "Entities/Unit.h"
 #include "Globals/SharedDefines.h"
 #include "Server/DBCEnums.h"
+#include "Spells/SpellDefines.h"
 #include "naxxramas.h"
 
 static const DialogueEntry aNaxxDialogue[] =
@@ -86,7 +87,7 @@ void instance_naxxramas::OnPlayerEnter(Player* pPlayer)
 }
 
 
-const float BUFF_FACTOR = 1.1f;
+const float BUFF_FACTOR = 1.3f;
 
 void instance_naxxramas::OnCreatureCreate(Creature* pCreature)
 {
@@ -123,14 +124,16 @@ void instance_naxxramas::OnCreatureCreate(Creature* pCreature)
 
 void instance_naxxramas::OnCreatureRespawn(Creature* pCreature)
 {
-    pCreature->SetMaxHealth(pCreature->GetMaxHealth()* BUFF_FACTOR);
+    /*pCreature->SetMaxHealth(pCreature->GetMaxHealth()* BUFF_FACTOR);
     pCreature->SetHealthPercent(100.f);
     pCreature->GetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE);
     pCreature->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, pCreature->GetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE)* BUFF_FACTOR);
     pCreature->SetBaseWeaponDamage(RANGED_ATTACK, MINDAMAGE, pCreature->GetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE)* BUFF_FACTOR);
     pCreature->SetBaseWeaponDamage(RANGED_ATTACK, MAXDAMAGE, pCreature->GetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE)* BUFF_FACTOR);
     pCreature->SetBaseWeaponDamage(OFF_ATTACK, MINDAMAGE, pCreature->GetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE)* BUFF_FACTOR);
-    pCreature->SetBaseWeaponDamage(OFF_ATTACK, MAXDAMAGE, pCreature->GetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE)* BUFF_FACTOR);
+    pCreature->SetBaseWeaponDamage(OFF_ATTACK, MAXDAMAGE, pCreature->GetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE)* BUFF_FACTOR);*/
+    if (!pCreature->HasAura(384152) && !pCreature->IsPet() && !pCreature->IsCritter())
+        pCreature->CastSpell(pCreature, 384152, TRIGGERED_OLD_TRIGGERED);
 }
 
 void instance_naxxramas::OnObjectCreate(GameObject* pGo)
