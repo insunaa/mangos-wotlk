@@ -534,7 +534,7 @@ struct boss_sapphironAI : public CombatAI
         if (summoned->GetEntry() == NPC_BLIZZARD)
         {
             if (Unit* pEnemy = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                void(0);//summoned->AI()->AttackStart(pEnemy);
+                summoned->AI()->AttackStart(pEnemy);
         }
     }
 
@@ -722,7 +722,7 @@ struct SummonBlizzard : public SpellScript
     void OnEffectExecute(Spell* spell, SpellEffectIndex /* effIdx */) const override
     {
         if (Unit* unitTarget = spell->GetUnitTarget())
-            (void)0;//unitTarget->CastSpell(unitTarget, SPELL_SUMMON_BLIZZARD, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, spell->GetCaster()->GetObjectGuid());
+            unitTarget->CastSpell(unitTarget, SPELL_SUMMON_BLIZZARD, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, spell->GetCaster()->GetObjectGuid());
     }
 };
 
