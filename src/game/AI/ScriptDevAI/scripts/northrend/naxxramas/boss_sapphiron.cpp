@@ -534,7 +534,7 @@ struct boss_sapphironAI : public CombatAI
         if (summoned->GetEntry() == NPC_BLIZZARD)
         {
             if (Unit* pEnemy = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                summoned->AI()->AttackStart(pEnemy);
+                void(0);//summoned->AI()->AttackStart(pEnemy);
         }
     }
 
@@ -565,6 +565,7 @@ struct boss_sapphironAI : public CombatAI
             m_creature->InterruptNonMeleeSpells(false);
             SetCombatMovement(false);
             SetMeleeEnabled(false);
+            m_creature->AttackStop(false, true);
             m_creature->SetTarget(nullptr);
             m_creature->GetMotionMaster()->MovePoint(1, aLiftOffPosition[0], aLiftOffPosition[1], aLiftOffPosition[2], FORCED_MOVEMENT_RUN);
         }
