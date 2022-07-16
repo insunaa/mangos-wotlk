@@ -631,7 +631,11 @@ struct boss_sapphironAI : public CombatAI
                     }
                 }
                 else
+                {
+                    m_blizzardCount = 0;
                     DisableCombatAction(action);
+                }
+
                 return;
 
             }
