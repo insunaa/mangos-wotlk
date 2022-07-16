@@ -112,26 +112,10 @@ void instance_naxxramas::OnCreatureCreate(Creature* pCreature)
         case NPC_SUB_BOSS_TRIGGER:  m_lGothTriggerList.push_back(pCreature->GetObjectGuid()); break;
         case NPC_TESLA_COIL:        m_lThadTeslaCoilList.push_back(pCreature->GetObjectGuid()); break;
     }
-
-    /*pCreature->SetMaxHealth(pCreature->GetMaxHealth()* BUFF_FACTOR);
-    pCreature->GetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE);
-    pCreature->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, pCreature->GetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE)* BUFF_FACTOR);
-    pCreature->SetBaseWeaponDamage(RANGED_ATTACK, MINDAMAGE, pCreature->GetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE)* BUFF_FACTOR);
-    pCreature->SetBaseWeaponDamage(RANGED_ATTACK, MAXDAMAGE, pCreature->GetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE)* BUFF_FACTOR);
-    pCreature->SetBaseWeaponDamage(OFF_ATTACK, MINDAMAGE, pCreature->GetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE)* BUFF_FACTOR);
-    pCreature->SetBaseWeaponDamage(OFF_ATTACK, MAXDAMAGE, pCreature->GetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE)* BUFF_FACTOR);*/
 }
 
 void instance_naxxramas::OnCreatureRespawn(Creature* pCreature)
 {
-    /*pCreature->SetMaxHealth(pCreature->GetMaxHealth()* BUFF_FACTOR);
-    pCreature->SetHealthPercent(100.f);
-    pCreature->GetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE);
-    pCreature->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, pCreature->GetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE)* BUFF_FACTOR);
-    pCreature->SetBaseWeaponDamage(RANGED_ATTACK, MINDAMAGE, pCreature->GetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE)* BUFF_FACTOR);
-    pCreature->SetBaseWeaponDamage(RANGED_ATTACK, MAXDAMAGE, pCreature->GetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE)* BUFF_FACTOR);
-    pCreature->SetBaseWeaponDamage(OFF_ATTACK, MINDAMAGE, pCreature->GetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE)* BUFF_FACTOR);
-    pCreature->SetBaseWeaponDamage(OFF_ATTACK, MAXDAMAGE, pCreature->GetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE)* BUFF_FACTOR);*/
     if (!pCreature->HasAura(384152) && !pCreature->IsPet() && !pCreature->IsCritter())
         pCreature->CastSpell(pCreature, 384152, TRIGGERED_OLD_TRIGGERED);
 }
