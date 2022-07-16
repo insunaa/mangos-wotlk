@@ -261,9 +261,6 @@ void instance_naxxramas::OnObjectCreate(GameObject* pGo)
             if (m_auiEncounter[TYPE_THADDIUS] == DONE)
                 pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
             break;
-        case GO_ICEBLOCK:
-            m_alSapphironBlockGuids.insert((pGo->GetObjectGuid()));
-            break;
 
         default:
             // Heigan Traps - many different entries which are only required for sorting

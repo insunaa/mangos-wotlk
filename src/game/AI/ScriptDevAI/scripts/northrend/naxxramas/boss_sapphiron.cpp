@@ -490,13 +490,6 @@ struct boss_sapphironAI : public CombatAI
         SetDeathPrevention(false);
         SetMeleeEnabled(true);
         m_creature->SetHover(false);
-        auto iceBlocks = ((instance_naxxramas*)m_instance)->getIceBlockGOs();
-        if (!iceBlocks.empty())
-            for (auto iceBlock = iceBlocks.begin();iceBlock != iceBlocks.end();)
-            {
-                m_creature->GetMap()->GetGameObject(*iceBlock)->ForcedDespawn();
-                iceBlock = iceBlocks.erase(iceBlock);
-            }
     }
 
     uint32 GetSubsequentActionTimer(uint32 action)
@@ -579,20 +572,6 @@ struct boss_sapphironAI : public CombatAI
     {
         m_creature->HandleEmote(EMOTE_ONESHOT_LAND);
         ResetTimer(SAPPHIRON_GROUND_PHASE, 2u * IN_MILLISECONDS);
-        auto iceBlocks = ((instance_naxxramas*)m_instance)->getIceBlockGOs();
-        if (!iceBlocks.empty())
-            for (auto iceBlock = iceBlocks.begin();iceBlock != iceBlocks.end();)
-            {
-                m_creature->GetMap()->GetGameObject(*iceBlock)->ForcedDespawn();
-                iceBlock = iceBlocks.erase(iceBlock);
-            }
-        PlayerList players;
-        GetPlayerListWithEntryInWorld(players, m_creature, 100.f);
-        if (!players.empty())
-            for (auto player : players)
-            {
-                player->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FROST, false);
-            }
     }
 
     void HandleGroundPhase()
@@ -724,31 +703,10 @@ struct PeriodicIceBolt : public AuraScript
     {
         if (Unit* target =  aura->GetTarget())
         {
-            if (target->IsAlive() && !target->IsImmuneToSchool(sSpellTemplate.LookupEntry<SpellEntry>(SPELL_FROST_BREATH), SPELL_SCHOOL_MASK_FROST))/*!target->HasAura(SPELL_ICEBOLT_IMMUNITY))*/
+            if (target->IsAlive() && !target->HasAura(SPELL_ICEBOLT_IMMUNITY))
             {
-                target->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FROST, true);
-                
-                GameObject* pGameObj = new GameObject;
-
-                float x, y, z;
-                Position targetPos = target->GetPosition();
-                x = targetPos.GetPositionX();
-                y = targetPos.GetPositionY();
-                z = targetPos.GetPositionZ();
-
-                Map* map = target->GetMap();
-
-                if (!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_DYNAMICOBJECT), GO_ICEBLOCK, map, target->GetPhaseMask(), x, y, z, target->GetOrientation()))
-                {
-                    delete pGameObj;
-                    return;
-                }
-
-                pGameObj->SetRespawnTime(-1);
-                pGameObj->SetSpawnerGuid(target->GetObjectGuid());
-
-                map->Add(pGameObj);
-                pGameObj->AIM_Initialize();
+                target->CastSpell(target, SPELL_ICEBOLT_IMMUNITY, TRIGGERED_OLD_TRIGGERED);     // Icebolt which causes immunity to frost dmg
+                data.spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(SPELL_ICEBLOCK_SUMMON); // Summon Ice Block
             }
         }
     }
