@@ -621,7 +621,8 @@ struct boss_sapphironAI : public CombatAI
             {
                 if (m_blizzardCount <= (m_bIsRegularMode ? 2 : 6))
                 {
-                    if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_BLIZZARD_INIT) == CAST_OK)
+                    //if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_BLIZZARD_INIT) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_BLIZZARD) == CAST_OK)
                         ResetCombatAction(action, GetSubsequentActionTimer(action));
                 }
                 else
@@ -719,11 +720,11 @@ struct PeriodicIceBolt : public AuraScript
 
 struct SummonBlizzard : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex /* effIdx */) const override
-    {
+    //void OnEffectExecute(Spell* spell, SpellEffectIndex /* effIdx */) const override
+    /*{
         if (Unit* unitTarget = spell->GetUnitTarget())
             unitTarget->CastSpell(unitTarget, SPELL_SUMMON_BLIZZARD, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, spell->GetCaster()->GetObjectGuid());
-    }
+    }*/
 };
 
 struct DespawnIceBlock : public SpellScript
