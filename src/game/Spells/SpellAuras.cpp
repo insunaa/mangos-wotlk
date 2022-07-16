@@ -7043,6 +7043,7 @@ void Aura::HandleAuraModIncreaseHealthPercent(bool apply, bool /*Real*/)
         case 60430:                                         // Molten Fury
         case 64193:                                         // Heartbreak
         case 65737:                                         // Heartbreak
+        case 384152:                                        // [DNT] Naxxramas Increased Difficulty
             target->SetHealth(target->GetMaxHealth());
             break;
         default:
