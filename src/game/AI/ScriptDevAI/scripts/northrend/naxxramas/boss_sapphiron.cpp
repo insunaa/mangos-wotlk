@@ -614,7 +614,7 @@ struct boss_sapphironAI : public CombatAI
             }
             case SAPPHIRON_BLIZZARD:
             {
-                if (m_blizzardCount >= (m_bIsRegularMode ? 2 : 6))
+                if (m_blizzardCount <= (m_bIsRegularMode ? 2 : 6))
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_BLIZZARD_INIT) == CAST_OK)
                         ResetCombatAction(action, GetSubsequentActionTimer(action));
