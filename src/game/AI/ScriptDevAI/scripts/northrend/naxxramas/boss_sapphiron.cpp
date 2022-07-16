@@ -418,7 +418,7 @@ enum
     SPELL_DESPAWN_ICEBLOCK_GO   = 28523,
     SPELL_SUMMON_WING_BUFFET    = 29329,
     SPELL_DESPAWN_WING_BUFFET   = 29330,            // Triggers spell 29336 (Despawn Buffet)
-    SPELL_WING_BUFFET           = 29328,
+    //SPELL_WING_BUFFET           = 29328,
     SPELL_DESPAWN_BUFFET_EFFECT = 29336,
     SPELL_CHILL                 = 28547,
     SPELL_CHILL_H               = 55699,
@@ -542,6 +542,10 @@ struct boss_sapphironAI : public CombatAI
     {
         if (type == POINT_MOTION_TYPE && m_phase == PHASE_LIFT_OFF)
         {
+            // Summon the Wing Buffet NPC and cast the triggered aura to despawn it
+            if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_WING_BUFFET) == CAST_OK)
+                DoCastSpellIfCan(m_creature, SPELL_DESPAWN_WING_BUFFET);
+
             // Actual take off
             m_creature->HandleEmote(EMOTE_ONESHOT_LIFTOFF);
             m_creature->SetHover(true);
