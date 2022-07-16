@@ -394,7 +394,7 @@ enum
     EMOTE_GENERIC_ENRAGED       = -1000003,
 
     // All phases spells
-    SPELL_FROST_AURA            = 28529,            // Periodically triggers 28531
+    SPELL_FROST_AURA            = 71387,            // Periodically triggers 28531
     SPELL_FROST_AURA_H          = 55799,
     SPELL_BESERK                = 26662,
 
@@ -420,7 +420,7 @@ enum
     SPELL_DESPAWN_WING_BUFFET   = 29330,            // Triggers spell 29336 (Despawn Buffet)
     SPELL_WING_BUFFET           = 29328,
     SPELL_DESPAWN_BUFFET_EFFECT = 29336,
-    SPELL_CHILL                 = 28531,
+    SPELL_CHILL                 = 28547,
     SPELL_CHILL_H               = 55699,
     SPELL_ACHIEVEMENT_CHECK     = 60539,                    // unused
 
