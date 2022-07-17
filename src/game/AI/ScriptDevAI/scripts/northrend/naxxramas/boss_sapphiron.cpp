@@ -379,6 +379,7 @@ SDCategory: Naxxramas
 EndScriptData */
 
 #include "AI/BaseAI/UnitAI.h"
+#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/include/sc_grid_searchers.h"
@@ -394,6 +395,8 @@ enum
 {
     EMOTE_BREATH                = -1533082,
     EMOTE_GENERIC_ENRAGED       = -1000003,
+    EMOTE_SAPPHIRON_FLY         = 32801,
+    EMOTE_SAPPHIRON_LAND        = 32802,
 
     // All phases spells
     SPELL_FROST_AURA            = 71387,            // Periodically triggers 28531
@@ -551,6 +554,7 @@ struct boss_sapphironAI : public CombatAI
 
             // Actual take off
             m_creature->HandleEmote(EMOTE_ONESHOT_LIFTOFF);
+            DoBroadcastText(EMOTE_SAPPHIRON_FLY, m_creature);
             m_creature->SetHover(true);
             m_creature->CastSpell(nullptr, SPELL_DRAGON_HOVER, TRIGGERED_OLD_TRIGGERED);
             ResetCombatAction(SAPPHIRON_ICEBOLT, 8u * IN_MILLISECONDS);
@@ -579,8 +583,9 @@ struct boss_sapphironAI : public CombatAI
     void HandleLandingPhase()
     {
         m_creature->HandleEmote(EMOTE_ONESHOT_LAND);
+        DoBroadcastText(EMOTE_SAPPHIRON_LAND, m_creature);
         ResetTimer(SAPPHIRON_GROUND_PHASE, 2u * IN_MILLISECONDS);
-        if (Creature* buffetDummy = GetClosestCreatureWithEntry(m_creature, NPC_WING_BUFFET, 5.f))
+        if (Creature* buffetDummy = GetClosestCreatureWithEntry(m_creature, NPC_WING_BUFFET, 10.f))
         {
             buffetDummy->ForcedDespawn(); // Despawn Dummy manually due to different Air-Phase durations between 10 and 25 versions
         }
