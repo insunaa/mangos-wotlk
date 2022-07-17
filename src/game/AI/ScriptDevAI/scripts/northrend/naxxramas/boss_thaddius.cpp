@@ -277,129 +277,129 @@ bool EffectDummyNPC_spell_thaddius_encounter(Unit* /*pCaster*/, uint32 uiSpellId
 ** npc_tesla_coil
 ************/
 
-// struct npc_tesla_coilAI : public Scripted_NoMovementAI
-// {
-//     npc_tesla_coilAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
-//     {
-//         m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
-//         m_uiSetupTimer = 1 * IN_MILLISECONDS;
-//         m_uiOverloadTimer = 0;
-//         m_bReapply = false;
-//         Reset();
-//     }
+struct npc_tesla_coilAI : public Scripted_NoMovementAI
+{
+    npc_tesla_coilAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+    {
+        m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
+        m_uiSetupTimer = 1 * IN_MILLISECONDS;
+        m_uiOverloadTimer = 0;
+        m_bReapply = false;
+        Reset();
+    }
 
-//     instance_naxxramas* m_pInstance;
-//     bool m_bToFeugen;
-//     bool m_bReapply;
+    instance_naxxramas* m_pInstance;
+    bool m_bToFeugen;
+    bool m_bReapply;
 
-//     uint32 m_uiSetupTimer;
-//     uint32 m_uiOverloadTimer;
+    uint32 m_uiSetupTimer;
+    uint32 m_uiOverloadTimer;
 
-//     void Reset() override {}
-//     void MoveInLineOfSight(Unit* /*pWho*/) override {}
+    void Reset() override {}
+    void MoveInLineOfSight(Unit* /*pWho*/) override {}
 
-//     void Aggro(Unit* /*pWho*/) override
-//     {
-//         DoScriptText(EMOTE_LOSING_LINK, m_creature);
-//     }
+    void Aggro(Unit* /*pWho*/) override
+    {
+        DoScriptText(EMOTE_LOSING_LINK, m_creature);
+    }
 
-//     // Overwrite this function here to
-//     // * Keep Chain spells casted when evading after useless EnterCombat caused by 'buffing' the add
-//     // * To not remove the Passive spells when evading after ie killed a player
-//     void EnterEvadeMode() override
-//     {
-//         m_creature->CombatStop();
-//     }
+    // Overwrite this function here to
+    // * Keep Chain spells casted when evading after useless EnterCombat caused by 'buffing' the add
+    // * To not remove the Passive spells when evading after ie killed a player
+    void EnterEvadeMode() override
+    {
+        m_creature->CombatStop();
+    }
 
-//     bool SetupChain()
-//     {
-//         // Check, if instance_ script failed or encounter finished
-//         if (!m_pInstance || m_pInstance->GetData(TYPE_THADDIUS) == DONE)
-//             return true;
+    bool SetupChain()
+    {
+        // Check, if instance_ script failed or encounter finished
+        if (!m_pInstance || m_pInstance->GetData(TYPE_THADDIUS) == DONE)
+            return true;
 
-//         GameObject* pNoxTeslaFeugen  = m_pInstance->GetSingleGameObjectFromStorage(GO_CONS_NOX_TESLA_FEUGEN);
-//         GameObject* pNoxTeslaStalagg = m_pInstance->GetSingleGameObjectFromStorage(GO_CONS_NOX_TESLA_STALAGG);
+        GameObject* pNoxTeslaFeugen  = m_pInstance->GetSingleGameObjectFromStorage(GO_CONS_NOX_TESLA_FEUGEN);
+        GameObject* pNoxTeslaStalagg = m_pInstance->GetSingleGameObjectFromStorage(GO_CONS_NOX_TESLA_STALAGG);
 
-//         // Try again, till Tesla GOs are spawned
-//         if (!pNoxTeslaFeugen || !pNoxTeslaStalagg)
-//             return false;
+        // Try again, till Tesla GOs are spawned
+        if (!pNoxTeslaFeugen || !pNoxTeslaStalagg)
+            return false;
 
-//         m_bToFeugen = m_creature->GetDistanceOrder(pNoxTeslaFeugen, pNoxTeslaStalagg);
+        m_bToFeugen = m_creature->GetDistanceOrder(pNoxTeslaFeugen, pNoxTeslaStalagg);
 
-//         return DoCastSpellIfCan(m_creature, m_bToFeugen ? SPELL_FEUGEN_CHAIN : SPELL_STALAGG_CHAIN) == CAST_OK;
-//     }
+        return DoCastSpellIfCan(m_creature, m_bToFeugen ? SPELL_FEUGEN_CHAIN : SPELL_STALAGG_CHAIN) == CAST_OK;
+    }
 
-//     void ReApplyChain(uint32 uiEntry)
-//     {
-//         if (uiEntry)                                        // called from Stalagg/Feugen with their entry
-//         {
-//             // Only apply chain to own add
-//             if ((uiEntry == NPC_FEUGEN && !m_bToFeugen) || (uiEntry == NPC_STALAGG && m_bToFeugen))
-//                 return;
+    void ReApplyChain(uint32 uiEntry)
+    {
+        if (uiEntry)                                        // called from Stalagg/Feugen with their entry
+        {
+            // Only apply chain to own add
+            if ((uiEntry == NPC_FEUGEN && !m_bToFeugen) || (uiEntry == NPC_STALAGG && m_bToFeugen))
+                return;
 
-//             m_bReapply = true;                              // Reapply Chains on next tick
-//         }
-//         else                                                // if called from next tick, needed because otherwise the spell doesn't bind
-//         {
-//             m_bReapply = false;
-//             m_creature->InterruptNonMeleeSpells(true);
-//             GameObject* pGo = m_pInstance->GetSingleGameObjectFromStorage(m_bToFeugen ? GO_CONS_NOX_TESLA_FEUGEN : GO_CONS_NOX_TESLA_STALAGG);
+            m_bReapply = true;                              // Reapply Chains on next tick
+        }
+        else                                                // if called from next tick, needed because otherwise the spell doesn't bind
+        {
+            m_bReapply = false;
+            m_creature->InterruptNonMeleeSpells(true);
+            GameObject* pGo = m_pInstance->GetSingleGameObjectFromStorage(m_bToFeugen ? GO_CONS_NOX_TESLA_FEUGEN : GO_CONS_NOX_TESLA_STALAGG);
 
-//             if (pGo && pGo->GetGoType() == GAMEOBJECT_TYPE_BUTTON && pGo->GetLootState() == GO_ACTIVATED)
-//                 pGo->ResetDoorOrButton();
+            if (pGo && pGo->GetGoType() == GAMEOBJECT_TYPE_BUTTON && pGo->GetLootState() == GO_ACTIVATED)
+                pGo->ResetDoorOrButton();
 
-//             DoCastSpellIfCan(m_creature, m_bToFeugen ? SPELL_FEUGEN_CHAIN : SPELL_STALAGG_CHAIN);
-//         }
-//     }
+            DoCastSpellIfCan(m_creature, m_bToFeugen ? SPELL_FEUGEN_CHAIN : SPELL_STALAGG_CHAIN);
+        }
+    }
 
-//     void SetOverloading()
-//     {
-//         m_uiOverloadTimer = 14 * IN_MILLISECONDS;           // it takes some time to overload and activate Thaddius
-//     }
+    void SetOverloading()
+    {
+        m_uiOverloadTimer = 14 * IN_MILLISECONDS;           // it takes some time to overload and activate Thaddius
+    }
 
-//     void UpdateAI(const uint32 uiDiff) override
-//     {
-//         m_creature->SelectHostileTarget();
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        m_creature->SelectHostileTarget();
 
-//         if (!m_uiOverloadTimer && !m_uiSetupTimer && !m_bReapply)
-//             return;                                         // Nothing to do this tick
+        if (!m_uiOverloadTimer && !m_uiSetupTimer && !m_bReapply)
+            return;                                         // Nothing to do this tick
 
-//         if (m_uiSetupTimer)
-//         {
-//             if (m_uiSetupTimer <= uiDiff)
-//             {
-//                 if (SetupChain())
-//                     m_uiSetupTimer = 0;
-//                 else
-//                     m_uiSetupTimer = 5 * IN_MILLISECONDS;
-//             }
-//             else
-//                 m_uiSetupTimer -= uiDiff;
-//         }
+        if (m_uiSetupTimer)
+        {
+            if (m_uiSetupTimer <= uiDiff)
+            {
+                if (SetupChain())
+                    m_uiSetupTimer = 0;
+                else
+                    m_uiSetupTimer = 5 * IN_MILLISECONDS;
+            }
+            else
+                m_uiSetupTimer -= uiDiff;
+        }
 
-//         if (m_uiOverloadTimer)
-//         {
-//             if (m_uiOverloadTimer <=  uiDiff)
-//             {
-//                 m_uiOverloadTimer = 0;
-//                 m_creature->RemoveAurasDueToSpell(m_bToFeugen ? SPELL_FEUGEN_TESLA_PASSIVE : SPELL_STALAGG_TESLA_PASSIVE);
-//                 DoCastSpellIfCan(m_creature,  SPELL_SHOCK_OVERLOAD, CAST_INTERRUPT_PREVIOUS);
-//                 DoScriptText(EMOTE_TESLA_OVERLOAD, m_creature);
-//                 m_pInstance->DoUseDoorOrButton(m_bToFeugen ? GO_CONS_NOX_TESLA_FEUGEN : GO_CONS_NOX_TESLA_STALAGG);
-//             }
-//             else
-//                 m_uiOverloadTimer -= uiDiff;
-//         }
+        if (m_uiOverloadTimer)
+        {
+            if (m_uiOverloadTimer <=  uiDiff)
+            {
+                m_uiOverloadTimer = 0;
+                m_creature->RemoveAurasDueToSpell(m_bToFeugen ? SPELL_FEUGEN_TESLA_PASSIVE : SPELL_STALAGG_TESLA_PASSIVE);
+                DoCastSpellIfCan(m_creature,  SPELL_SHOCK_OVERLOAD, CAST_INTERRUPT_PREVIOUS);
+                DoScriptText(EMOTE_TESLA_OVERLOAD, m_creature);
+                m_pInstance->DoUseDoorOrButton(m_bToFeugen ? GO_CONS_NOX_TESLA_FEUGEN : GO_CONS_NOX_TESLA_STALAGG);
+            }
+            else
+                m_uiOverloadTimer -= uiDiff;
+        }
 
-//         if (m_bReapply)
-//             ReApplyChain(0);
-//     }
-// };
+        if (m_bReapply)
+            ReApplyChain(0);
+    }
+};
 
-// UnitAI* GetAI_npc_tesla_coil(Creature* pCreature)
-// {
-//     return new npc_tesla_coilAI(pCreature);
-// }
+UnitAI* GetAI_npc_tesla_coil(Creature* pCreature)
+{
+    return new npc_tesla_coilAI(pCreature);
+}
 
 /************
 ** boss_thaddiusAddsAI - Superclass for Feugen & Stalagg
@@ -469,7 +469,7 @@ struct boss_thaddiusAddsAI : public ScriptedAI
         }
     }
 
-   /* void JustRespawned() override
+    void JustRespawned() override
     {
         Reset();                                            // Needed to reset the flags properly
 
@@ -489,7 +489,7 @@ struct boss_thaddiusAddsAI : public ScriptedAI
                     pTeslaAI->ReApplyChain(m_creature->GetEntry());
             }
         }
-    }*/
+    }
 
     void JustReachedHome() override
     {
@@ -907,11 +907,11 @@ void AddSC_boss_thaddius()
     pNewScript->GetAI = &GetAI_boss_feugen;
     pNewScript->RegisterSelf();
 
-/*    pNewScript = new Script;
+    pNewScript = new Script;
     pNewScript->Name = "npc_tesla_coil";
     pNewScript->GetAI = &GetAI_npc_tesla_coil;
     pNewScript->pEffectDummyNPC = &EffectDummyNPC_spell_thaddius_encounter;
-    pNewScript->RegisterSelf();*/
+    pNewScript->RegisterSelf();
 
     RegisterSpellScript<MagneticPull>("spell_magnetic_pull");
     RegisterSpellScript<PolarityShift>("spell_thaddius_polarity_shift");

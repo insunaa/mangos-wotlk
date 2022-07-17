@@ -156,10 +156,11 @@ struct boss_gluthAI : public ScriptedAI
                 if (pZombie->IsWithinDistInMap(m_creature, 15.0f))
                 {
                     m_creature->SetFacingToObject(pZombie);
+                    DoCastSpellIfCan(pZombie, SPELL_ZOMBIE_CHOW_SEARCH_INSTAKILL_TARGETED);
                 }
             }
         }
-        m_creature->CastSpell(nullptr, SPELL_ZOMBIE_CHOW_SEARCH_INSTAKILL_AOE, TRIGGERED_OLD_TRIGGERED);
+        //m_creature->CastSpell(nullptr, SPELL_ZOMBIE_CHOW_SEARCH_INSTAKILL_AOE, TRIGGERED_OLD_TRIGGERED);
     }
 
     void UpdateAI(const uint32 uiDiff) override
