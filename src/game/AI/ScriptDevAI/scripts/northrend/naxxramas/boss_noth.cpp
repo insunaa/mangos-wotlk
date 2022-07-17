@@ -117,6 +117,7 @@ struct boss_nothAI : public ScriptedAI
 
         m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, false);
         SetReactState(REACT_AGGRESSIVE);
+        SetRootSelf(false);
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -148,6 +149,8 @@ struct boss_nothAI : public ScriptedAI
             }
         }
         ScriptedAI::EnterEvadeMode();
+        m_creature->ForcedDespawn();
+        m_creature->Respawn();
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -195,6 +198,7 @@ struct boss_nothAI : public ScriptedAI
                     if (DoCastSpellIfCan(m_creature, SPELL_TELEPORT) == CAST_OK)
                     {
                         DoScriptText(EMOTE_TELEPORT, m_creature);
+                        SetRootSelf(true);
                         m_creature->GetMotionMaster()->MoveIdle();
                         m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, true);
                         SetReactState(REACT_PASSIVE);
@@ -278,6 +282,7 @@ struct boss_nothAI : public ScriptedAI
                 if (DoCastSpellIfCan(m_creature, SPELL_TELEPORT_RETURN) == CAST_OK)
                 {
                     DoScriptText(EMOTE_TELEPORT_RETURN, m_creature);
+                    SetRootSelf(false);
                     SetReactState(REACT_AGGRESSIVE);
                     SetMeleeEnabled(true);
                     m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, false);
