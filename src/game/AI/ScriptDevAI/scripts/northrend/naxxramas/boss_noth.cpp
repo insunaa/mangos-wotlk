@@ -143,7 +143,7 @@ struct boss_nothAI : public ScriptedAI
             {
                 if (Player* pPlayer = lPlayer.getSource())
                 {
-                    if (pPlayer->IsAlive() && !pPlayer->IsGameMaster())
+                    if (pPlayer->IsAlive() && !pPlayer->IsGameMaster() && pPlayer->IsInWorld())
                         return;
                 }
             }

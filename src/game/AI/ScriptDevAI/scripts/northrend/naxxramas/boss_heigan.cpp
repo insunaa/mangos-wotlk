@@ -22,6 +22,7 @@ SDCategory: Naxxramas
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "Entities/Player.h"
 #include "naxxramas.h"
 
 enum
@@ -114,7 +115,7 @@ struct boss_heiganAI : public ScriptedAI
             {
                 if (Player* pPlayer = lPlayer.getSource())
                 {
-                    if (pPlayer->IsAlive() && !pPlayer->IsGameMaster())
+                    if (pPlayer->IsAlive() && !pPlayer->IsGameMaster() && pPlayer->IsInWorld())
                         return;
                 }
             }
