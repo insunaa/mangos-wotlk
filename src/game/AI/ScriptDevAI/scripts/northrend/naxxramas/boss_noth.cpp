@@ -173,6 +173,9 @@ struct boss_nothAI : public ScriptedAI
                     {
                         DoScriptText(EMOTE_TELEPORT, m_creature);
                         m_creature->GetMotionMaster()->MoveIdle();
+                        m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, true);
+                        m_creature->AttackStop(true, true);
+                        m_creature->SetTarget(nullptr);
                         m_uiPhase = PHASE_BALCONY;
                         ++m_uiPhaseSub;
 
@@ -250,6 +253,7 @@ struct boss_nothAI : public ScriptedAI
                 if (DoCastSpellIfCan(m_creature, SPELL_TELEPORT_RETURN) == CAST_OK)
                 {
                     DoScriptText(EMOTE_TELEPORT_RETURN, m_creature);
+                    m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, false);
                     m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
                     switch (m_uiPhaseSub)
                     {

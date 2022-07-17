@@ -133,9 +133,11 @@ struct boss_heiganAI : public ScriptedAI
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_TELEPORT) == CAST_OK)
                 {
+                    SetRootSelf(true);
                     DoScriptText(EMOTE_TELEPORT, m_creature);
                     m_creature->GetMotionMaster()->MoveIdle();
-
+                    m_creature->AttackStop(true);
+                    m_creature->SetTarget(nullptr);
                     m_uiPhase = PHASE_PLATFORM;
                     ResetPhase();
                     return;
@@ -166,6 +168,7 @@ struct boss_heiganAI : public ScriptedAI
         {
             if (m_uiPhaseTimer < uiDiff)                    // Return to fight
             {
+                SetRootSelf(false);
                 m_creature->InterruptNonMeleeSpells(true);
                 DoScriptText(EMOTE_RETURN, m_creature);
                 m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());

@@ -568,7 +568,7 @@ struct boss_sapphironAI : public CombatAI
             m_creature->InterruptNonMeleeSpells(false);
             SetCombatMovement(false);
             SetMeleeEnabled(false);
-            m_creature->AttackStop(false, true);
+            m_creature->AttackStop(true, true);
             m_creature->SetTarget(nullptr);
             m_creature->GetMotionMaster()->MovePoint(1, aLiftOffPosition[0], aLiftOffPosition[1], aLiftOffPosition[2], FORCED_MOVEMENT_RUN);
         }
