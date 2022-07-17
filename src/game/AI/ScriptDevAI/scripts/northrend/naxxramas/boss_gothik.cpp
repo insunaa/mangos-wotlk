@@ -105,6 +105,7 @@ struct boss_gothikAI : public ScriptedAI
         m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, false);
         SetMeleeEnabled(false);
         SetCombatMovement(false);
+        SetReactState(REACT_PASSIVE);
 
         m_uiPhase = PHASE_SPEECH;
         m_uiSpeech = 1;
@@ -191,7 +192,7 @@ struct boss_gothikAI : public ScriptedAI
             {
                 if (Player* pPlayer = lPlayer.getSource())
                 {
-                    if (pPlayer->IsAlive())
+                    if (pPlayer->IsAlive() && !pPlayer->IsGameMaster())
                         return;
                 }
             }
@@ -382,6 +383,7 @@ struct boss_gothikAI : public ScriptedAI
                         // Remove Immunity
                         m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, false);
                         SetMeleeEnabled(true);
+                        SetReactState(REACT_AGGRESSIVE);
 
                         DoResetThreat();
                         m_creature->SetInCombatWithZone();

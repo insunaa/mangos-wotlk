@@ -128,6 +128,24 @@ struct boss_nothAI : public ScriptedAI
             m_pInstance->SetData(TYPE_NOTH, IN_PROGRESS);
     }
 
+    void EnterEvadeMode() override
+    {
+        Map::PlayerList const& lPlayers = m_pInstance->instance->GetPlayers();
+
+        if (!lPlayers.isEmpty())
+        {
+            for (const auto& lPlayer : lPlayers)
+            {
+                if (Player* pPlayer = lPlayer.getSource())
+                {
+                    if (pPlayer->IsAlive() && !pPlayer->IsGameMaster())
+                        return;
+                }
+            }
+        }
+        ScriptedAI::EnterEvadeMode();
+    }
+
     void JustSummoned(Creature* pSummoned) override
     {
         pSummoned->SetInCombatWithZone();
@@ -174,6 +192,8 @@ struct boss_nothAI : public ScriptedAI
                         DoScriptText(EMOTE_TELEPORT, m_creature);
                         m_creature->GetMotionMaster()->MoveIdle();
                         m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, true);
+                        SetReactState(REACT_PASSIVE);
+                        SetMeleeEnabled(false);
                         m_creature->AttackStop(true, true);
                         m_creature->SetTarget(nullptr);
                         m_uiPhase = PHASE_BALCONY;
@@ -253,6 +273,8 @@ struct boss_nothAI : public ScriptedAI
                 if (DoCastSpellIfCan(m_creature, SPELL_TELEPORT_RETURN) == CAST_OK)
                 {
                     DoScriptText(EMOTE_TELEPORT_RETURN, m_creature);
+                    SetReactState(REACT_AGGRESSIVE);
+                    SetMeleeEnabled(true);
                     m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, false);
                     m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
                     switch (m_uiPhaseSub)
