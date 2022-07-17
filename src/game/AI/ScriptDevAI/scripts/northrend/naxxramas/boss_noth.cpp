@@ -203,7 +203,7 @@ struct boss_nothAI : public ScriptedAI
                         m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, true);
                         SetReactState(REACT_PASSIVE);
                         SetMeleeEnabled(false);
-                        m_creature->AttackStop(true, true);
+                        m_creature->AttackStop(false, true);
                         m_creature->SetTarget(nullptr);
                         m_uiPhase = PHASE_BALCONY;
                         ++m_uiPhaseSub;

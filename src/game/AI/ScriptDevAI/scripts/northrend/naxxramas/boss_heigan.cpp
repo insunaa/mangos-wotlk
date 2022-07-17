@@ -159,7 +159,7 @@ struct boss_heiganAI : public ScriptedAI
                     DoScriptText(EMOTE_TELEPORT, m_creature);
                     m_creature->GetMotionMaster()->MoveIdle();
                     SetReactState(REACT_PASSIVE);
-                    m_creature->AttackStop(true);
+                    m_creature->AttackStop();
                     m_creature->SetTarget(nullptr);
                     m_uiPhase = PHASE_PLATFORM;
                     ResetPhase();

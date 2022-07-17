@@ -142,7 +142,7 @@ struct boss_gothikAI : public ScriptedAI
 
         // Make immune
         m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, true);
-        m_creature->AttackStop(true, true);
+        m_creature->AttackStop(false, true);
         m_creature->SetTarget(nullptr);
 
         m_pInstance->SetGothTriggers();
