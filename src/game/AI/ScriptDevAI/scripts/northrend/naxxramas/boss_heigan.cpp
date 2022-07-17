@@ -125,7 +125,7 @@ struct boss_heiganAI : public ScriptedAI
         if (m_pInstance)
             m_pInstance->SetData(TYPE_HEIGAN, FAIL);
         m_creature->ForcedDespawn();
-        m_creature->SetRespawnDelay(10 * IN_MILLISECONDS, true);
+        m_creature->SetRespawnTime(10 * IN_MILLISECONDS);
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
