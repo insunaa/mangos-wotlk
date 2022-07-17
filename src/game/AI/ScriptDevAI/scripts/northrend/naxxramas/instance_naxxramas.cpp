@@ -86,9 +86,6 @@ void instance_naxxramas::OnPlayerEnter(Player* pPlayer)
     pPlayer->SummonCreature(NPC_SAPPHIRON, aSapphPositions[0], aSapphPositions[1], aSapphPositions[2], aSapphPositions[3], TEMPSPAWN_DEAD_DESPAWN, 0);
 }
 
-
-const float BUFF_FACTOR = 1.3f;
-
 void instance_naxxramas::OnCreatureCreate(Creature* pCreature)
 {
     switch (pCreature->GetEntry())
@@ -111,6 +108,10 @@ void instance_naxxramas::OnCreatureCreate(Creature* pCreature)
 
         case NPC_SUB_BOSS_TRIGGER:  m_lGothTriggerList.push_back(pCreature->GetObjectGuid()); break;
         case NPC_TESLA_COIL:        m_lThadTeslaCoilList.push_back(pCreature->GetObjectGuid()); break;
+        case NPC_ROTTING_MAGGOT:
+        case NPC_DISEASED_MAGGOT:
+        case NPC_EYE_STALK:
+            m_sHeiganBackroomAdds.push_back(pCreature->GetObjectGuid()); break;
     }
 }
 
@@ -283,6 +284,15 @@ void instance_naxxramas::OnCreatureDeath(Creature* pCreature)
 {
     if (pCreature->GetEntry() == NPC_MR_BIGGLESWORTH && m_auiEncounter[TYPE_KELTHUZAD] != DONE)
         DoOrSimulateScriptTextForThisInstance(SAY_KELTHUZAD_CAT_DIED, NPC_KELTHUZAD);
+
+    switch (pCreature->GetEntry())
+    {
+        case NPC_EYE_STALK:
+        case NPC_DISEASED_MAGGOT:
+        case NPC_ROTTING_MAGGOT:
+            m_sHeiganBackroomAdds.remove(pCreature->GetObjectGuid()); break;
+        default: break;
+    }
 }
 
 bool instance_naxxramas::IsEncounterInProgress() const
@@ -348,7 +358,13 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
             if (uiData == IN_PROGRESS)
                 SetSpecialAchievementCriteria(TYPE_ACHIEV_SAFETY_DANCE, true);
             else if (uiData == DONE)
+            {
                 DoUseDoorOrButton(GO_PLAG_HEIG_EXIT_DOOR);
+                if (!m_sHeiganBackroomAdds.empty())
+                    for (auto& creatureGuid : m_sHeiganBackroomAdds)
+                        if (Creature* add = instance->GetCreature(creatureGuid))
+                            add->ForcedDespawn();
+            }
             break;
         case TYPE_LOATHEB:
             m_auiEncounter[uiType] = uiData;
