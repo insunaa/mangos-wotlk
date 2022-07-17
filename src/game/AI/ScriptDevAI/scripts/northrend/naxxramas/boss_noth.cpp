@@ -21,6 +21,7 @@ SDComment: Summons need verify, need better phase-switch support (unattackable?)
 SDCategory: Naxxramas
 EndScriptData */
 
+#include "AI/BaseAI/UnitAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "naxxramas.h"
 
@@ -113,6 +114,9 @@ struct boss_nothAI : public ScriptedAI
         m_uiBlinkTimer = 25000;
         m_uiCurseTimer = 4000;
         m_uiSummonTimer = 12000;
+
+        m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, false);
+        SetReactState(REACT_AGGRESSIVE);
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -179,7 +183,8 @@ struct boss_nothAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
+            if (m_creature->getThreatManager().isThreatListEmpty())
+                return;
 
         if (m_uiPhase == PHASE_GROUND)
         {

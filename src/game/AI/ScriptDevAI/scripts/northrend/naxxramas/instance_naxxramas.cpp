@@ -364,6 +364,7 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
                     for (auto& creatureGuid : m_sHeiganBackroomAdds)
                         if (Creature* add = instance->GetCreature(creatureGuid))
                             add->ForcedDespawn();
+                m_sHeiganBackroomAdds.clear();
             }
             break;
         case TYPE_LOATHEB:

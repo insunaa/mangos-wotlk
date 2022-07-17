@@ -86,6 +86,8 @@ struct boss_heiganAI : public ScriptedAI
     {
         m_uiPhase = PHASE_GROUND;
         m_uiTauntTimer = urand(20000, 60000);               // TODO, find information
+        SetReactState(REACT_AGGRESSIVE);
+        SetMeleeEnabled(true);
         ResetPhase();
     }
 
@@ -100,6 +102,24 @@ struct boss_heiganAI : public ScriptedAI
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_HEIGAN, IN_PROGRESS);
+    }
+
+    void EnterEvadeMode() override
+    {
+        Map::PlayerList const& lPlayers = m_pInstance->instance->GetPlayers();
+
+        if (!lPlayers.isEmpty())
+        {
+            for (const auto& lPlayer : lPlayers)
+            {
+                if (Player* pPlayer = lPlayer.getSource())
+                {
+                    if (pPlayer->IsAlive() && !pPlayer->IsGameMaster())
+                        return;
+                }
+            }
+        }
+        ScriptedAI::EnterEvadeMode();
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
@@ -123,7 +143,8 @@ struct boss_heiganAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
+        //if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
+        if (m_creature->getThreatManager().isThreatListEmpty())
             return;
 
         if (m_uiPhase == PHASE_GROUND)
@@ -136,6 +157,7 @@ struct boss_heiganAI : public ScriptedAI
                     SetRootSelf(true);
                     DoScriptText(EMOTE_TELEPORT, m_creature);
                     m_creature->GetMotionMaster()->MoveIdle();
+                    SetReactState(REACT_PASSIVE);
                     m_creature->AttackStop(true);
                     m_creature->SetTarget(nullptr);
                     m_uiPhase = PHASE_PLATFORM;
@@ -169,10 +191,10 @@ struct boss_heiganAI : public ScriptedAI
             if (m_uiPhaseTimer < uiDiff)                    // Return to fight
             {
                 SetRootSelf(false);
+                SetReactState(REACT_AGGRESSIVE);
                 m_creature->InterruptNonMeleeSpells(true);
                 DoScriptText(EMOTE_RETURN, m_creature);
                 m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
-
                 m_uiPhase = PHASE_GROUND;
                 ResetPhase();
                 return;

@@ -316,7 +316,8 @@ struct boss_gothikAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
+            if (m_creature->getThreatManager().isThreatListEmpty())
+                return;
 
         switch (m_uiPhase)
         {
