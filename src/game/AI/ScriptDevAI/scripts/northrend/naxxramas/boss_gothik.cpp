@@ -198,8 +198,10 @@ struct boss_gothikAI : public ScriptedAI
             }
         }
         ScriptedAI::EnterEvadeMode();
+        if (m_pInstance)
+            m_pInstance->SetData(TYPE_GOTHIK, FAIL);
         m_creature->ForcedDespawn();
-        m_creature->Respawn();
+        m_creature->SetRespawnDelay(10 * IN_MILLISECONDS, true);
     }
 
     void KilledUnit(Unit* pVictim) override

@@ -149,8 +149,10 @@ struct boss_nothAI : public ScriptedAI
             }
         }
         ScriptedAI::EnterEvadeMode();
+        if (m_pInstance)
+            m_pInstance->SetData(TYPE_NOTH, FAIL);
         m_creature->ForcedDespawn();
-        m_creature->Respawn();
+        m_creature->SetRespawnDelay(10 * IN_MILLISECONDS, true);
     }
 
     void JustSummoned(Creature* pSummoned) override

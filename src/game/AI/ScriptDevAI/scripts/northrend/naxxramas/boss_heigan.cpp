@@ -88,6 +88,7 @@ struct boss_heiganAI : public ScriptedAI
         m_uiPhase = PHASE_GROUND;
         m_uiTauntTimer = urand(20000, 60000);               // TODO, find information
         SetReactState(REACT_AGGRESSIVE);
+        SetRootSelf(false);
         SetMeleeEnabled(true);
         ResetPhase();
     }
@@ -121,6 +122,10 @@ struct boss_heiganAI : public ScriptedAI
             }
         }
         ScriptedAI::EnterEvadeMode();
+        if (m_pInstance)
+            m_pInstance->SetData(TYPE_HEIGAN, FAIL);
+        m_creature->ForcedDespawn();
+        m_creature->SetRespawnDelay(10 * IN_MILLISECONDS, true);
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
@@ -144,9 +149,9 @@ struct boss_heiganAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        //if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-        if (m_creature->getThreatManager().isThreatListEmpty())
-            return;
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
+            if (m_creature->getThreatManager().isThreatListEmpty())
+                return;
 
         if (m_uiPhase == PHASE_GROUND)
         {
