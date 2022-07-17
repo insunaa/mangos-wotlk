@@ -22,6 +22,7 @@ SDCategory: Naxxramas
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "AI/ScriptDevAI/include/sc_creature.h"
 #include "naxxramas.h"
 
 enum
@@ -74,7 +75,6 @@ struct boss_gothikAI : public ScriptedAI
     {
         m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        SetCombatMovement(false);
         Reset();
     }
 
@@ -104,6 +104,7 @@ struct boss_gothikAI : public ScriptedAI
         // Remove immunity
         m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, false);
         SetMeleeEnabled(false);
+        SetCombatMovement(false);
 
         m_uiPhase = PHASE_SPEECH;
         m_uiSpeech = 1;
@@ -140,6 +141,8 @@ struct boss_gothikAI : public ScriptedAI
 
         // Make immune
         m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, true);
+        m_creature->AttackStop(true, true);
+        m_creature->SetTarget(nullptr);
 
         m_pInstance->SetGothTriggers();
         PrepareSummonPlaces();
@@ -176,6 +179,24 @@ struct boss_gothikAI : public ScriptedAI
         }
 
         return false;
+    }
+
+    void EnterEvadeMode() override
+    {
+        Map::PlayerList const& lPlayers = m_pInstance->instance->GetPlayers();
+
+        if (!lPlayers.isEmpty())
+        {
+            for (const auto& lPlayer : lPlayers)
+            {
+                if (Player* pPlayer = lPlayer.getSource())
+                {
+                    if (pPlayer->IsAlive())
+                        return;
+                }
+            }
+        }
+        ScriptedAI::EnterEvadeMode();
     }
 
     void KilledUnit(Unit* pVictim) override
