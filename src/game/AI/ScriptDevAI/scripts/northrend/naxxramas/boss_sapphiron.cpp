@@ -427,6 +427,7 @@ enum
     SPELL_ACHIEVEMENT_CHECK     = 60539,                    // unused
 
     NPC_BLIZZARD                = 16474,
+    NPC_WING_BUFFET             = 17025,
 };
 
 static const float aLiftOffPosition[3] = {3522.386f, -5236.784f, 137.709f};
@@ -579,6 +580,10 @@ struct boss_sapphironAI : public CombatAI
     {
         m_creature->HandleEmote(EMOTE_ONESHOT_LAND);
         ResetTimer(SAPPHIRON_GROUND_PHASE, 2u * IN_MILLISECONDS);
+        if (Creature* buffetDummy = GetClosestCreatureWithEntry(m_creature, NPC_WING_BUFFET, 5.f))
+        {
+            buffetDummy->ForcedDespawn(); // Despawn Dummy manually due to different Air-Phase durations between 10 and 25 versions
+        }
     }
 
     void HandleGroundPhase()
