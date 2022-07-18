@@ -271,6 +271,7 @@ struct npc_vengeance_greeterAI : public ScriptedAI
             if (player->getClass() == CLASS_WARRIOR)
             {
                 player->learnSpellHighRank(71);
+                player->learnSpellHighRank(355);
                 player->learnSpellHighRank(2458);
             }
             if (player->getClass() == CLASS_PALADIN)
@@ -287,6 +288,13 @@ struct npc_vengeance_greeterAI : public ScriptedAI
                 player->learnSpellHighRank(5487);
                 player->learnSpellHighRank(33943);
                 player->learnSpellHighRank(40120);
+            }
+            if (player->getClass() == CLASS_WARLOCK)
+            {
+                player->learnSpellHighRank(697);
+                player->learnSpellHighRank(712);
+                player->learnSpellHighRank(691);
+                player->learnSpellHighRank(1122);
             }
         }
 
