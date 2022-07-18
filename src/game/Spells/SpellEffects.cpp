@@ -7933,20 +7933,20 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
     }
 
     int32 fixed_bonus = 0;
-    //for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
+    for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
     {
-        switch (m_spellInfo->Effect[eff_idx])
+        switch (m_spellInfo->Effect[j])
         {
             case SPELL_EFFECT_WEAPON_DAMAGE:
             case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
-                fixed_bonus += damagePerEffect[eff_idx];
+                fixed_bonus += damagePerEffect[j];
                 break;
             case SPELL_EFFECT_NORMALIZED_WEAPON_DMG:
-                fixed_bonus += damagePerEffect[eff_idx];
+                fixed_bonus += damagePerEffect[j];
                 normalized = true;
                 break;
             case SPELL_EFFECT_WEAPON_PERCENT_DAMAGE:
-                weaponDamagePercentMod *= float(damagePerEffect[eff_idx]) / 100.0f;
+                weaponDamagePercentMod *= float(damagePerEffect[j]) / 100.0f;
 
                 // applied only to prev.effects fixed damage
                 fixed_bonus = int32(fixed_bonus * weaponDamagePercentMod);
