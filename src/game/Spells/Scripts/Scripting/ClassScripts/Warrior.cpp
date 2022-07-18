@@ -115,6 +115,7 @@ struct WarriorDevastate : public SpellScript
         if (sunder)
         {
             sunder->GetHolder()->RefreshHolder();
+            sLog.outError("StackAmount: %d, SpellEffectValue: %d", sunder->GetStackAmount(), spell->CalculateSpellEffectValue(EFFECT_INDEX_2, target));
             spell->SetDamage(spell->GetDamage() + sunder->GetStackAmount() * spell->CalculateSpellEffectValue(EFFECT_INDEX_2, target));
         }
 
