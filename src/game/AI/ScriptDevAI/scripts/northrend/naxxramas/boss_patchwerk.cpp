@@ -86,7 +86,7 @@ struct boss_patchwerkAI : public CombatAI
     {
         ResetTimer(PATCHWERK_BERSERK, MINUTE * 6u * IN_MILLISECONDS);
         ResetTimer(PATCHWERK_BERSERK_SILMEBOLT, MINUTE * 6u * IN_MILLISECONDS);
-        CombatAI::Aggro(nullptr);
+        CombatAI::Aggro();
     }
 
     void ExecuteAction(uint32 action) override
