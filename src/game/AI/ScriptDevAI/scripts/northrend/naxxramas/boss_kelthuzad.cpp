@@ -153,7 +153,7 @@ struct boss_kelthuzadAI : public ScriptedAI
         m_uiPhase               = PHASE_INTRO;
 
         // it may be some spell should be used instead, to control the intro phase
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING | UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
         SetCombatMovement(false);
     }
 
@@ -376,7 +376,10 @@ struct boss_kelthuzadAI : public ScriptedAI
                 if (m_uiSummonIntroTimer < uiDiff)
                 {
                     if (!m_uiIntroPackCount)
+                    {
                         DoScriptText(SAY_SUMMON_MINIONS, m_creature);
+                        DoCastSpellIfCan(nullptr, SPELL_CHANNEL_VISUAL);
+                    }
 
                     SummonIntroCreatures(m_uiIntroPackCount);
                     ++m_uiIntroPackCount;
@@ -392,7 +395,7 @@ struct boss_kelthuzadAI : public ScriptedAI
                     m_uiPhase = PHASE_NORMAL;
                     DespawnIntroCreatures();
 
-                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING);
+                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING | UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
                     SetCombatMovement(true);
                     m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
 
