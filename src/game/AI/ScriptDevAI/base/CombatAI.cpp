@@ -14,6 +14,7 @@
 * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#include "AI/ScriptDevAI/include/sc_creature.h"
 #include "AI/ScriptDevAI/include/sc_instance.h"
 #include "Entities/Creature.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
@@ -92,6 +93,7 @@ void CombatAI::AddOnAggroText(uint32 text)
 
 void CombatAI::JustDied(Unit* killer)
 {
+    ScriptedAI::JustDied(killer);
     if (!m_onKilledTexts.empty())
         DoBroadcastText(m_onKilledTexts[urand(0, m_onAggroTexts.size() - 1)], m_creature, killer);
     if (!m_instanceDataType)
@@ -102,6 +104,7 @@ void CombatAI::JustDied(Unit* killer)
 
 void CombatAI::JustReachedHome()
 {
+    ScriptedAI::JustReachedHome();
     if (!m_instanceDataType)
         return;
     if (ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
@@ -110,6 +113,7 @@ void CombatAI::JustReachedHome()
 
 void CombatAI::Aggro(Unit* who)
 {
+    ScriptedAI::Aggro(who);
     if (!m_onAggroTexts.empty())
         DoBroadcastText(m_onAggroTexts[urand(0, m_onAggroTexts.size() - 1)], m_creature, who);
     if (!m_instanceDataType)
