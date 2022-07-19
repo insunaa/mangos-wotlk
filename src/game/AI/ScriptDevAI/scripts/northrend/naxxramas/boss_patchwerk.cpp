@@ -125,6 +125,8 @@ struct HatefulStrikePrimer : public SpellScript
 
         if (Unit* caster = spell->GetCaster())
         {
+            if (!caster->CanReachWithMeleeAttack(target))
+                return false;
 
             Difficulty diff = caster->GetMap()->GetDifficulty();
             uint32 maxTargets = diff == RAID_DIFFICULTY_10MAN_NORMAL ? 2 : 3;
