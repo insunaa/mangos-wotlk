@@ -29,8 +29,8 @@ enum
 {
     SAY_AGGRO1            = 13068,
     SAY_AGGRO2            = 13069,
-    SAY_SLAY              = -1533019,
     SAY_DEATH             = 13070,
+    SAY_SLAY              = 13071,
 
     EMOTE_BERSERK         = 11694,
     EMOTE_ENRAGE          = 7798,
@@ -58,7 +58,7 @@ struct boss_patchwerkAI : public CombatAI
     boss_patchwerkAI(Creature* creature) : CombatAI(creature, PATCHWERK_ACTION_MAX),
     m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        //AddOnKillText(SAY_SLAY);
+        AddOnKillText(SAY_SLAY);
         AddOnDeathText(SAY_DEATH);
         AddOnAggroText(SAY_AGGRO1, SAY_AGGRO2);
         SetDataType(TYPE_PATCHWERK);
@@ -88,12 +88,6 @@ struct boss_patchwerkAI : public CombatAI
 
         if (m_instance)
             m_instance->SetData(TYPE_PATCHWERK, DONE);
-    }
-
-    void KilledUnit(Unit*) override
-    {
-        DoBroadcastText(13071, m_creature);
-        CombatAI::KilledUnit(nullptr);
     }
 
     void Aggro(Unit* /*who*/) override
