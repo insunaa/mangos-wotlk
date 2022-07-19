@@ -31,6 +31,7 @@ Enrages 26527*/
 #include "AI/ScriptDevAI/base/CombatAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "Common.h"
+#include "Entities/Unit.h"
 #include "Spells/SpellDefines.h"
 #include "naxxramas.h"
 
@@ -157,7 +158,7 @@ struct boss_grobbulusAI : public CombatAI
             }
             case GROBBULUS_INJECTION:
             {
-                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_MUTATING_INJECTION, SELECT_FLAG_PLAYER | SELECT_FLAG_NOT_AURA))
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_MUTATING_INJECTION, SELECT_FLAG_PLAYER | SELECT_FLAG_NOT_AURA | SELECT_FLAG_SKIP_TANK))
                 {
                     if (DoCastSpellIfCan(target, SPELL_MUTATING_INJECTION, CAST_TRIGGERED) == CAST_OK)
                         ResetCombatAction(action, GetSubsequentActionTimer(action));
