@@ -31,6 +31,7 @@ Enrages 26527*/
 #include "AI/ScriptDevAI/base/CombatAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "Common.h"
+#include "Spells/SpellDefines.h"
 #include "naxxramas.h"
 
 enum
@@ -104,8 +105,11 @@ struct boss_grobbulusAI : public CombatAI
     void SpellHitTarget(Unit* target, const SpellEntry* spell) override
     {
         // Summon a Fallout Slime for every player hit by Slime Spray
-        if ((spell->Id == SPELL_SLIME_SPRAY) && target->GetTypeId() == TYPEID_PLAYER)
-            DoCastSpellIfCan(target, SPELL_SUMMON_FALLOUT_SLIME, CAST_TRIGGERED);
+        //if ((spell->Id == SPELL_SLIME_SPRAY) && target->GetTypeId() == TYPEID_PLAYER)
+            //DoCastSpellIfCan(target, SPELL_SUMMON_FALLOUT_SLIME, TRIGGERED_OLD_TRIGGERED);
+
+        if ((spell->Id == SPELL_SLIME_SPRAY || spell->Id == SPELL_SLIME_SPRAY_H) && target->GetTypeId() == TYPEID_PLAYER)
+            m_creature->SummonCreature(NPC_FALLOUT_SLIME, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 10 * IN_MILLISECONDS);
     }
 
     uint32 GetSubsequentActionTimer(uint32 id)
