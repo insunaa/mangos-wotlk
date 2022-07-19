@@ -2329,7 +2329,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
 
                     // Add 5-stack effect from Holy Vengeance
                     const SpellAuraHolder* existing = target->GetSpellAuraHolder(31803, GetObjectGuid());
-                    if (existing && existing->GetStackAmount() >= 5)
+                    if (existing && existing->GetStackAmount() <= 5)
                         CastSpell(target, 42463, TRIGGERED_OLD_TRIGGERED, nullptr, triggeredByAura);
                     break;
                 }
