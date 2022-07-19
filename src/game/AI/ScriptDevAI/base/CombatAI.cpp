@@ -91,7 +91,7 @@ void CombatAI::AddOnAggroText(uint32 text)
     m_onAggroTexts.push_back(text);
 }
 
-void CombatAI::JustDied(Unit* killer)
+/*void CombatAI::JustDied(Unit* killer)
 {
     ScriptedAI::JustDied(killer);
     if (!m_onKilledTexts.empty())
@@ -120,7 +120,7 @@ void CombatAI::Aggro(Unit* who)
         return;
     if (ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
         instance->SetData(m_instanceDataType, IN_PROGRESS);
-}
+}*/
 
 void CombatAI::KilledUnit(Unit* victim)
 {

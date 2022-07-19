@@ -71,9 +71,9 @@ class CombatAI : public ScriptedAI
         }
         void SetDataType(uint32 type) { m_instanceDataType = type; }
         void KilledUnit(Unit* /*victim*/) override;
-        void JustDied(Unit* killer = nullptr) override;
+/*        void JustDied(Unit* killer = nullptr) override;
         void JustReachedHome() override;
-        void Aggro(Unit* who = nullptr) override;
+        void Aggro(Unit* who = nullptr) override;*/
 
         // virtual void ExecuteAction(uint32 action) {}
     private:
