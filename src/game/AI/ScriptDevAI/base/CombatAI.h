@@ -19,6 +19,8 @@
 
 #include "Entities/Creature.h"
 #include "AI/ScriptDevAI/include/sc_creature.h"
+#include "Platform/Define.h"
+#include <vector>
 
 /*
     Small wrapper class that reduces the amount of code needed to use CombatActions and adds proper spell action reset functionality
@@ -43,13 +45,34 @@ class CombatAI : public ScriptedAI
             AddOnKillText(value);
             AddOnKillText(fargs...);
         }
+        void AddOnDeathText(uint32 text);
+        template<typename... Targs>
+        void AddOnDeathText(uint32 value, Targs... fargs)
+        {
+            AddOnDeathText(value);
+            AddOnDeathText(fargs...);
+        }
+        void AddOnAggroText(uint32 text);
+        template<typename... Targs>
+        void AddOnAggroText(uint32 value, Targs... fargs)
+        {
+            AddOnAggroText(value);
+            AddOnAggroText(fargs...);
+        }
+        void SetDataType(uint32 type) { m_instanceDataType = type; }
         void KilledUnit(Unit* /*victim*/) override;
+        void JustDied(Unit*) override;
+        void JustReachedHome() override;
+        void Aggro(Unit*) override;
 
         // virtual void ExecuteAction(uint32 action) {}
     private:
         ObjectGuid m_storedTarget;
 
         std::vector<int32> m_onDeathTexts;
+        std::vector<uint32> m_onKilledTexts;
+        std::vector<uint32> m_onAggroTexts;
+        uint32 m_instanceDataType = 0;
         bool m_onKillCooldown;
 
         bool m_stopTargeting;

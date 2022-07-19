@@ -14,6 +14,7 @@
 * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#include "AI/ScriptDevAI/include/sc_instance.h"
 #include "Entities/Creature.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
 #include "Spells/Spell.h"
@@ -77,6 +78,44 @@ void CombatAI::OnTaunt()
 void CombatAI::AddOnKillText(int32 text)
 {
     m_onDeathTexts.push_back(text);
+}
+
+void CombatAI::AddOnDeathText(uint32 text)
+{
+    m_onKilledTexts.push_back(text);
+}
+
+void CombatAI::AddOnAggroText(uint32 text)
+{
+    m_onAggroTexts.push_back(text);
+}
+
+void CombatAI::JustDied(Unit* killer)
+{
+    if (!m_onKilledTexts.empty())
+        DoBroadcastText(m_onKilledTexts[urand(0, m_onAggroTexts.size() - 1)], m_creature, killer);
+    if (!m_instanceDataType)
+        return;
+    if (ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
+        instance->SetData(m_instanceDataType, DONE);
+}
+
+void CombatAI::JustReachedHome()
+{
+    if (!m_instanceDataType)
+        return;
+    if (ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
+        instance->SetData(m_instanceDataType, FAIL);
+}
+
+void CombatAI::Aggro(Unit* who)
+{
+    if (!m_onAggroTexts.empty())
+        DoBroadcastText(m_onAggroTexts[urand(0, m_onAggroTexts.size() - 1)], m_creature, who);
+    if (!m_instanceDataType)
+        return;
+    if (ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
+        instance->SetData(m_instanceDataType, IN_PROGRESS);
 }
 
 void CombatAI::KilledUnit(Unit* victim)
