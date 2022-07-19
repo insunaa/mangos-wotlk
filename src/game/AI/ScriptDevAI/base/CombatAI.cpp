@@ -130,7 +130,7 @@ void CombatAI::KilledUnit(Unit* victim)
     if (!m_onKillCooldown && m_onDeathTexts.size() > 0)
     {
         m_onKillCooldown = true;
-        DoScriptText(m_onDeathTexts[urand(0, m_onDeathTexts.size() - 1)], m_creature, victim);
+        DoBroadcastText(m_onDeathTexts[urand(0, m_onDeathTexts.size() - 1)], m_creature, victim);
         ResetTimer(ACTION_ON_KILL_COOLDOWN, 10000);
     }
 }
