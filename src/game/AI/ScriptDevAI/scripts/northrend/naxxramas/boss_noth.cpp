@@ -118,6 +118,7 @@ struct boss_nothAI : public ScriptedAI
         m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, false);
         SetReactState(REACT_AGGRESSIVE);
         SetRootSelf(false);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -206,6 +207,7 @@ struct boss_nothAI : public ScriptedAI
                         m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, true);
                         SetReactState(REACT_PASSIVE);
                         SetMeleeEnabled(false);
+                        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
                         m_creature->AttackStop(false, true);
                         m_creature->SetTarget(nullptr);
                         m_uiPhase = PHASE_BALCONY;
@@ -285,6 +287,7 @@ struct boss_nothAI : public ScriptedAI
                 if (DoCastSpellIfCan(m_creature, SPELL_TELEPORT_RETURN) == CAST_OK)
                 {
                     DoScriptText(EMOTE_TELEPORT_RETURN, m_creature);
+                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
                     SetRootSelf(false);
                     SetReactState(REACT_AGGRESSIVE);
                     SetMeleeEnabled(true);

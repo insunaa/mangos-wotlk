@@ -57,6 +57,7 @@ enum
 enum GrobbulusActions
 {
     GROBBULUS_SLIME_STREAM,
+    GROBBULUS_CHECK_MELEE,
     GROBBULUS_SLIME_SPRAY,
     GROBBULUS_INJECTION,
     GROBBULUS_POISON_CLOUD,
@@ -72,11 +73,12 @@ struct boss_grobbulusAI : public CombatAI
         m_bIsRegularMode = creature->GetMap()->IsRegularDifficulty();
         m_uiBerserkTimeSecs = m_bIsRegularMode ? 12 * MINUTE : 9 * MINUTE;
         m_uiBerserkTimer = m_uiBerserkTimeSecs * IN_MILLISECONDS;
-        AddCombatAction(GROBBULUS_SLIME_STREAM, 5u * IN_MILLISECONDS);
+        AddCombatAction(GROBBULUS_SLIME_STREAM, true);
         AddCombatAction(GROBBULUS_SLIME_SPRAY, 20u * IN_MILLISECONDS, 30u * IN_MILLISECONDS); //Spell List
         AddCombatAction(GROBBULUS_INJECTION, 13u * IN_MILLISECONDS);
         AddCombatAction(GROBBULUS_POISON_CLOUD, 20u * IN_MILLISECONDS, 25u * IN_MILLISECONDS); //Spell List
         AddCombatAction(GROBBULUS_BERSERK, m_uiBerserkTimer);
+        AddCombatAction(GROBBULUS_CHECK_MELEE, 5u * IN_MILLISECONDS);
     }
 
     ScriptedInstance* m_instance;
@@ -88,7 +90,7 @@ struct boss_grobbulusAI : public CombatAI
         if (m_instance)
             m_instance->SetData(TYPE_GROBBULUS, IN_PROGRESS);
 
-        ResetIfNotStarted(GROBBULUS_SLIME_STREAM, 5u * IN_MILLISECONDS);
+        //ResetIfNotStarted(GROBBULUS_SLIME_STREAM, 5u * IN_MILLISECONDS);
     }
 
     void EnterEvadeMode() override
@@ -126,6 +128,7 @@ struct boss_grobbulusAI : public CombatAI
             }
             case GROBBULUS_POISON_CLOUD: return 15u * IN_MILLISECONDS;
             case GROBBULUS_SLIME_SPRAY: return urand(20, 30) * IN_MILLISECONDS;
+            case GROBBULUS_CHECK_MELEE: return 1u * IN_MILLISECONDS;
             default: return 0;
         }
     }
@@ -134,11 +137,22 @@ struct boss_grobbulusAI : public CombatAI
     {
         switch (action)
         {
+            case GROBBULUS_CHECK_MELEE:
+            {
+                if (!m_creature->CanReachWithMeleeAttack(m_creature->GetVictim()))
+                {
+                    ResetCombatAction(GROBBULUS_SLIME_STREAM, 3u * IN_MILLISECONDS);
+                    DisableCombatAction(action);
+                    break;
+                }
+                ResetCombatAction(action, GetSubsequentActionTimer(action));
+            }
             case GROBBULUS_SLIME_STREAM:
             {
                 if (!m_creature->CanReachWithMeleeAttack(m_creature->GetVictim()))
                     DoCastSpellIfCan(m_creature, SPELL_SLIME_STREAM, CAST_TRIGGERED);
-                ResetCombatAction(action, 3u * IN_MILLISECONDS);
+                else
+                    ResetCombatAction(GROBBULUS_CHECK_MELEE, GetSubsequentActionTimer(GROBBULUS_CHECK_MELEE));
                 break;
             }
             case GROBBULUS_INJECTION:

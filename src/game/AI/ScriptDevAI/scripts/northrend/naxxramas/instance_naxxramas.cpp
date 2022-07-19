@@ -461,7 +461,6 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
                 if (Creature* cloud_creature = instance->GetCreature(cloud))
                 {
                     cloud_creature->ForcedDespawn();
-                    sLog.outError("Cloud despawned successfully");
                 }
             }
             break;
