@@ -273,6 +273,7 @@ struct npc_vengeance_greeterAI : public ScriptedAI
                 player->learnSpellHighRank(71);
                 player->learnSpellHighRank(355);
                 player->learnSpellHighRank(2458);
+                player->learnSpellHighRank(7386);
             }
             if (player->getClass() == CLASS_PALADIN)
             {
