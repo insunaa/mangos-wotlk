@@ -45,6 +45,11 @@ class CombatAI : public ScriptedAI
             AddOnKillText(value);
             AddOnKillText(fargs...);
         }
+        /**
+        * Adds one or more Broadcast Texts to possibly emit when Unit dies
+        * This function is not called if JustDied is overridden. Add CombatAI::JustDied(); to your overriding function.
+        * @param text Broadcast Text ID
+        */
         void AddOnDeathText(uint32 text);
         template<typename... Targs>
         void AddOnDeathText(uint32 value, Targs... fargs)
@@ -52,6 +57,11 @@ class CombatAI : public ScriptedAI
             AddOnDeathText(value);
             AddOnDeathText(fargs...);
         }
+        /**
+        * Adds one or more Broadcast Texts to possibly emit when Unit enters combat
+        * This function is not called if Aggro is overridden. Add CombatAI::Aggro(); to your overriding function.
+        * @param text Broadcast Text ID
+        */
         void AddOnAggroText(uint32 text);
         template<typename... Targs>
         void AddOnAggroText(uint32 value, Targs... fargs)
@@ -61,9 +71,9 @@ class CombatAI : public ScriptedAI
         }
         void SetDataType(uint32 type) { m_instanceDataType = type; }
         void KilledUnit(Unit* /*victim*/) override;
-        void JustDied(Unit*) override;
+        void JustDied(Unit* killer = nullptr) override;
         void JustReachedHome() override;
-        void Aggro(Unit*) override;
+        void Aggro(Unit* who = nullptr) override;
 
         // virtual void ExecuteAction(uint32 action) {}
     private:
