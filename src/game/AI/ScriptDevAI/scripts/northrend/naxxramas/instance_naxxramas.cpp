@@ -112,6 +112,8 @@ void instance_naxxramas::OnCreatureCreate(Creature* pCreature)
         case NPC_DISEASED_MAGGOT:
         case NPC_EYE_STALK:
             m_sHeiganBackroomAdds.push_back(pCreature->GetObjectGuid()); break;
+        case NPC_GROBBULUS_CLOUD:
+            m_lGrobbulusClouds.push_back(pCreature->GetObjectGuid()); break;
     }
 }
 
@@ -291,6 +293,8 @@ void instance_naxxramas::OnCreatureDeath(Creature* pCreature)
         case NPC_DISEASED_MAGGOT:
         case NPC_ROTTING_MAGGOT:
             m_sHeiganBackroomAdds.remove(pCreature->GetObjectGuid()); break;
+        case NPC_GROBBULUS_CLOUD:
+            m_lGrobbulusClouds.remove(pCreature->GetObjectGuid()); break;
         default: break;
     }
 }
@@ -452,6 +456,14 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_GROBBULUS:
             m_auiEncounter[uiType] = uiData;
+            for (const auto& cloud : m_lGrobbulusClouds)
+            {
+                if (Creature* cloud_creature = instance->GetCreature(cloud))
+                {
+                    cloud_creature->ForcedDespawn();
+                    sLog.outError("Cloud despawned successfully");
+                }
+            }
             break;
         case TYPE_GLUTH:
             m_auiEncounter[uiType] = uiData;

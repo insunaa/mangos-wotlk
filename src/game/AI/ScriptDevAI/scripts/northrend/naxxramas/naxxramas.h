@@ -79,6 +79,7 @@ enum
     NPC_ANUB_REKHAN             = 15956,
     NPC_FAERLINA                = 15953,
 
+    NPC_GROBBULUS_CLOUD         = 16363,
     NPC_THADDIUS                = 15928,
     NPC_STALAGG                 = 15929,
     NPC_FEUGEN                  = 15930,
@@ -299,6 +300,7 @@ class instance_naxxramas : public ScriptedInstance
         std::unordered_map<ObjectGuid, GothTrigger> m_mGothTriggerMap;
         GuidList m_alHeiganTrapGuids[MAX_HEIGAN_TRAP_AREAS];
         GuidList m_sHeiganBackroomAdds;
+        GuidList m_lGrobbulusClouds;
 
         float m_fChamberCenterX;
         float m_fChamberCenterY;
