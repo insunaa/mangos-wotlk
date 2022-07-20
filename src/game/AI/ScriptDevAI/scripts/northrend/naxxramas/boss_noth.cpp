@@ -363,47 +363,6 @@ struct boss_nothAI : public ScriptedAI
     }
 };
 
-struct CurseOfThePlagueBringer : public AuraScript
-{
-    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
-    {
-        uint32 spellID = aura->GetSpellProto()->Id;
-        auto* target = procData.source;
-        sLog.outError("1Curse Proc intercepted! Target: %s", target->GetName());
-        if (target->HasAura(SPELL_CURSE_PLAGUEBRINGER) || target->HasAura(SPELL_CURSE_PLAGUEBRINGER_H))
-        {
-            switch (spellID) {
-                case SPELL_CURSE_PLAGUEBRINGER:
-                    target->CastSpell(nullptr, SPELL_CURSE_PLAGUEBRINGER+1, TRIGGERED_OLD_TRIGGERED); break;
-                    target->CastSpell(nullptr, SPELL_CURSE_PLAGUEBRINGER_H+1, TRIGGERED_OLD_TRIGGERED); break;
-                    default: break;
-            }
-            sLog.outError("Curse Proc intercepted! Target: %s", target->GetName());
-        }
-        return SPELL_AURA_PROC_OK;
-    }
-
-    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
-    {
-        uint32 spell_id = data.spellInfo->Id;
-        auto* target = data.caster;
-        if (!target)
-            return;
-        sLog.outError("1Curse Period intercepted! Target: %s", target->GetName());
-        if (target->HasAura(SPELL_CURSE_PLAGUEBRINGER) || target->HasAura(SPELL_CURSE_PLAGUEBRINGER_H))
-        {
-            switch (spell_id) {
-                case SPELL_CURSE_PLAGUEBRINGER:
-                    target->CastSpell(target, SPELL_CURSE_PLAGUEBRINGER+1, TRIGGERED_OLD_TRIGGERED); sLog.outError("CURSES!"); break;
-                case SPELL_CURSE_PLAGUEBRINGER_H:
-                    target->CastSpell(target, SPELL_CURSE_PLAGUEBRINGER_H+1, TRIGGERED_OLD_TRIGGERED); break;
-                default: target->CastSpell(target, SPELL_CURSE_PLAGUEBRINGER+1, TRIGGERED_OLD_TRIGGERED); sLog.outError("CURSES!"); break;
-            }
-            sLog.outError("Curse Period intercepted! Target: %s", target->GetName());
-        }
-    }
-};
-
 UnitAI* GetAI_boss_noth(Creature* pCreature)
 {
     return new boss_nothAI(pCreature);
@@ -415,6 +374,4 @@ void AddSC_boss_noth()
     pNewScript->Name = "boss_noth";
     pNewScript->GetAI = &GetAI_boss_noth;
     pNewScript->RegisterSelf();
-
-    RegisterSpellScript<CurseOfThePlagueBringer>("spell_curse_of_the_plaguebringer");
 }
