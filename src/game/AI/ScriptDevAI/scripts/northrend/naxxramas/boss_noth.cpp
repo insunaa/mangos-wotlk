@@ -367,7 +367,6 @@ struct CurseOfThePlagueBringer : public AuraScript
 {
     SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
     {
-        procData.cooldown = 1;
         uint32 spellID = aura->GetSpellProto()->Id;
         auto* target = procData.source;
         sLog.outError("1Curse Proc intercepted! Target: %s", target->GetName());
@@ -382,6 +381,23 @@ struct CurseOfThePlagueBringer : public AuraScript
             sLog.outError("Curse Proc intercepted! Target: %s", target->GetName());
         }
         return SPELL_AURA_PROC_OK;
+    }
+
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
+    {
+        uint32 spell_id = data.spellInfo->Id;
+        auto* target = data.target;
+        sLog.outError("1Curse Period intercepted! Target: %s", target->GetName());
+        if (target->HasAura(SPELL_CURSE_PLAGUEBRINGER) || target->HasAura(SPELL_CURSE_PLAGUEBRINGER_H))
+        {
+            switch (spell_id) {
+                case SPELL_CURSE_PLAGUEBRINGER:
+                    target->CastSpell(nullptr, SPELL_CURSE_PLAGUEBRINGER+1, TRIGGERED_OLD_TRIGGERED); break;
+                    target->CastSpell(nullptr, SPELL_CURSE_PLAGUEBRINGER_H+1, TRIGGERED_OLD_TRIGGERED); break;
+                    default: break;
+            }
+            sLog.outError("Curse Period intercepted! Target: %s", target->GetName());
+        }
     }
 };
 
