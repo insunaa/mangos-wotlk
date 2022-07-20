@@ -395,8 +395,9 @@ struct CurseOfThePlagueBringer : public AuraScript
             switch (spell_id) {
                 case SPELL_CURSE_PLAGUEBRINGER:
                     target->CastSpell(target, SPELL_CURSE_PLAGUEBRINGER+1, TRIGGERED_OLD_TRIGGERED); sLog.outError("CURSES!"); break;
+                case SPELL_CURSE_PLAGUEBRINGER_H:
                     target->CastSpell(target, SPELL_CURSE_PLAGUEBRINGER_H+1, TRIGGERED_OLD_TRIGGERED); break;
-                    default: break;
+                default: target->CastSpell(target, SPELL_CURSE_PLAGUEBRINGER+1, TRIGGERED_OLD_TRIGGERED); sLog.outError("CURSES!"); break;
             }
             sLog.outError("Curse Period intercepted! Target: %s", target->GetName());
         }
