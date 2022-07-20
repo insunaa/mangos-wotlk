@@ -370,12 +370,13 @@ struct CurseOfThePlagueBringer : public AuraScript
         procData.cooldown = 1;
         uint32 spellID = aura->GetSpellProto()->Id;
         auto* target = procData.source;
+        sLog.outError("1Curse Proc intercepted! Target: %s", target->GetName());
         if (target->HasAura(SPELL_CURSE_PLAGUEBRINGER) || target->HasAura(SPELL_CURSE_PLAGUEBRINGER_H))
         {
             switch (spellID) {
                 case SPELL_CURSE_PLAGUEBRINGER:
-                    target->CastSpell(target, SPELL_CURSE_PLAGUEBRINGER+1, TRIGGERED_OLD_TRIGGERED); break;
-                    target->CastSpell(target, SPELL_CURSE_PLAGUEBRINGER_H+1, TRIGGERED_OLD_TRIGGERED); break;
+                    target->CastSpell(nullptr, SPELL_CURSE_PLAGUEBRINGER+1, TRIGGERED_OLD_TRIGGERED); break;
+                    target->CastSpell(nullptr, SPELL_CURSE_PLAGUEBRINGER_H+1, TRIGGERED_OLD_TRIGGERED); break;
                     default: break;
             }
             sLog.outError("Curse Proc intercepted! Target: %s", target->GetName());
