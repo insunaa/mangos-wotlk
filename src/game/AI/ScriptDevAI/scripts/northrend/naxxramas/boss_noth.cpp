@@ -378,6 +378,7 @@ struct CurseOfThePlagueBringer : public AuraScript
                     target->CastSpell(target, SPELL_CURSE_PLAGUEBRINGER_H+1, TRIGGERED_OLD_TRIGGERED); break;
                     default: break;
             }
+            sLog.outError("Curse Proc intercepted! Target: %s", target->GetName());
         }
         return SPELL_AURA_PROC_OK;
     }
