@@ -23,6 +23,8 @@ EndScriptData */
 
 #include "AI/BaseAI/UnitAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "Spells/Scripts/SpellScript.h"
+#include "Spells/SpellDefines.h"
 #include "naxxramas.h"
 
 enum
@@ -361,6 +363,26 @@ struct boss_nothAI : public ScriptedAI
     }
 };
 
+struct CurseOfThePlagueBringer : public AuraScript
+{
+    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
+    {
+        procData.cooldown = 1;
+        uint32 spellID = aura->GetSpellProto()->Id;
+        auto* target = procData.source;
+        if (target->HasAura(SPELL_CURSE_PLAGUEBRINGER) || target->HasAura(SPELL_CURSE_PLAGUEBRINGER_H))
+        {
+            switch (spellID) {
+                case SPELL_CURSE_PLAGUEBRINGER:
+                    target->CastSpell(target, SPELL_CURSE_PLAGUEBRINGER+1, TRIGGERED_OLD_TRIGGERED); break;
+                    target->CastSpell(target, SPELL_CURSE_PLAGUEBRINGER_H+1, TRIGGERED_OLD_TRIGGERED); break;
+                    default: break;
+            }
+        }
+        return SPELL_AURA_PROC_OK;
+    }
+};
+
 UnitAI* GetAI_boss_noth(Creature* pCreature)
 {
     return new boss_nothAI(pCreature);
@@ -372,4 +394,6 @@ void AddSC_boss_noth()
     pNewScript->Name = "boss_noth";
     pNewScript->GetAI = &GetAI_boss_noth;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<CurseOfThePlagueBringer>("spell_curse_of_the_plaguebringer");
 }
