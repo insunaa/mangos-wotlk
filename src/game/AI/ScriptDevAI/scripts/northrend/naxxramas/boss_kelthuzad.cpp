@@ -154,6 +154,7 @@ struct boss_kelthuzadAI : public ScriptedAI
 
         // it may be some spell should be used instead, to control the intro phase
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING | UNIT_FLAG_UNINTERACTIBLE);
+        m_creature->CastStop();
         SetCombatMovement(false);
     }
 

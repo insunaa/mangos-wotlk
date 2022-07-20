@@ -157,7 +157,7 @@ enum
     // Frostwyrm Lair
     GO_KELTHUZAD_WATERFALL_DOOR = 181225,                   // exit, open after sapphiron is dead
     GO_KELTHUZAD_EXIT_DOOR      = 181228,
-
+    GO_KELTHUZAD_TRIGGER        = 181444,
 
     GO_ICEBLOCK                 = 181247,
 
@@ -312,6 +312,7 @@ class instance_naxxramas : public ScriptedInstance
         uint8 m_uiHorseMenKilled;
         uint32 m_uiLivingPoisonTimer;
         uint32 m_uiScreamsTimer;
+        uint32 m_despawnKTTriggerTimer;
 
         DialogueHelper m_dialogueHelper;
 };
