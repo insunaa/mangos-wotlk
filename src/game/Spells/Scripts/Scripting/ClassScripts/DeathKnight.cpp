@@ -46,6 +46,13 @@ struct ScourgeStrike : public SpellScript
 
 struct RaiseDeadDk : public SpellScript
 {
+
+    void OnInit(Spell* /*spell*/) const override
+    {
+        sLog.outError("Spell Init");
+    }
+
+
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex eff) const override
     {
         //if (eff == EFFECT_INDEX_1)
