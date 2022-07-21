@@ -177,7 +177,7 @@ struct npc_web_wrapAI : public ScriptedAI
             // Note: normally we should use the Knockback effect to handle this, but because this doesn't behave as expected we'll just use Jump Movement
             // pVictim->KnockBackFrom(m_creature, -fDist, uiEffectMiscValue * 0.1f);
 
-            float fSpeed = fDist * (uiEffectMiscValue * 0.01f) * 0.1;
+            float fSpeed = fDist * (uiEffectMiscValue * 0.01f);
             pVictim->GetMotionMaster()->MoveJump(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), fSpeed, 0.0f);
 
             m_victimGuid = pVictim->GetObjectGuid();
@@ -203,7 +203,6 @@ struct npc_web_wrapAI : public ScriptedAI
     {
         if (m_uiWebWrapTimer)
         {
-            sLog.outError("WebWrap Init");
             // Finally the player gets web wrapped and he should change the display id until the creature is killed
             if (m_uiWebWrapTimer <= uiDiff)
             {
