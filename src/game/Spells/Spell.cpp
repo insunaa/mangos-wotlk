@@ -1369,6 +1369,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
     // Do damage and triggers
     else if (m_damage)
     {
+    if (m_spellInfo->Id == 46584) sLog.outError("20");
         // Fill base damage struct (unitTarget - is real spell target)
         SpellNonMeleeDamage spellDamageInfo(caster, unitTarget, m_spellInfo->Id, m_spellSchoolMask, this);
 
@@ -1397,6 +1398,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 
         m_damage = spellDamageInfo.damage; // update value so that script handler has access
         OnHit(missInfo); // TODO: After spell damage calc is moved to proper handler - move this before the first if
+    if (m_spellInfo->Id == 46584) sLog.outError("21");
 
         // Send log damage message to client
         Unit::SendSpellNonMeleeDamageLog(&spellDamageInfo);
@@ -1434,6 +1436,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
     }
 
     OnAfterHit();
+    if (m_spellInfo->Id == 46584) sLog.outError("22");
 
     if (unit->IsCreature())
         // cast at creature (or GO) quest objectives update at successful cast finished (+channel finished)
@@ -3738,6 +3741,7 @@ SpellCastResult Spell::cast(bool skipCheck)
 
         // Immediate spell, no big deal
         handle_immediate();
+    if (m_spellInfo->Id == 46584) sLog.outError("11");
     }
 
     m_trueCaster->DecreaseCastCounter();
