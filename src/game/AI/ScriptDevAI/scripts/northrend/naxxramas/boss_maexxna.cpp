@@ -217,6 +217,17 @@ struct npc_web_wrapAI : public ScriptedAI
             else
                 m_uiWebWrapTimer -= uiDiff;
         }
+        if (m_victimGuid)
+        {
+            if (Player* pVictim = m_creature->GetMap()->GetPlayer(m_victimGuid))
+            {
+                if (!pVictim->IsAlive())
+                {
+                    pVictim->RemoveAurasDueToSpell(SPELL_WEBWRAP);
+                    pVictim->RestoreDisplayId();
+                }
+            }
+        }
     }
 };
 
