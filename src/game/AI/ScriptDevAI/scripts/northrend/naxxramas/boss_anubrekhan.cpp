@@ -99,6 +99,8 @@ struct boss_anubrekhanAI : public ScriptedAI
 
     void KilledUnit(Unit* pVictim) override
     {
+        if (!pVictim)
+            return;
         // Force the player to spawn corpse scarabs via spell
         if (pVictim->GetTypeId() == TYPEID_PLAYER)
             pVictim->CastSpell(pVictim, SPELL_SELF_SPAWN_5, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
