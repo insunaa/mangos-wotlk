@@ -561,10 +561,10 @@ void AddSC_boss_maexxna()
     newScript->GetAI = &GetNewAIInstance<npc_web_wrapAI>;
     newScript->RegisterSelf();
 
-    newScript = new Script;
+/*    newScript = new Script;
     newScript->Name = "npc_invible_man";
     newScript->GetAI = &GetNewAIInstance<npc_invisible_manAI>;
-    newScript->RegisterSelf();
+    newScript->RegisterSelf();*/
 
 //    RegisterSpellScript<WebWrap>("spell_web_wrap");
 //    RegisterSpellScript<ClearWebWrap>("spell_clear_web_wrap");
