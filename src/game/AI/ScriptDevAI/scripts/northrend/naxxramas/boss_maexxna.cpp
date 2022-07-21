@@ -66,8 +66,8 @@ enum
     SPELL_POISONSHOCK           = 28741,
     SPELL_POISONSHOCK_H         = 54122,
 
-    SPELL_NECROTICPOISON        = 28776,
-    SPELL_NECROTICPOISON_H      = 54121,
+    SPELL_NECROTICPOISON_H      = 28776,
+    SPELL_NECROTICPOISON        = 54121,
 
     SPELL_FRENZY                = 54123,
     SPELL_FRENZY_H              = 54124,
@@ -189,6 +189,7 @@ struct boss_maexxnaAI : public CombatAI
             case MAEXXNA_POISON_SHOCK: return urand(10u, 20u) * IN_MILLISECONDS;
             case MAEXXNA_NECROTIC_POISON: return urand(20u, 30u) * IN_MILLISECONDS;
             case MAEXXNA_SUMMON_SPIDERLING: return 30u * IN_MILLISECONDS;
+            default: return 0;
         }
     }
 
@@ -274,6 +275,8 @@ struct boss_maexxnaAI : public CombatAI
                         script_error_log("Error in script Naxxramas::boss_maexxna: less summoning NPCs (entry %u) than expected targets (%u) for Web Wrap ability. Check your DB", NPC_INVISIBLE_MAN, t_webWrap);
                         break;
                     }
+
+                    sLog.outError("Web Wrap Targets Found!");
 
                     // Randomly pick up to the trigger NPCs
                     std::vector<Unit*> invisibleMen(m_summoningTriggers.begin(), m_summoningTriggers.end());
