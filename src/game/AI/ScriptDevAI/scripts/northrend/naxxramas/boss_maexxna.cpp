@@ -24,6 +24,7 @@ EndScriptData */
 #include "AI/ScriptDevAI/base/CombatAI.h"
 #include "AI/ScriptDevAI/base/TimerAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "Entities/Unit.h"
 #include "naxxramas.h"
 
 enum
@@ -180,6 +181,7 @@ struct npc_web_wrapAI : public ScriptedAI
 
             m_victimGuid = pVictim->GetObjectGuid();
             m_uiWebWrapTimer = uiEffectMiscValue == 200 ? 1000 : 2000;
+            m_creature->SetInCombatWithVictim(pVictim);
         }
     }
 
@@ -309,7 +311,7 @@ struct boss_maexxnaAI : public CombatAI
             summoned->SetInCombatWithZone();
         if (summoned->GetEntry() == NPC_WEB_WRAP)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_WEBWRAP, SELECT_FLAG_PLAYER))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_WEBWRAP, SELECT_FLAG_PLAYER | SELECT_FLAG_SKIP_TANK))
             {
                 if (npc_web_wrapAI* pWebAI = dynamic_cast<npc_web_wrapAI*>(summoned->AI()))
                     pWebAI->SetVictim(pTarget);
