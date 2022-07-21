@@ -314,7 +314,7 @@ struct boss_maexxnaAI : public CombatAI
         if (summoned->GetEntry() == NPC_WEB_WRAP)
         {
             sLog.outError("Before target selection");
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_WEBWRAP, SELECT_FLAG_PLAYER))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, uint32(0), SELECT_FLAG_PLAYER))
             {
                 sLog.outError("Target selected: %s", pTarget->GetName());
                 if (npc_web_wrapAI* pWebAI = dynamic_cast<npc_web_wrapAI*>(summoned->AI()))
