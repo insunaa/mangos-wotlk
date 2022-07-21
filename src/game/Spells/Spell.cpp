@@ -3657,26 +3657,36 @@ SpellCastResult Spell::cast(bool skipCheck)
         m_caster->AI()->OnSpellCooldownAdded(m_spellInfo);
 
     TakePower();
+    if (m_spellInfo->Id == 46584) sLog.outError("1");
     TakeReagents();                                         // we must remove reagents before HandleEffects to allow place crafted item in same slot
+    if (m_spellInfo->Id == 46584) sLog.outError("2");
     TakeAmmo();
+    if (m_spellInfo->Id == 46584) sLog.outError("3");
 
     SendCastResult(castResult);
+    if (m_spellInfo->Id == 46584) sLog.outError("4");
     SendSpellGo();                                          // we must send smsg_spell_go packet before m_castItem delete in TakeCastItem()...
+    if (m_spellInfo->Id == 46584) sLog.outError("5");
 
     InitializeDamageMultipliers();
+    if (m_spellInfo->Id == 46584) sLog.outError("6");
 
     OnCast();
+    if (m_spellInfo->Id == 46584) sLog.outError("7");
 
     if (!m_IsTriggeredSpell && !m_trueCaster->IsGameObject() && !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_NOT_AN_ACTION))
         m_caster->RemoveAurasOnCast(AURA_INTERRUPT_FLAG_ACTION_LATE, m_spellInfo);
+    if (m_spellInfo->Id == 46584) sLog.outError("8");
 
     // process immediate effects (items, ground, etc.) also initialize some variables
     _handle_immediate_phase();
+    if (m_spellInfo->Id == 46584) sLog.outError("9");
 
     Unit* procTarget = m_targets.getUnitTarget();
     if (!procTarget)
         procTarget = m_caster;
 
+    if (m_spellInfo->Id == 46584) sLog.outError("10");
     // Okay, everything is prepared. Now we need to distinguish between immediate and evented delayed spells
     if (IsDelayedSpell())
     {
