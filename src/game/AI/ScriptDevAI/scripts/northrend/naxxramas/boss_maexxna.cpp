@@ -315,6 +315,7 @@ struct boss_maexxnaAI : public CombatAI
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_WEBWRAP, SELECT_FLAG_PLAYER | SELECT_FLAG_SKIP_TANK))
             {
+                sLog.outError("Target selected: %s", pTarget->GetName());
                 if (npc_web_wrapAI* pWebAI = dynamic_cast<npc_web_wrapAI*>(summoned->AI()))
                     pWebAI->SetVictim(pTarget);
             }
