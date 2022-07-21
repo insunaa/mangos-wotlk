@@ -157,6 +157,7 @@ struct npc_web_wrapAI : public ScriptedAI
     {
         if (pVictim)
         {
+            sLog.outError("SetVictim called");
             // Vanilla spell 28618, 28619, 28620, 28621 had effect SPELL_EFFECT_PULL_TOWARDS with EffectMiscValue = 200, 300, 400 and 500
             // All these spells trigger 28622 after 1 or 2 seconds
             // the EffectMiscValue may have been based on the distance between the victim and the target
