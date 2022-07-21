@@ -177,8 +177,8 @@ struct npc_web_wrapAI : public ScriptedAI
             // Note: normally we should use the Knockback effect to handle this, but because this doesn't behave as expected we'll just use Jump Movement
             // pVictim->KnockBackFrom(m_creature, -fDist, uiEffectMiscValue * 0.1f);
 
-            float fSpeed = fDist * (uiEffectMiscValue * 0.01f);
-            pVictim->GetMotionMaster()->MoveJump(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), fSpeed, 10.0f);
+            float fSpeed = fDist * (uiEffectMiscValue * 0.01f) * 0.1;
+            pVictim->GetMotionMaster()->MoveJump(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), fSpeed, 0.0f);
 
             m_victimGuid = pVictim->GetObjectGuid();
             m_uiWebWrapTimer = uiEffectMiscValue == 200 ? 1000 : 2000;
@@ -194,6 +194,7 @@ struct npc_web_wrapAI : public ScriptedAI
             {
                 if (pVictim->IsAlive())
                     pVictim->RemoveAurasDueToSpell(SPELL_WEBWRAP);
+                pVictim->RestoreDisplayId();
             }
         }
     }
@@ -207,7 +208,10 @@ struct npc_web_wrapAI : public ScriptedAI
             if (m_uiWebWrapTimer <= uiDiff)
             {
                 if (Player* pVictim = m_creature->GetMap()->GetPlayer(m_victimGuid))
+                {
+                    pVictim->SetDisplayId(15435);
                     pVictim->CastSpell(pVictim, SPELL_WEBWRAP, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
+                }
 
                 m_uiWebWrapTimer = 0;
             }
@@ -313,10 +317,8 @@ struct boss_maexxnaAI : public CombatAI
             summoned->SetInCombatWithZone();
         if (summoned->GetEntry() == NPC_WEB_WRAP)
         {
-            sLog.outError("Before target selection");
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, uint32(0), SELECT_FLAG_PLAYER))
             {
-                sLog.outError("Target selected: %s", pTarget->GetName());
                 if (npc_web_wrapAI* pWebAI = dynamic_cast<npc_web_wrapAI*>(summoned->AI()))
                     pWebAI->SetVictim(pTarget);
             }
