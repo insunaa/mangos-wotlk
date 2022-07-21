@@ -419,8 +419,6 @@ Spell::Spell(WorldObject * caster, SpellEntry const* info, uint32 triggeredFlags
     MANGOS_ASSERT(caster != nullptr && info != nullptr);
     MANGOS_ASSERT(info == sSpellTemplate.LookupEntry<SpellEntry>(info->Id) && "`info` must be pointer to sSpellTemplate element");
 
-    if (info->Id == 46584) { sLog.outError("Exists: %d",(bool)m_spellScript); m_spellScript->OnInit(this); }
-
     if (info->SpellDifficultyId && caster->IsInWorld() && caster->GetMap()->IsDungeon())
     {
         if (SpellEntry const* spellEntry = GetSpellEntryByDifficulty(info->SpellDifficultyId, caster->GetMap()->GetDifficulty(), caster->GetMap()->IsRaid()))
@@ -1371,7 +1369,6 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
     // Do damage and triggers
     else if (m_damage)
     {
-    if (m_spellInfo->Id == 46584) sLog.outError("20");
         // Fill base damage struct (unitTarget - is real spell target)
         SpellNonMeleeDamage spellDamageInfo(caster, unitTarget, m_spellInfo->Id, m_spellSchoolMask, this);
 
@@ -1400,7 +1397,6 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 
         m_damage = spellDamageInfo.damage; // update value so that script handler has access
         OnHit(missInfo); // TODO: After spell damage calc is moved to proper handler - move this before the first if
-    if (m_spellInfo->Id == 46584) sLog.outError("21");
 
         // Send log damage message to client
         Unit::SendSpellNonMeleeDamageLog(&spellDamageInfo);
@@ -1438,7 +1434,6 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
     }
 
     OnAfterHit();
-    if (m_spellInfo->Id == 46584) sLog.outError("22");
 
     if (unit->IsCreature())
         // cast at creature (or GO) quest objectives update at successful cast finished (+channel finished)
@@ -3662,36 +3657,26 @@ SpellCastResult Spell::cast(bool skipCheck)
         m_caster->AI()->OnSpellCooldownAdded(m_spellInfo);
 
     TakePower();
-    if (m_spellInfo->Id == 46584) sLog.outError("1");
     TakeReagents();                                         // we must remove reagents before HandleEffects to allow place crafted item in same slot
-    if (m_spellInfo->Id == 46584) sLog.outError("2");
     TakeAmmo();
-    if (m_spellInfo->Id == 46584) sLog.outError("3");
 
     SendCastResult(castResult);
-    if (m_spellInfo->Id == 46584) sLog.outError("4");
     SendSpellGo();                                          // we must send smsg_spell_go packet before m_castItem delete in TakeCastItem()...
-    if (m_spellInfo->Id == 46584) sLog.outError("5");
 
     InitializeDamageMultipliers();
-    if (m_spellInfo->Id == 46584) sLog.outError("6");
 
     OnCast();
-    if (m_spellInfo->Id == 46584) sLog.outError("7");
 
     if (!m_IsTriggeredSpell && !m_trueCaster->IsGameObject() && !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_NOT_AN_ACTION))
         m_caster->RemoveAurasOnCast(AURA_INTERRUPT_FLAG_ACTION_LATE, m_spellInfo);
-    if (m_spellInfo->Id == 46584) sLog.outError("8");
 
     // process immediate effects (items, ground, etc.) also initialize some variables
     _handle_immediate_phase();
-    if (m_spellInfo->Id == 46584) sLog.outError("9");
 
     Unit* procTarget = m_targets.getUnitTarget();
     if (!procTarget)
         procTarget = m_caster;
 
-    if (m_spellInfo->Id == 46584) sLog.outError("10");
     // Okay, everything is prepared. Now we need to distinguish between immediate and evented delayed spells
     if (IsDelayedSpell())
     {
@@ -3743,7 +3728,6 @@ SpellCastResult Spell::cast(bool skipCheck)
 
         // Immediate spell, no big deal
         handle_immediate();
-    if (m_spellInfo->Id == 46584) sLog.outError("11");
     }
 
     m_trueCaster->DecreaseCastCounter();
