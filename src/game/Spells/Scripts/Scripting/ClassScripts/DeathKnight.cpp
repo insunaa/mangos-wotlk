@@ -52,6 +52,10 @@ struct RaiseDeadDk : public SpellScript
         sLog.outError("Spell Init");
     }
 
+    void OnAfterHit() const override
+    {
+        sLog.outError("After hit");
+    }
 
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex eff) const override
     {
