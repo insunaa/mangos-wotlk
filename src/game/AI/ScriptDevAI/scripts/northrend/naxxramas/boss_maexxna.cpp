@@ -313,6 +313,7 @@ struct boss_maexxnaAI : public CombatAI
             summoned->SetInCombatWithZone();
         if (summoned->GetEntry() == NPC_WEB_WRAP)
         {
+            sLog.outError("Before target selection");
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_WEBWRAP, SELECT_FLAG_PLAYER | SELECT_FLAG_SKIP_TANK))
             {
                 sLog.outError("Target selected: %s", pTarget->GetName());
