@@ -115,6 +115,8 @@ void instance_naxxramas::OnCreatureCreate(Creature* pCreature)
             m_sHeiganBackroomAdds.push_back(pCreature->GetObjectGuid()); break;
         case NPC_GROBBULUS_CLOUD:
             m_lGrobbulusClouds.push_back(pCreature->GetObjectGuid()); break;
+        case NPC_CORPSE_SCARAB:
+            m_lCorpseScarabs.push_back(pCreature->GetObjectGuid()); break;
     }
 }
 
@@ -300,6 +302,8 @@ void instance_naxxramas::OnCreatureDeath(Creature* pCreature)
             m_sHeiganBackroomAdds.remove(pCreature->GetObjectGuid()); break;
         case NPC_GROBBULUS_CLOUD:
             m_lGrobbulusClouds.remove(pCreature->GetObjectGuid()); break;
+        case NPC_CORPSE_SCARAB:
+            m_lCorpseScarabs.remove(pCreature->GetObjectGuid()); break;
         default: break;
     }
 }
@@ -327,6 +331,10 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
             {
                 DoUseDoorOrButton(GO_ARAC_ANUB_GATE);
                 DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_MAEXXNA_ID);
+                if (!m_lCorpseScarabs.empty())
+                    for (auto& creatureGuid : m_lCorpseScarabs)
+                        if (Creature* add = instance->GetCreature(creatureGuid))
+                            add->ForcedDespawn();
             }
             break;
         case TYPE_FAERLINA:

@@ -78,6 +78,7 @@ enum
 
     NPC_ANUB_REKHAN             = 15956,
     NPC_FAERLINA                = 15953,
+    NPC_CORPSE_SCARAB           = 16698,
 
     NPC_GROBBULUS_CLOUD         = 16363,
     NPC_THADDIUS                = 15928,
@@ -301,6 +302,7 @@ class instance_naxxramas : public ScriptedInstance
         GuidList m_alHeiganTrapGuids[MAX_HEIGAN_TRAP_AREAS];
         GuidList m_sHeiganBackroomAdds;
         GuidList m_lGrobbulusClouds;
+        GuidList m_lCorpseScarabs;
 
         float m_fChamberCenterX;
         float m_fChamberCenterY;
