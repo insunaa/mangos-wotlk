@@ -48,7 +48,7 @@ struct RaiseDeadDk : public SpellScript
 {
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex eff) const override
     {
-        if (eff == EFFECT_INDEX_1)
+        //if (eff == EFFECT_INDEX_1)
         {
             Unit* caster = spell->GetCaster();
             if (target->IsTrivialForTarget(caster))
@@ -59,6 +59,13 @@ struct RaiseDeadDk : public SpellScript
 
             if (target->GetCreatureType() != CREATURE_TYPE_HUMANOID)
                 return false;
+
+            if (!target || target == caster)
+                if (Player* pcaster = dynamic_cast<Player*>(spell->GetCaster()))
+                    if (pcaster->HasItemCount(37201, 1))
+                    {
+                        return true;
+                    }
         }
 
         return true;
@@ -66,13 +73,14 @@ struct RaiseDeadDk : public SpellScript
 
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
-        if (effIdx == EFFECT_INDEX_2) // reagent consuming version
-            if (spell->GetTargetList().size() > 1) // more than caster is hit
-                return;
+//        if (effIdx == EFFECT_INDEX_2) // reagent consuming version
+//            if (spell->GetTargetList().size() > 1) // more than caster is hit
+//                return;
 
         Unit* caster = spell->GetCaster();
         uint32 spellId = caster->HasAura(52143) ? 52150 : 46585; // Master of Ghouls talent
-        if (effIdx == EFFECT_INDEX_2) // corpse dust version
+//        if (effIdx == EFFECT_INDEX_2) // corpse dust version
+        if (!spell->GetUnitTarget() || spell->GetUnitTarget() == caster)
         {
             if (caster->CastSpell(nullptr, 48289, TRIGGERED_IGNORE_GCD) == SPELL_CAST_OK)
             {
@@ -81,8 +89,8 @@ struct RaiseDeadDk : public SpellScript
             }
             else
                 caster->RemoveSpellCooldown(*spell->m_spellInfo, true);
-        }
-        else if (effIdx == EFFECT_INDEX_1) // corpse version
+        } else
+//        else if (effIdx == EFFECT_INDEX_1) // corpse version
             caster->CastSpell(spell->GetUnitTarget(), spellId, TRIGGERED_OLD_TRIGGERED);
     }
 };
