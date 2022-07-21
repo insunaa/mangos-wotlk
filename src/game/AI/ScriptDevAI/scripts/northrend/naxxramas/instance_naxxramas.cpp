@@ -327,14 +327,15 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
         case TYPE_ANUB_REKHAN:
             m_auiEncounter[uiType] = uiData;
             DoUseDoorOrButton(GO_ARAC_ANUB_DOOR);
+            if (!m_lCorpseScarabs.empty())
+                for (auto& creatureGuid : m_lCorpseScarabs)
+                    if (Creature* add = instance->GetCreature(creatureGuid))
+                        add->ForcedDespawn();
+            m_lCorpseScarabs.clear();
             if (uiData == DONE)
             {
                 DoUseDoorOrButton(GO_ARAC_ANUB_GATE);
                 DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_MAEXXNA_ID);
-                if (!m_lCorpseScarabs.empty())
-                    for (auto& creatureGuid : m_lCorpseScarabs)
-                        if (Creature* add = instance->GetCreature(creatureGuid))
-                            add->ForcedDespawn();
             }
             break;
         case TYPE_FAERLINA:
