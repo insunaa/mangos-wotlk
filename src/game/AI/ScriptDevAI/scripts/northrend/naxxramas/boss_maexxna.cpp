@@ -403,6 +403,7 @@ struct boss_maexxnaAI : public CombatAI
                 }*/
                 if (DoCastWebWrap())
                     ResetCombatAction(action, GetSubsequentActionTimer(action));
+                break;
             }
             case MAEXXNA_WEBSPRAY:
             {
