@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/base/CombatAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "Spells/SpellTargetDefines.h"
 #include "naxxramas.h"
 
 enum
@@ -121,6 +122,13 @@ struct boss_patchwerkAI : public CombatAI
 
 struct HatefulStrikePrimer : public SpellScript
 {
+
+    void OnInit(Spell* spell) const override
+    {
+        spell->SetMaxAffectedTargets(spell->GetCaster()->GetMap()->GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL ? 2 : 3);
+        spell->SetFilteringScheme(EFFECT_INDEX_0, false, SCHEME_HIGHEST_HP);
+    }
+
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
     {
         if (target->GetTypeId() != TYPEID_PLAYER || !spell->GetCaster()->CanReachWithMeleeAttack(target))

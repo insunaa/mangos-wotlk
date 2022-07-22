@@ -9083,8 +9083,12 @@ void Spell::FilterTargetMap(UnitList& filterUnitList, SpellTargetFilterScheme sc
         case SCHEME_HIGHEST_HP:
         {
             // Returns the target with the highest HP in melee range
-            Unit* hatedTarget = nullptr;
+            //Unit* hatedTarget = nullptr;
+            UnitList hatedTargets;
             uint32 maxHP = 0;
+            uint32 targetCount = m_affectedTargetCount;
+            if (!targetCount)
+                targetCount++;
             for (auto& unit : filterUnitList)
             {
                 if (m_caster->CanReachWithMeleeAttack(unit))
@@ -9092,15 +9096,23 @@ void Spell::FilterTargetMap(UnitList& filterUnitList, SpellTargetFilterScheme sc
                     if (unit->GetHealth() > maxHP)
                     {
                         maxHP = unit->GetHealth();
-                        hatedTarget = unit;
+                        hatedTargets.insert(hatedTargets.begin(), unit);
+                        //hatedTarget = unit;
+                    }
+                    else
+                    {
+                        hatedTargets.push_back(unit);
                     }
                 }
             }
-            if (!hatedTarget)
+            //if (!hatedTarget)
+            if (hatedTargets.empty())
                 return;
 
             filterUnitList.clear();
-            filterUnitList.push_back(hatedTarget);
+            hatedTargets.resize(targetCount);
+            std::swap(filterUnitList, hatedTargets);
+            //filterUnitList.push_back(hatedTarget);
             break;
         }
         case SCHEME_RANDOM_CHAIN:
