@@ -282,7 +282,9 @@ struct npc_vengeance_greeterAI : public ScriptedAI
             }
             if (player->getClass() == CLASS_SHAMAN)
             {
+                player->learnSpellHighRank(3599);
                 player->learnSpellHighRank(5394);
+                player->learnSpellHighRank(8071);
             }
             if (player->getClass() == CLASS_DRUID)
             {
