@@ -152,10 +152,7 @@ struct boss_grobbulusAI : public CombatAI
             case GROBBULUS_SLIME_STREAM:
             {
                 if (!m_creature->CanReachWithMeleeAttack(m_creature->GetVictim()))
-                {
-                    if (!DoCastSpellIfCan(m_creature, SPELL_SLIME_STREAM, CAST_TRIGGERED))
-                        break;
-                }
+                    DoCastSpellIfCan(m_creature, SPELL_SLIME_STREAM, CAST_TRIGGERED);
 
                 ResetCombatAction(GROBBULUS_CHECK_MELEE, GetSubsequentActionTimer(GROBBULUS_CHECK_MELEE));
                 DisableCombatAction(action);
