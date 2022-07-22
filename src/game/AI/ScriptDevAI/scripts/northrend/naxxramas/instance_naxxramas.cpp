@@ -122,8 +122,18 @@ void instance_naxxramas::OnCreatureCreate(Creature* pCreature)
 
 void instance_naxxramas::OnCreatureRespawn(Creature* pCreature)
 {
-    if (!pCreature->IsWorldBoss())
-        return;
+    switch (pCreature->GetEntry())
+    {
+        case NPC_FAERLINA_FOLLOWER:
+        case NPC_FAERLINA_FOLLOWER_H:
+        case NPC_FAERLINA_WORSHIPPER:
+        case NPC_FAERLINA_WORSHIPPER_H:
+        case NPC_DEATHKNIGHT_UNDERSTUDY:
+        case NPC_DEATHKNIGHT_UNDERSTUDY_H:
+            break;
+        default:
+            if (!pCreature->IsWorldBoss()) return;
+    }
     if (!pCreature->HasAura(384152) && !pCreature->IsPet() && !pCreature->IsCritter())
         pCreature->CastSpell(pCreature, 384152, TRIGGERED_OLD_TRIGGERED);
 }
