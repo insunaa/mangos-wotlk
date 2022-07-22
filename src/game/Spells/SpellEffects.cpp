@@ -1747,7 +1747,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 }
                 case 28359:                                 // Trigger Teslas
                 {
-                    if (unitTarget)
+                    if (unitTarget && !unitTarget->IsPlayer())
                     {
                         DoScriptText(-1533150, unitTarget, unitTarget);
                         unitTarget->RemoveAllAuras();

@@ -142,7 +142,7 @@ struct boss_grobbulusAI : public CombatAI
             {
                 if (!m_creature->CanReachWithMeleeAttack(m_creature->GetVictim()))
                 {
-                    ResetCombatAction(GROBBULUS_SLIME_STREAM, 3u * IN_MILLISECONDS);
+                    ResetCombatAction(GROBBULUS_SLIME_STREAM, 5u * IN_MILLISECONDS);
                     DisableCombatAction(action);
                     break;
                 }

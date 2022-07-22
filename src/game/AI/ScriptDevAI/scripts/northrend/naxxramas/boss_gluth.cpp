@@ -124,6 +124,8 @@ struct boss_gluthAI : public ScriptedAI
     void JustSummoned(Creature* pSummoned) override
     {
         pSummoned->GetMotionMaster()->MoveFollow(m_creature, ATTACK_DISTANCE, 0);
+        pSummoned->SetBaseRunSpeed(0.5, true);
+        pSummoned->SetBaseWalkSpeed(0.5);
         m_lZombieChowGuidList.push_back(pSummoned->GetObjectGuid());
     }
 
