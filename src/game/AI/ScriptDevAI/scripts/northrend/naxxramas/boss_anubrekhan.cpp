@@ -164,7 +164,7 @@ struct boss_anubrekhanAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
-        if (pSummoned->GetEntry() == NPC_CRYPT_GUARD)
+        if (pSummoned && pSummoned->GetEntry() == NPC_CRYPT_GUARD)
         {
             pSummoned->CastSpell(pSummoned, SPELL_SELF_SPAWN_10, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
             DoScriptText(EMOTE_CORPSE_SCARABS, pSummoned);

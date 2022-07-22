@@ -122,6 +122,8 @@ void instance_naxxramas::OnCreatureCreate(Creature* pCreature)
 
 void instance_naxxramas::OnCreatureRespawn(Creature* pCreature)
 {
+    if (!pCreature->IsWorldBoss())
+        return;
     if (!pCreature->HasAura(384152) && !pCreature->IsPet() && !pCreature->IsCritter())
         pCreature->CastSpell(pCreature, 384152, TRIGGERED_OLD_TRIGGERED);
 }
