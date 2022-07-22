@@ -22,6 +22,7 @@ SDCategory: Naxxramas
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "MotionGenerators/MotionMaster.h"
 #include "naxxramas.h"
 
 enum
@@ -141,7 +142,8 @@ struct boss_gluthAI : public ScriptedAI
             {
                 pZombie->AttackStop(true, true);
                 pZombie->AI()->SetReactState(REACT_PASSIVE);
-                pZombie->GetMotionMaster()->MoveChase(m_creature, ATTACK_DISTANCE);
+                pZombie->GetMotionMaster()->MovePoint(1, m_creature->GetPosition(), FORCED_MOVEMENT_WALK, .5f);
+                //pZombie->GetMotionMaster()->MoveChase(m_creature, ATTACK_DISTANCE);
             }
         }
     }
