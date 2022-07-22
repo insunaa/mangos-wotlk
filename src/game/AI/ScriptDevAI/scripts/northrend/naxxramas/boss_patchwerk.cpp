@@ -123,51 +123,33 @@ struct HatefulStrikePrimer : public SpellScript
 {
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
     {
-        if (!target)
+        if (target->GetTypeId() != TYPEID_PLAYER || !spell->GetCaster()->CanReachWithMeleeAttack(target))
             return false;
-
-        if (Unit* caster = spell->GetCaster())
-        {
-            if (!caster->CanReachWithMeleeAttack(target))
-                return false;
-
-            Difficulty diff = caster->GetMap()->GetDifficulty();
-            uint32 maxTargets = diff == RAID_DIFFICULTY_10MAN_NORMAL ? 2 : 3;
-            ThreatList threatList = caster->getThreatManager().getThreatList();
-            if (threatList.size() == 1)
-                return true;
-
-            uint32 meleeTargets = 0;
-            for (auto itr = ++threatList.begin(); itr != threatList.end(); ++itr)
-                if (caster->CanReachWithMeleeAttack((*itr)->getTarget()))
-                    meleeTargets++;
-
-            if (meleeTargets == 1)
-                return true;
-
-            uint32 i = 1;
-            for (auto itr = ++threatList.begin(); i < maxTargets && itr != threatList.end(); i++)
-            {
-                if ((*itr)->getUnitGuid() == target->GetObjectGuid())
-                    return true;
-                itr++;
-            }
-        }
-        return false;
+        return true;
     }
 
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
-        if (effIdx == EFFECT_INDEX_0)
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        Unit* caster = spell->GetCaster();
+        auto& targetInfo = spell->GetTargetList();
+        if (!target || targetInfo.rbegin()->targetGUID != target->GetObjectGuid())
+            return;
+
+        for (auto& targetInfo : targetInfo)
         {
-            if (Unit* caster = spell->GetCaster())
-            {
-                // Target is filtered in Spell::FilterTargetMap
-                Difficulty diff = caster->GetMap()->GetDifficulty();
-                if (Unit* unitTarget = spell->GetUnitTarget())
-                    caster->CastSpell(unitTarget, diff == RAID_DIFFICULTY_10MAN_NORMAL ? SPELL_HATEFULSTRIKE : SPELL_HATEFULSTRIKE_H, TRIGGERED_NONE);
-            }
+            if (caster->GetMap()->GetPlayer(targetInfo.targetGUID) == caster->GetVictim())
+                continue;
+
+            if (caster->getThreatManager().getThreat(caster->GetMap()->GetPlayer(targetInfo.targetGUID)) > caster->getThreatManager().getThreat(target) || target == caster->GetVictim())
+                target = caster->GetMap()->GetPlayer(targetInfo.targetGUID);
         }
+
+        Difficulty diff = caster->GetMap()->GetDifficulty();
+        caster->CastSpell(target, diff == RAID_DIFFICULTY_10MAN_NORMAL ? SPELL_HATEFULSTRIKE : SPELL_HATEFULSTRIKE_H, TRIGGERED_INSTANT_CAST | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL);
     }
 };
 
