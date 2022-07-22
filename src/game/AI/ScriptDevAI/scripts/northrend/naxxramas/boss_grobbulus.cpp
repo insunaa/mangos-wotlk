@@ -147,16 +147,18 @@ struct boss_grobbulusAI : public CombatAI
                     break;
                 }
                 ResetCombatAction(action, GetSubsequentActionTimer(action));
+                break;
             }
             case GROBBULUS_SLIME_STREAM:
             {
                 if (!m_creature->CanReachWithMeleeAttack(m_creature->GetVictim()))
                 {
-                    DoCastSpellIfCan(m_creature, SPELL_SLIME_STREAM, CAST_TRIGGERED);
-                    DisableCombatAction(action);
+                    if (!DoCastSpellIfCan(m_creature, SPELL_SLIME_STREAM, CAST_TRIGGERED))
+                        break;
                 }
-                else
-                    ResetCombatAction(GROBBULUS_CHECK_MELEE, GetSubsequentActionTimer(GROBBULUS_CHECK_MELEE));
+
+                ResetCombatAction(GROBBULUS_CHECK_MELEE, GetSubsequentActionTimer(GROBBULUS_CHECK_MELEE));
+                DisableCombatAction(action);
                 break;
             }
             case GROBBULUS_INJECTION:
