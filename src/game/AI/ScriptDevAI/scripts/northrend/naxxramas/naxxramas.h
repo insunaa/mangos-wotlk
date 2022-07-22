@@ -5,6 +5,7 @@
 #ifndef DEF_NAXXRAMAS_H
 #define DEF_NAXXRAMAS_H
 
+#include "AI/ScriptDevAI/scripts/northrend/naxxramas/naxxramas.h"
 #include <unordered_set>
 enum
 {
@@ -83,8 +84,13 @@ enum
     NPC_FAERLINA_FOLLOWER       = 16505,
     NPC_FAERLINA_FOLLOWER_H     = 29273,
     NPC_CORPSE_SCARAB           = 16698,
+    NPC_CORPSE_SCARAB_H         = 29267,
+    NPC_CRYPT_GUARD             = 16573,
+    NPC_CRYPT_GUARD_H           = 29256,
 
     NPC_GROBBULUS_CLOUD         = 16363,
+    NPC_ZOMBIE_CHOW             = 16360,
+    NPC_ZOMBIE_CHOW_H           = 30303,
     NPC_THADDIUS                = 15928,
     NPC_STALAGG                 = 15929,
     NPC_FEUGEN                  = 15930,
@@ -123,9 +129,13 @@ enum
 
     // Kel'Thuzad
     NPC_SOLDIER_FROZEN          = 16427,
+    NPC_SOLDIER_FROZEN_H        = 30015,
     NPC_UNSTOPPABLE_ABOM        = 16428,
+    NPC_UNSTOPPABLE_ABOM_H      = 30048,
     NPC_SOUL_WEAVER             = 16429,
+    NPC_SOUL_WEAVER_H           = 30018,
     NPC_GUARDIAN                = 16441,
+    NPC_GUARDIAN_H              = 30057,
 
     // Arachnid Quarter
     GO_ARAC_ANUB_DOOR           = 181126,                   // encounter door
