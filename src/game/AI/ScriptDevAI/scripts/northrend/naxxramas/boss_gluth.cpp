@@ -138,7 +138,7 @@ struct boss_gluthAI : public ScriptedAI
         for (GuidList::const_iterator itr = m_lZombieChowGuidList.begin(); itr != m_lZombieChowGuidList.end(); ++itr)
         {
             if (Creature* pZombie = m_creature->GetMap()->GetCreature(*itr))
-                pZombie->GetMotionMaster()->MoveFollow(m_creature, ATTACK_DISTANCE, 0);
+                pZombie->GetMotionMaster()->MoveChase(m_creature, ATTACK_DISTANCE, 0, false, true);
         }
     }
 
