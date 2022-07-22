@@ -18,6 +18,7 @@
 
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
+#include "Spells/SpellDefines.h"
 #include "WorldPacket.h"
 #include "Server/Opcodes.h"
 #include "Log.h"
@@ -12201,7 +12202,7 @@ void Spell::EffectSummonAllTotems(SpellEffectIndex eff_idx)
         if (ActionButton const* actionButton = ((Player*)m_caster)->GetActionButton(start_button + slot))
             if (actionButton->GetType() == ACTION_BUTTON_SPELL)
                 if (uint32 spell_id = actionButton->GetAction())
-                    m_caster->CastSpell(unitTarget, spell_id, TRIGGERED_OLD_TRIGGERED);
+                    m_caster->CastSpell(unitTarget, spell_id, TRIGGERED_INSTANT_CAST | TRIGGERED_IGNORE_GCD);
 }
 
 void Spell::EffectDestroyAllTotems(SpellEffectIndex /*eff_idx*/)
