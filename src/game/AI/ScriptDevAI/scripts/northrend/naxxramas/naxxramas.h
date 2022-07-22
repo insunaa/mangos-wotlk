@@ -85,7 +85,7 @@ enum
     NPC_FAERLINA_FOLLOWER_H     = 29273,
     NPC_CORPSE_SCARAB           = 16698,
     NPC_CORPSE_SCARAB_H         = 29267,
-    NPC_CRYPT_GUARD             = 16573,
+    NPC_CRYPT_GUARD_N           = 16573,
     NPC_CRYPT_GUARD_H           = 29256,
 
     NPC_GROBBULUS_CLOUD         = 16363,
