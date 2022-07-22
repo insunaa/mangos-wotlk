@@ -142,10 +142,10 @@ struct boss_gluthAI : public ScriptedAI
             {
                 pZombie->AttackStop(true, true);
                 pZombie->AI()->SetReactState(REACT_PASSIVE);
-                pZombie->GetMotionMaster()->MovePoint(1, m_creature->GetPosition(), FORCED_MOVEMENT_WALK, .5f);
-                //pZombie->GetMotionMaster()->MoveChase(m_creature, ATTACK_DISTANCE);
+                pZombie->GetMotionMaster()->MovePoint(1, m_creature->GetPosition(), FORCED_MOVEMENT_WALK);
             }
         }
+        m_uiSummonTimer = 15000;
     }
 
     // Replaces missing spell 28236
