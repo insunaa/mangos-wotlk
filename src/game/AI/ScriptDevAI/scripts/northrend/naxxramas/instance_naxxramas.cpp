@@ -144,6 +144,8 @@ void instance_naxxramas::OnCreatureRespawn(Creature* pCreature)
         case NPC_SOUL_WEAVER_H:
         case NPC_GUARDIAN:
         case NPC_GUARDIAN_H:
+        case NPC_FALLOUT_SLIME_N:
+        case NPC_FALLOUT_SLIME_H:
             break;
         default:
             if (!pCreature->IsWorldBoss()) return;

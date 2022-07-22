@@ -89,6 +89,8 @@ enum
     NPC_CRYPT_GUARD_H           = 29256,
 
     NPC_GROBBULUS_CLOUD         = 16363,
+    NPC_FALLOUT_SLIME_N         = 16290,
+    NPC_FALLOUT_SLIME_H         = 29388,
     NPC_ZOMBIE_CHOW_N           = 16360,
     NPC_ZOMBIE_CHOW_H           = 30303,
     NPC_THADDIUS                = 15928,

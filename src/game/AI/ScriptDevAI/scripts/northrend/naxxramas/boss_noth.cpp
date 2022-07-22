@@ -161,6 +161,8 @@ struct boss_nothAI : public ScriptedAI
 
     void JustSummoned(Creature* pSummoned) override
     {
+        if (!pSummoned->HasAura(384152))
+            pSummoned->CastSpell(pSummoned, 384152, TRIGGERED_OLD_TRIGGERED);
         pSummoned->SetInCombatWithZone();
     }
 

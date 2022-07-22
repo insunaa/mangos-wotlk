@@ -295,6 +295,8 @@ struct boss_gothikAI : public ScriptedAI
         m_lSummonedAddGuids.push_back(pSummoned->GetObjectGuid());
         if (!IsCentralDoorClosed())
             pSummoned->SetInCombatWithZone();
+        if (!pSummoned->HasAura(384152))
+            pSummoned->CastSpell(pSummoned, 384152, TRIGGERED_OLD_TRIGGERED);
     }
 
     void SummonedCreatureJustDied(Creature* pSummoned) override
