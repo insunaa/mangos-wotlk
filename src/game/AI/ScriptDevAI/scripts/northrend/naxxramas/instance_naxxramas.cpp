@@ -134,7 +134,7 @@ void instance_naxxramas::OnCreatureRespawn(Creature* pCreature)
         case NPC_CORPSE_SCARAB_H:
         case NPC_CRYPT_GUARD:
         case NPC_CRYPT_GUARD_H:
-        case NPC_ZOMBIE_CHOW:
+        case NPC_ZOMBIE_CHOW_N:
         case NPC_ZOMBIE_CHOW_H:
         case NPC_SOLDIER_FROZEN:
         case NPC_SOLDIER_FROZEN_H:
