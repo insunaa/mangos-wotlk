@@ -138,7 +138,7 @@ struct HatefulStrikePrimer : public SpellScript
                 return true;
 
             uint32 meleeTargets = 0;
-            for (auto itr = ++threatList.begin(); itr != threatList.end();)
+            for (auto itr = ++threatList.begin(); itr != threatList.end(); ++itr)
                 if (caster->CanReachWithMeleeAttack((*itr)->getTarget()))
                     meleeTargets++;
 
