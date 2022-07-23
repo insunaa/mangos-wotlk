@@ -288,6 +288,7 @@ struct npc_vengeance_greeterAI : public ScriptedAI
             }
             if (player->getClass() == CLASS_DRUID)
             {
+                player->learnSpellHighRank(6795);
                 player->learnSpellHighRank(5487);
                 player->learnSpellHighRank(33943);
                 player->learnSpellHighRank(40120);
