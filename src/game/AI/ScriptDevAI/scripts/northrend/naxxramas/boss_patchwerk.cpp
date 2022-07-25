@@ -51,7 +51,6 @@ enum PatchwerkActions
     PATCHWERK_ENRAGE_LOW,
     PATCHWERK_ACTION_MAX,
     PATCHWERK_BERSERK,
-    PATCHWERK_BERSERK_SILMEBOLT,
 };
 
 struct boss_patchwerkAI : public CombatAI
@@ -68,9 +67,6 @@ struct boss_patchwerkAI : public CombatAI
         {
             DoBroadcastText(EMOTE_BERSERK, m_creature);
             m_creature->CastSpell(nullptr, SPELL_BERSERK, TRIGGERED_OLD_TRIGGERED);
-        });
-        AddCustomAction(PATCHWERK_BERSERK_SILMEBOLT, true, [&]()
-        {
             m_creature->SetSpellList(SPELLSET_BERSERK);
         });
     }
@@ -96,7 +92,6 @@ struct boss_patchwerkAI : public CombatAI
         DoBroadcastText(urand(0, 1) ? SAY_AGGRO1 : SAY_AGGRO2, m_creature);
 
         ResetTimer(PATCHWERK_BERSERK, MINUTE * 6u * IN_MILLISECONDS);
-        ResetTimer(PATCHWERK_BERSERK_SILMEBOLT, MINUTE * 6u * IN_MILLISECONDS);
 
         if (m_instance)
             m_instance->SetData(TYPE_PATCHWERK, IN_PROGRESS);

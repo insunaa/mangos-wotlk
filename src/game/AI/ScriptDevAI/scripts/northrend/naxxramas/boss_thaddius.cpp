@@ -230,7 +230,8 @@ struct boss_thaddiusAI : public ScriptedAI
 
         // Ball Lightning if target not in melee range
         // TODO: Verify, likely that the boss should attack any enemy in melee range before starting to cast
-        if (!m_creature->CanReachWithMeleeAttack(m_creature->GetVictim()))
+        //if (!m_creature->CanReachWithMeleeAttack(m_creature->GetVictim()))
+        if (!m_creature->SelectAttackingTarget(ATTACKING_TARGET_NEAREST_BY, 0, nullptr, SELECT_FLAG_PLAYER | SELECT_FLAG_IN_MELEE_RANGE | SELECT_FLAG_NOT_IMMUNE))
         {
             if (m_uiBallLightningTimer < uiDiff)
             {
@@ -241,7 +242,10 @@ struct boss_thaddiusAI : public ScriptedAI
                 m_uiBallLightningTimer -= uiDiff;
         }
         else
+        {
+            m_uiBallLightningTimer = 1 * IN_MILLISECONDS;
             DoMeleeAttackIfReady();
+        }
     }
 };
 
