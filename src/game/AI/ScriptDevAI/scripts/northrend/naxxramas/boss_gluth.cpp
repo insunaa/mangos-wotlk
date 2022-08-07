@@ -21,6 +21,7 @@ SDComment: Gluth should turn around to face the victim when he devours a Zombie
 SDCategory: Naxxramas
 EndScriptData */
 
+#include "AI/ScriptDevAI/base/CombatAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "MotionGenerators/MotionMaster.h"
 #include "naxxramas.h"
@@ -57,51 +58,53 @@ static const float aZombieSummonLoc[MAX_ZOMBIE_LOCATIONS][3] =
     {3308.3f, -3185.8f, 297.42f},
 };
 
-struct boss_gluthAI : public ScriptedAI
+enum GluthActions
 {
-    boss_gluthAI(Creature* pCreature) : ScriptedAI(pCreature)
-    {
-        m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
+    GLUTH_MORTAL_WOUND,
+    GLUTH_DECIMATE,
+    GLUTH_ENRAGE,
+    GLUTH_SUMMON_ZOMBIE_CHOW,
+    GLUTH_ZOMBIE_CHOW_SEARCH,
+    GLUTH_BERSERK,
+    GLUTH_ACTIONS_MAX,
+};
 
-        DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+struct boss_gluthAI : public CombatAI
+{
+    boss_gluthAI(Creature* creature) : CombatAI(creature, GLUTH_ACTIONS_MAX), 
+    m_instance(static_cast<instance_naxxramas*>(creature->GetInstanceData()))
+    {
+        SetDataType(TYPE_GLUTH);
+        m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
+        AddCombatAction(GLUTH_MORTAL_WOUND, 10s);
+        AddCombatAction(GLUTH_DECIMATE, 110s);
+        AddCombatAction(GLUTH_ENRAGE, 25s);
+        AddCombatAction(GLUTH_SUMMON_ZOMBIE_CHOW, 15s);
+        AddCombatAction(GLUTH_ZOMBIE_CHOW_SEARCH, 3s);
+        AddCombatAction(GLUTH_BERSERK, 8min);
     }
 
-    instance_naxxramas* m_pInstance;
-    bool m_bIsRegularMode;
-
-    uint32 m_uiMortalWoundTimer;
-    uint32 m_uiDecimateTimer;
-    uint32 m_uiEnrageTimer;
-    uint32 m_uiSummonTimer;
-    uint32 m_uiZombieSearchTimer;
-
-    uint32 m_uiBerserkTimer;
-
+    instance_naxxramas* m_instance;
+    bool m_isRegularMode;
     GuidList m_lZombieChowGuidList;
 
     void Reset() override
     {
-        m_uiMortalWoundTimer  = 10000;
-        m_uiDecimateTimer     = 110000;
-        m_uiEnrageTimer       = 25000;
-        m_uiSummonTimer       = 15000;
-        m_uiZombieSearchTimer = 3000;
-
-        m_uiBerserkTimer     = MINUTE * 8 * IN_MILLISECONDS;
+        DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    std::chrono::milliseconds GetSubsequentActionTimer(uint32 action)
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_GLUTH, DONE);
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_GLUTH, IN_PROGRESS);
+        switch (action)
+        {
+            case GLUTH_MORTAL_WOUND: return 10s;
+            case GLUTH_DECIMATE: return 100s;
+            case GLUTH_ENRAGE: return std::chrono::seconds(urand(20, 30));
+            case GLUTH_SUMMON_ZOMBIE_CHOW: return 10s;
+            case GLUTH_ZOMBIE_CHOW_SEARCH: return 3s;
+            case GLUTH_BERSERK: return 5min;
+        }
+        return 0s;
     }
 
     void KilledUnit(Unit* pVictim) override
@@ -116,8 +119,8 @@ struct boss_gluthAI : public ScriptedAI
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_GLUTH, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_GLUTH, FAIL);
 
         DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
@@ -145,7 +148,7 @@ struct boss_gluthAI : public ScriptedAI
                 pZombie->GetMotionMaster()->MovePoint(1, m_creature->GetPosition(), FORCED_MOVEMENT_WALK);
             }
         }
-        m_uiSummonTimer = 15000;
+        ResetCombatAction(GLUTH_SUMMON_ZOMBIE_CHOW, 15s);
     }
 
     // Replaces missing spell 28236
@@ -164,11 +167,14 @@ struct boss_gluthAI : public ScriptedAI
                 }
             }
         });
+
         if (zombiesInRange.empty())
             return;
         else if(zombiesInRange.size() == 1)
         {
             Creature* pZombie = zombiesInRange.front();
+            if (!pZombie)
+                return;
             m_creature->GetMotionMaster()->MoveCharge(*pZombie, 5.f, EVENT_CHARGE);
             DoCastSpellIfCan(pZombie, SPELL_ZOMBIE_CHOW_SEARCH_INSTAKILL_TARGETED);
             return;
@@ -176,92 +182,68 @@ struct boss_gluthAI : public ScriptedAI
         m_creature->CastSpell(nullptr, SPELL_ZOMBIE_CHOW_SEARCH_INSTAKILL_AOE, TRIGGERED_OLD_TRIGGERED);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
+        switch (action) {
+            case GLUTH_ZOMBIE_CHOW_SEARCH:
+                DoSearchZombieChow();
+                break;
+            case GLUTH_SUMMON_ZOMBIE_CHOW:
+                {
+                    uint8 uiPos1 = urand(0, MAX_ZOMBIE_LOCATIONS - 1);
+                    m_creature->SummonCreature(NPC_ZOMBIE_CHOW, aZombieSummonLoc[uiPos1][0], aZombieSummonLoc[uiPos1][1], aZombieSummonLoc[uiPos1][2], 0.0f, TEMPSPAWN_DEAD_DESPAWN, 0);
 
-        if (m_uiZombieSearchTimer < uiDiff)
-        {
-            DoSearchZombieChow();
-            m_uiZombieSearchTimer = 3000;
+                    if (!m_isRegularMode)
+                    {
+                        uint8 uiPos2 = (uiPos1 + urand(1, MAX_ZOMBIE_LOCATIONS - 1)) % MAX_ZOMBIE_LOCATIONS;
+                        m_creature->SummonCreature(NPC_ZOMBIE_CHOW, aZombieSummonLoc[uiPos2][0], aZombieSummonLoc[uiPos2][1], aZombieSummonLoc[uiPos2][2], 0.0f, TEMPSPAWN_DEAD_DESPAWN, 0);
+                    }
+                    break;
+                }
+            case GLUTH_MORTAL_WOUND:
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MORTALWOUND) == CAST_OK)
+                    break;
+                return;
+            case GLUTH_ENRAGE:
+                if (DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_ENRAGE : SPELL_ENRAGE_H) == CAST_OK)
+                {
+                    DoScriptText(EMOTE_BOSS_GENERIC_ENRAGED, m_creature);
+                    break;
+                }
+                return;
+            case GLUTH_DECIMATE:
+                if (DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_DECIMATE : SPELL_DECIMATE_H) == CAST_OK)
+                {
+                    DoScriptText(EMOTE_DECIMATE, m_creature);
+                    DoCallAllZombieChow();
+                    break;
+                }
+                return;
+            case GLUTH_BERSERK:
+                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+                    break;
+                return;
         }
-        else
-            m_uiZombieSearchTimer -= uiDiff;
-
-        // Mortal Wound
-        if (m_uiMortalWoundTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MORTALWOUND) == CAST_OK)
-                m_uiMortalWoundTimer = 10000;
-        }
-        else
-            m_uiMortalWoundTimer -= uiDiff;
-
-        // Decimate
-        if (m_uiDecimateTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_DECIMATE : SPELL_DECIMATE_H) == CAST_OK)
-            {
-                DoScriptText(EMOTE_DECIMATE, m_creature);
-                DoCallAllZombieChow();
-                m_uiDecimateTimer = 100000;
-            }
-        }
-        else
-            m_uiDecimateTimer -= uiDiff;
-
-        // Enrage
-        if (m_uiEnrageTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_ENRAGE : SPELL_ENRAGE_H) == CAST_OK)
-            {
-                DoScriptText(EMOTE_BOSS_GENERIC_ENRAGED, m_creature);
-                m_uiEnrageTimer = urand(20000, 30000);
-            }
-        }
-        else
-            m_uiEnrageTimer -= uiDiff;
-
-        // Summon
-        if (m_uiSummonTimer < uiDiff)
-        {
-            uint8 uiPos1 = urand(0, MAX_ZOMBIE_LOCATIONS - 1);
-            m_creature->SummonCreature(NPC_ZOMBIE_CHOW, aZombieSummonLoc[uiPos1][0], aZombieSummonLoc[uiPos1][1], aZombieSummonLoc[uiPos1][2], 0.0f, TEMPSPAWN_DEAD_DESPAWN, 0);
-
-            if (!m_bIsRegularMode)
-            {
-                uint8 uiPos2 = (uiPos1 + urand(1, MAX_ZOMBIE_LOCATIONS - 1)) % MAX_ZOMBIE_LOCATIONS;
-                m_creature->SummonCreature(NPC_ZOMBIE_CHOW, aZombieSummonLoc[uiPos2][0], aZombieSummonLoc[uiPos2][1], aZombieSummonLoc[uiPos2][2], 0.0f, TEMPSPAWN_DEAD_DESPAWN, 0);
-            }
-
-            m_uiSummonTimer = 10000;
-        }
-        else
-            m_uiSummonTimer -= uiDiff;
-
-        // Berserk
-        if (m_uiBerserkTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
-                m_uiBerserkTimer = MINUTE * 5 * IN_MILLISECONDS;
-        }
-        else
-            m_uiBerserkTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
+        ResetCombatAction(action, GetSubsequentActionTimer(action));
     }
 };
 
-UnitAI* GetAI_boss_gluth(Creature* pCreature)
+struct EatZombieChowAOE : SpellScript
 {
-    return new boss_gluthAI(pCreature);
-}
+    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
+    {
+        if (target->GetEntry() != NPC_ZOMBIE_CHOW)
+            return false;
+        return true;
+    }
+};
 
 void AddSC_boss_gluth()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_gluth";
-    pNewScript->GetAI = &GetAI_boss_gluth;
+    pNewScript->GetAI = &GetNewAIInstance<boss_gluthAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<EatZombieChowAOE>("spell_zombie_chow_search_instakill_aoe");
 }
