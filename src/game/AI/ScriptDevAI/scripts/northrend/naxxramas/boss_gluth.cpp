@@ -151,22 +151,29 @@ struct boss_gluthAI : public ScriptedAI
     // Replaces missing spell 28236
     void DoSearchZombieChow()
     {
-        for (GuidList::const_iterator itr = m_lZombieChowGuidList.begin(); itr != m_lZombieChowGuidList.end(); ++itr)
-        {
-            if (Creature* pZombie = m_creature->GetMap()->GetCreature(*itr))
+        CreatureList zombiesInRange(m_lZombieChowGuidList.size());
+        std::for_each(m_lZombieChowGuidList.begin(), m_lZombieChowGuidList.end(), [&](const ObjectGuid& guid){
+            if (Creature* pZombie = m_creature->GetMap()->GetCreature(guid))
             {
                 if (!pZombie->IsAlive())
-                    continue;
+                    return;
 
-                // Devour a Zombie
-                if (pZombie->IsWithinDistInMap(m_creature, 15.0f))
+                if (pZombie->IsWithinDistInMap(m_creature, 10.0f))
                 {
-                    m_creature->SetFacingToObject(pZombie);
-                    DoCastSpellIfCan(pZombie, SPELL_ZOMBIE_CHOW_SEARCH_INSTAKILL_TARGETED);
+                    zombiesInRange.emplace_back(pZombie);
                 }
             }
+        });
+        if (zombiesInRange.empty())
+            return;
+        else if(zombiesInRange.size() == 1)
+        {
+            Creature* pZombie = zombiesInRange.front();
+            m_creature->GetMotionMaster()->MoveCharge(*pZombie, 5.f, EVENT_CHARGE);
+            DoCastSpellIfCan(pZombie, SPELL_ZOMBIE_CHOW_SEARCH_INSTAKILL_TARGETED);
+            return;
         }
-        //m_creature->CastSpell(nullptr, SPELL_ZOMBIE_CHOW_SEARCH_INSTAKILL_AOE, TRIGGERED_OLD_TRIGGERED);
+        m_creature->CastSpell(nullptr, SPELL_ZOMBIE_CHOW_SEARCH_INSTAKILL_AOE, TRIGGERED_OLD_TRIGGERED);
     }
 
     void UpdateAI(const uint32 uiDiff) override

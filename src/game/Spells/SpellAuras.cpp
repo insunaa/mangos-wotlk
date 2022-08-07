@@ -7032,6 +7032,7 @@ void Aura::HandleAuraModIncreaseHealthPercent(bool apply, bool /*Real*/)
             if (apply)
                 target->ModifyHealth(target->GetMaxHealth() - oldMaxHealth);
             break;
+        case 61254:                                         // Will of Sartharion
         case 60430:                                         // Molten Fury
         case 64193:                                         // Heartbreak
         case 65737:                                         // Heartbreak

@@ -117,13 +117,6 @@ struct boss_patchwerkAI : public CombatAI
 
 struct HatefulStrikePrimer : public SpellScript
 {
-
-/*    void OnInit(Spell* spell) const override
-    {
-        spell->SetMaxAffectedTargets(spell->GetCaster()->GetMap()->GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL ? 2 : 3);
-        spell->SetFilteringScheme(EFFECT_INDEX_0, false, SCHEME_HIGHEST_HP);
-    }*/
-
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
     {
         if (target->GetTypeId() != TYPEID_PLAYER || !spell->GetCaster()->CanReachWithMeleeAttack(target))
@@ -138,9 +131,6 @@ struct HatefulStrikePrimer : public SpellScript
 
         Unit* target = spell->GetUnitTarget();
         Unit* caster = spell->GetCaster();
-       /* auto& targetInfo = spell->GetTargetList();
-        if (!target || targetInfo.rbegin()->targetGUID != target->GetObjectGuid())
-            return;*/
         if (!target || spell->GetTargetList().empty())
             return;
 
