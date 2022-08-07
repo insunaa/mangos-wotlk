@@ -106,6 +106,11 @@ class TimerManager
 
         virtual void GetAIInformation(ChatHandler& reader);
 
+        std::chrono::milliseconds RandomTimer(std::chrono::milliseconds min, std::chrono::milliseconds max)
+        {
+            return std::chrono::milliseconds(urand(min.count(), max.count()));
+        }
+
     protected:
         void AddTimer(uint32 id, Timer&& timer);
     private:
