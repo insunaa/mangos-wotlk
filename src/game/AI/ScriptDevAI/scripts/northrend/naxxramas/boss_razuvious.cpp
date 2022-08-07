@@ -126,7 +126,7 @@ struct boss_razuviousAI : public CombatAI
                     case 2: DoScriptText(SAY_COMMAND3, m_creature); break;
                     case 3: DoScriptText(SAY_COMMAND4, m_creature); break;
                 }
-                return;
+                break;
         }
         ResetCombatAction(action, GetSubsequentActionTimer(action));
     }
