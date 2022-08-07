@@ -99,7 +99,7 @@ struct boss_gluthAI : public CombatAI
         {
             case GLUTH_MORTAL_WOUND: return 10s;
             case GLUTH_DECIMATE: return 100s;
-            case GLUTH_ENRAGE: return std::chrono::seconds(urand(20, 30));
+            case GLUTH_ENRAGE: return RandomTimer(20s, 30s);
             case GLUTH_SUMMON_ZOMBIE_CHOW: return 10s;
             case GLUTH_ZOMBIE_CHOW_SEARCH: return 3s;
             case GLUTH_BERSERK: return 5min;
@@ -115,14 +115,6 @@ struct boss_gluthAI : public CombatAI
             DoScriptText(EMOTE_ZOMBIE, m_creature);
             m_creature->SetHealth(m_creature->GetHealth() + m_creature->GetMaxHealth() * 0.05f);
         }
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_instance)
-            m_instance->SetData(TYPE_GLUTH, FAIL);
-
-        DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     void JustSummoned(Creature* pSummoned) override
