@@ -120,6 +120,7 @@ struct boss_gluthAI : public CombatAI
     void JustSummoned(Creature* pSummoned) override
     {
         pSummoned->GetMotionMaster()->MoveChase(m_creature, ATTACK_DISTANCE);
+        pSummoned->getThreatManager().addThreat(m_creature, 20.f);
         m_lZombieChowGuidList.push_back(pSummoned->GetObjectGuid());
     }
 
@@ -147,18 +148,14 @@ struct boss_gluthAI : public CombatAI
     void DoSearchZombieChow()
     {
         CreatureList zombiesInRange(m_lZombieChowGuidList.size());
-        std::for_each(m_lZombieChowGuidList.begin(), m_lZombieChowGuidList.end(), [&](const ObjectGuid& guid){
-            if (Creature* pZombie = m_creature->GetMap()->GetCreature(guid))
-            {
-                if (!pZombie->IsAlive())
-                    return;
-
-                if (pZombie->IsWithinDistInMap(m_creature, 10.0f))
-                {
-                    zombiesInRange.emplace_back(pZombie);
-                }
-            }
-        });
+        GetCreatureListWithEntryInGrid(zombiesInRange, m_creature, NPC_ZOMBIE_CHOW, 10.f);
+        for (auto zombieItr = zombiesInRange.begin();zombieItr != zombiesInRange.end();)
+        {
+            if (!(*zombieItr) || !(*zombieItr)->IsAlive())
+                zombieItr = zombiesInRange.erase(zombieItr);
+            else
+                zombieItr++;
+        }
 
         if (zombiesInRange.empty())
             return;
@@ -176,7 +173,8 @@ struct boss_gluthAI : public CombatAI
 
     void ExecuteAction(uint32 action) override
     {
-        switch (action) {
+        switch (action)
+        {
             case GLUTH_ZOMBIE_CHOW_SEARCH:
                 DoSearchZombieChow();
                 break;
