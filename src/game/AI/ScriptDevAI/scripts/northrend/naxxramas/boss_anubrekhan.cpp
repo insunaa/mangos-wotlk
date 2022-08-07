@@ -21,8 +21,10 @@ SDComment: Intro text usage is not very clear. Requires additional research.
 SDCategory: Naxxramas
 EndScriptData */
 
+#include "AI/ScriptDevAI/base/CombatAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "naxxramas.h"
+#include <chrono>
 
 enum
 {
@@ -67,34 +69,43 @@ static const DialogueEntry aIntroDialogue[] =
 
 static const float aCryptGuardLoc[4] = {3333.5f, -3475.9f, 287.1f, 3.17f};
 
-struct boss_anubrekhanAI : public ScriptedAI
+enum AnubRekhanActions
 {
-    boss_anubrekhanAI(Creature* pCreature) : ScriptedAI(pCreature),
-        m_introDialogue(aIntroDialogue)
-    {
-        m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        m_introDialogue.InitializeDialogueHelper(m_pInstance);
-        m_bHasTaunted = false;
-        Reset();
+    ANUBREKHAN_IMPALE,
+    ANUBREKHAN_LOCUST_SWARM,
+    ANUBREKHAN_ACTIONS_MAX,
+    ANUBREKHAN_SUMMON,
+};
 
-        DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+struct boss_anubrekhanAI : public CombatAI
+{
+    boss_anubrekhanAI(Creature* creature) : CombatAI(creature, ANUBREKHAN_ACTIONS_MAX),
+        m_introDialogue(aIntroDialogue),
+        m_instance(static_cast<instance_naxxramas*>(creature->GetInstanceData())),
+        m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
+    {
+        m_introDialogue.InitializeDialogueHelper(m_instance);
+        m_hasTaunted = false;
+        SetDataType(TYPE_ANUB_REKHAN);
+        AddOnAggroText(SAY_AGGRO1, SAY_AGGRO2, SAY_AGGRO3);
+        AddCombatAction(ANUBREKHAN_IMPALE, 15s);
+        AddCombatAction(ANUBREKHAN_LOCUST_SWARM, 90s);
+        AddCustomAction(ANUBREKHAN_SUMMON, true, [&](){
+            m_creature->SummonCreature(NPC_CRYPT_GUARD, aCryptGuardLoc[0], aCryptGuardLoc[1], aCryptGuardLoc[2], aCryptGuardLoc[3], TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
+        });
+        Reset();
     }
 
-    instance_naxxramas* m_pInstance;
+    instance_naxxramas* m_instance;
     DialogueHelper m_introDialogue;
-    bool m_bIsRegularMode;
-
-    uint32 m_uiImpaleTimer;
-    uint32 m_uiLocustSwarmTimer;
-    uint32 m_uiSummonTimer;
-    bool   m_bHasTaunted;
+    bool m_isRegularMode;
+    bool m_hasTaunted;
 
     void Reset() override
     {
-        m_uiImpaleTimer      = 15000;
-        m_uiLocustSwarmTimer = 90000;
-        m_uiSummonTimer      = m_bIsRegularMode ? 20000 : 0;// spawn a guardian only after 20 seconds in normal mode; in heroic there are already 2 Guards spawned
+        DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        if (m_isRegularMode)
+            ResetCombatAction(ANUBREKHAN_SUMMON, 20s);
     }
 
     void KilledUnit(Unit* pVictim) override
@@ -107,43 +118,15 @@ struct boss_anubrekhanAI : public ScriptedAI
 
         if (urand(0, 4))
             return;
-
         DoScriptText(SAY_SLAY, m_creature);
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        switch (urand(0, 2))
-        {
-            case 0: DoScriptText(SAY_AGGRO1, m_creature); break;
-            case 1: DoScriptText(SAY_AGGRO2, m_creature); break;
-            case 2: DoScriptText(SAY_AGGRO3, m_creature); break;
-        }
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_ANUB_REKHAN, IN_PROGRESS);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_ANUB_REKHAN, DONE);
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_ANUB_REKHAN, FAIL);
-
-        DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     void MoveInLineOfSight(Unit* pWho) override
     {
-        if (!m_bHasTaunted && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 110.0f) && m_creature->IsWithinLOSInMap(pWho))
+        if (!m_hasTaunted && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 110.0f) && m_creature->IsWithinLOSInMap(pWho))
         {
             m_introDialogue.StartNextDialogueText(SAY_GREET);
-            m_bHasTaunted = true;
+            m_hasTaunted = true;
         }
 
         ScriptedAI::MoveInLineOfSight(pWho);
@@ -171,70 +154,46 @@ struct boss_anubrekhanAI : public ScriptedAI
         }
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    std::chrono::milliseconds GetSubsequentActionTimer(uint32 action)
     {
-        m_introDialogue.DialogueUpdate(uiDiff);
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        // Impale
-        if (m_uiImpaleTimer < uiDiff)
+        switch (action)
         {
-            // Cast Impale on a random target
-            // Do NOT cast it when we are afflicted by locust swarm
-            if (!m_creature->HasAura(SPELL_LOCUSTSWARM) && !m_creature->HasAura(SPELL_LOCUSTSWARM_H))
-            {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                    DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_IMPALE : SPELL_IMPALE_H);
-            }
-
-            m_uiImpaleTimer = 15000;
+            case ANUBREKHAN_IMPALE: return 15s;
+            case ANUBREKHAN_LOCUST_SWARM: return 100s;
         }
-        else
-            m_uiImpaleTimer -= uiDiff;
+        return 0s;
+    }
 
-        // Locust Swarm
-        if (m_uiLocustSwarmTimer < uiDiff)
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
         {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_LOCUSTSWARM : SPELL_LOCUSTSWARM_H) == CAST_OK)
-            {
-                DoScriptText(EMOTE_INSECT_SWARM, m_creature);
+            case ANUBREKHAN_IMPALE:
+                if (!m_creature->HasAura(SPELL_LOCUSTSWARM) && !m_creature->HasAura(SPELL_LOCUSTSWARM_H))
+                {
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                        DoCastSpellIfCan(pTarget, m_isRegularMode ? SPELL_IMPALE : SPELL_IMPALE_H);
+                }
+            break;
+            case ANUBREKHAN_LOCUST_SWARM:
+                if (DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_LOCUSTSWARM : SPELL_LOCUSTSWARM_H) == CAST_OK)
+                {
+                    DoScriptText(EMOTE_INSECT_SWARM, m_creature);
 
-                // Summon a crypt guard
-                m_uiSummonTimer = 3000;
-                m_uiLocustSwarmTimer = 100000;
-            }
+                    // Summon a crypt guard
+                    ResetTimer(ANUBREKHAN_SUMMON, 3s);
+                    break;
+                }
+                return;
         }
-        else
-            m_uiLocustSwarmTimer -= uiDiff;
-
-        // Summon
-        if (m_uiSummonTimer)
-        {
-            if (m_uiSummonTimer <= uiDiff)
-            {
-                // Workaround for the not existing spell
-                m_creature->SummonCreature(NPC_CRYPT_GUARD, aCryptGuardLoc[0], aCryptGuardLoc[1], aCryptGuardLoc[2], aCryptGuardLoc[3], TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
-                m_uiSummonTimer = 0;
-            }
-            else
-                m_uiSummonTimer -= uiDiff;
-        }
-
-        DoMeleeAttackIfReady();
+        ResetCombatAction(action, GetSubsequentActionTimer(action));
     }
 };
-
-UnitAI* GetAI_boss_anubrekhan(Creature* pCreature)
-{
-    return new boss_anubrekhanAI(pCreature);
-}
 
 void AddSC_boss_anubrekhan()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_anubrekhan";
-    pNewScript->GetAI = &GetAI_boss_anubrekhan;
+    pNewScript->GetAI = &GetNewAIInstance<boss_anubrekhanAI>;
     pNewScript->RegisterSelf();
 }
