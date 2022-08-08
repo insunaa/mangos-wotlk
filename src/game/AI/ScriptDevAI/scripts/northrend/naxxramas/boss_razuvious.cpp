@@ -22,12 +22,7 @@ SDCategory: Naxxramas
 EndScriptData */
 
 #include "AI/ScriptDevAI/base/CombatAI.h"
-#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
-#include "AI/ScriptDevAI/include/sc_creature.h"
-#include "AI/ScriptDevAI/include/sc_grid_searchers.h"
-#include "Entities/Unit.h"
-#include "Spells/SpellDefines.h"
 #include "naxxramas.h"
 
 enum
