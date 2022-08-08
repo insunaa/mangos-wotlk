@@ -42,7 +42,7 @@ enum
     SAY_DEATH    = 13079,
     SAY_SLAY1    = 13080,
     SAY_SLAY2    = 13081,
-    SAY_SLAY3    = 13082,
+    EMOTE_TRIUMPH= 13082,
 
     SPELL_UNBALANCING_STRIKE = 55470,
     SPELL_DISRUPTING_SHOUT   = 55543,
@@ -73,7 +73,7 @@ struct boss_razuviousAI : public CombatAI
         m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float, float, float z) { return z > resetZ; });
         m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
         SetDataType(TYPE_RAZUVIOUS);
-        AddOnKillText(SAY_SLAY1, SAY_SLAY2, SAY_SLAY3);
+        AddOnKillText(SAY_SLAY1, SAY_SLAY2);
         AddOnAggroText(SAY_AGGRO1, SAY_AGGRO2, SAY_AGGRO3, SAY_AGGRO4);
         AddOnDeathText(SAY_DEATH);
         AddCombatAction(RAZUVIOUS_UNBALANCING_STRIKE, 30s);
@@ -125,7 +125,10 @@ struct boss_razuviousAI : public CombatAI
                 return;
             case RAZUVIOUS_DISRUPTING_SHOUT:
                 if (DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_DISRUPTING_SHOUT : SPELL_DISRUPTING_SHOUT_H) == CAST_OK)
+                {
+                    DoBroadcastText(EMOTE_TRIUMPH, m_creature);
                     break;
+                }
                 return;
             case RAZUVIOUS_JAGGED_KNIFE:
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
