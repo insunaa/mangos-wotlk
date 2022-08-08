@@ -119,7 +119,7 @@ struct boss_razuviousAI : public CombatAI
                 }
                 return;
             case RAZUVIOUS_COMMAND_SOUND:
-                switch (urand(0, 3))
+                switch (urand(0, 2))
                 {
                     case 0: DoBroadcastText(SAY_COMMAND1, m_creature); break;
                     case 1: DoBroadcastText(SAY_COMMAND2, m_creature); break;
