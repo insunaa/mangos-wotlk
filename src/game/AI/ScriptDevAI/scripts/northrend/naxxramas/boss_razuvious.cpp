@@ -146,6 +146,9 @@ bool NpcSpellClick_npc_obedienceCrystal(Player* pPlayer, Creature* pClickedCreat
 {
     if (pClickedCreature->GetEntry() == NPC_OBEDIENCE_CRYSTAL)
     {
+        if (pClickedCreature->IsNonMeleeSpellCasted(true))
+            return false;
+
         CreatureList understudies;
         bool castSuccess = false;
         GetCreatureListWithEntryInGrid(understudies, pClickedCreature, NPC_DEATHKNIGHT_UNDERSTUDY, 60.f);
@@ -165,6 +168,21 @@ bool NpcSpellClick_npc_obedienceCrystal(Player* pPlayer, Creature* pClickedCreat
     return true;
 }
 
+struct ForcedObedience : public AuraScript, public SpellScript
+{
+    void OnInit(Spell* spell) const override
+    {
+        spell->SetFilteringScheme(EFFECT_INDEX_0, true, SCHEME_CLOSEST);
+    }
+
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply)
+            if (aura->GetId() == SPELL_FORCED_OBEDIENCE)
+                aura->GetTarget()->InterruptSpellsCastedOnMe();
+    }
+};
+
 void AddSC_boss_razuvious()
 {
     Script* pNewScript = new Script;
@@ -177,4 +195,6 @@ void AddSC_boss_razuvious()
     pNewScript->GetAI = &GetNewAIInstance<npc_obedienceCrystalAI>;
     pNewScript->pNpcSpellClick = &NpcSpellClick_npc_obedienceCrystal;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<ForcedObedience>("spell_forced_obedience");
 }

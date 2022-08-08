@@ -623,6 +623,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (55421,'spell_gymers_throw'),
 (55430,'spell_gymers_buddy'),
 (54517,'spell_magnetic_pull'),
+(55479,'spell_forced_obedience'),
 (55814,'spell_eck_spit'),
 (55853,'spell_vortex_aura'),
 (55931,'spell_conjure_flame_sphere'),
