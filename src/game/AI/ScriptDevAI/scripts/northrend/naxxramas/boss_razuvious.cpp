@@ -32,17 +32,17 @@ EndScriptData */
 
 enum
 {
-    //ToDo: Replace all Text with BroadcastText
-    SAY_AGGRO1               = -1533120,
-    SAY_AGGRO2               = -1533121,
-    SAY_AGGRO3               = -1533122,
-    SAY_SLAY1                = -1533123,
-    SAY_SLAY2                = -1533124,
-    SAY_COMMAND1             = -1533125,
-    SAY_COMMAND2             = -1533126,
-    SAY_COMMAND3             = -1533127,
-    SAY_COMMAND4             = -1533128,
-    SAY_DEATH                = -1533129,
+    SAY_COMMAND1 = 13072,
+    SAY_COMMAND2 = 13073,
+    SAY_COMMAND3 = 13074,
+    SAY_AGGRO1   = 13075,
+    SAY_AGGRO2   = 13076,
+    SAY_AGGRO3   = 13077,
+    SAY_AGGRO4   = 13078,
+    SAY_DEATH    = 13079,
+    SAY_SLAY1    = 13080,
+    SAY_SLAY2    = 13081,
+    SAY_SLAY3    = 13082,
 
     SPELL_UNBALANCING_STRIKE = 55470,
     SPELL_DISRUPTING_SHOUT   = 55543,
@@ -69,8 +69,8 @@ struct boss_razuviousAI : public CombatAI
     {
         m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
         SetDataType(TYPE_RAZUVIOUS);
-        AddOnKillText(SAY_SLAY1, SAY_SLAY2);
-        AddOnAggroText(SAY_AGGRO1, SAY_AGGRO2, SAY_AGGRO3);
+        AddOnKillText(SAY_SLAY1, SAY_SLAY2, SAY_SLAY3);
+        AddOnAggroText(SAY_AGGRO1, SAY_AGGRO2, SAY_AGGRO3, SAY_AGGRO4);
         AddOnDeathText(SAY_DEATH);
         AddCombatAction(RAZUVIOUS_UNBALANCING_STRIKE, 30s);
         AddCombatAction(RAZUVIOUS_DISRUPTING_SHOUT, 15s);
@@ -121,10 +121,9 @@ struct boss_razuviousAI : public CombatAI
             case RAZUVIOUS_COMMAND_SOUND:
                 switch (urand(0, 3))
                 {
-                    case 0: DoScriptText(SAY_COMMAND1, m_creature); break;
-                    case 1: DoScriptText(SAY_COMMAND2, m_creature); break;
-                    case 2: DoScriptText(SAY_COMMAND3, m_creature); break;
-                    case 3: DoScriptText(SAY_COMMAND4, m_creature); break;
+                    case 0: DoBroadcastText(SAY_COMMAND1, m_creature); break;
+                    case 1: DoBroadcastText(SAY_COMMAND2, m_creature); break;
+                    case 2: DoBroadcastText(SAY_COMMAND3, m_creature); break;
                 }
                 break;
         }
