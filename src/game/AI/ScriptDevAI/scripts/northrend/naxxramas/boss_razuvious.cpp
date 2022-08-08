@@ -51,14 +51,17 @@ enum
     SPELL_HOPELESS           = 29125,
     SPELL_FORCED_OBEDIENCE   = 55479,
     SPELL_OBEDIENCE_CHAINS   = 55520,
+    
+    SPELL_TAUNT              = 29060,
 };
+
+static const float resetZ = 285.0f;         // Above this altitude, Razuvious is outside his combat area (in the stairs) and should reset (leashing)
 
 enum RazuviousActions
 {
     RAZUVIOUS_UNBALANCING_STRIKE,
     RAZUVIOUS_DISRUPTING_SHOUT,
     RAZUVIOUS_JAGGED_KNIFE,
-    RAZUVIOUS_COMMAND_SOUND,
     RAZUVIOUS_MAX_ACTIONS
 };
 
@@ -67,6 +70,7 @@ struct boss_razuviousAI : public CombatAI
     boss_razuviousAI(Creature* creature) : CombatAI(creature, RAZUVIOUS_MAX_ACTIONS),
     m_instance (static_cast<instance_naxxramas*>(creature->GetInstanceData()))
     {
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float, float, float z) { return z > resetZ; });
         m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
         SetDataType(TYPE_RAZUVIOUS);
         AddOnKillText(SAY_SLAY1, SAY_SLAY2, SAY_SLAY3);
@@ -75,7 +79,6 @@ struct boss_razuviousAI : public CombatAI
         AddCombatAction(RAZUVIOUS_UNBALANCING_STRIKE, 30s);
         AddCombatAction(RAZUVIOUS_DISRUPTING_SHOUT, 15s);
         AddCombatAction(RAZUVIOUS_JAGGED_KNIFE, 10s, 15s);
-        AddCombatAction(RAZUVIOUS_COMMAND_SOUND, 40s);
     }
 
     instance_naxxramas* m_instance;
@@ -87,6 +90,20 @@ struct boss_razuviousAI : public CombatAI
         DoCastSpellIfCan(m_creature, SPELL_HOPELESS, CAST_TRIGGERED);
     }
 
+    void SpellHit(Unit* /*caster*/, const SpellEntry* spell) override
+    {
+        // Every time a Deathknight Understudy taunts Razuvious, he will yell its disappointment
+        if (spell->Id == SPELL_TAUNT)
+        {
+            switch (urand(0, 3))
+            {
+                case 0: DoBroadcastText(SAY_COMMAND1, m_creature); break;
+                case 1: DoBroadcastText(SAY_COMMAND2, m_creature); break;
+                case 2: DoBroadcastText(SAY_COMMAND3, m_creature); break;
+            }
+        }
+    }
+
     std::chrono::milliseconds GetSubsequentActionTimer(uint32 action)
     {
         switch (action)
@@ -94,7 +111,6 @@ struct boss_razuviousAI : public CombatAI
             case RAZUVIOUS_UNBALANCING_STRIKE: return 30s;
             case RAZUVIOUS_DISRUPTING_SHOUT: return 25s;
             case RAZUVIOUS_JAGGED_KNIFE: return 10s;
-            case RAZUVIOUS_COMMAND_SOUND: return 40s;
         }
         return 0s;
     }
@@ -118,14 +134,6 @@ struct boss_razuviousAI : public CombatAI
                         break;
                 }
                 return;
-            case RAZUVIOUS_COMMAND_SOUND:
-                switch (urand(0, 2))
-                {
-                    case 0: DoBroadcastText(SAY_COMMAND1, m_creature); break;
-                    case 1: DoBroadcastText(SAY_COMMAND2, m_creature); break;
-                    case 2: DoBroadcastText(SAY_COMMAND3, m_creature); break;
-                }
-                break;
         }
         ResetCombatAction(action, GetSubsequentActionTimer(action));
     }
