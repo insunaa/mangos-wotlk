@@ -175,6 +175,13 @@ struct ForcedObedience : public AuraScript, public SpellScript
         spell->SetFilteringScheme(EFFECT_INDEX_0, true, SCHEME_CLOSEST);
     }
 
+    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex idx) const override
+    {
+        if (target->HasCharmer())
+            return false;
+        return true;
+    }
+
     void OnApply(Aura* aura, bool apply) const override
     {
         if (!apply)
