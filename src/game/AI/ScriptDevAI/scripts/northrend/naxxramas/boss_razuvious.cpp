@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Razuvious
-SD%Complete: 85%
-SDComment: TODO: Timers and sounds need confirmation - orb handling for normal-mode is missing
+SD%Complete: 95%
+SDComment: TODO: Timers need confirmation
 SDCategory: Naxxramas
 EndScriptData */
 
