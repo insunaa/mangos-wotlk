@@ -13806,7 +13806,6 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
             charmed->AttackStop(true, true);
             charmed->InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
             charmed->InterruptSpell(CURRENT_MELEE_SPELL);
-            charmed->InterruptSpellsCastedOnMe();
 
             charmInfo->ResetCharmState();
             charmed->DeleteCharmInfo();
