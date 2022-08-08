@@ -21,14 +21,16 @@ SDComment:
 SDCategory: Naxxramas
 EndScriptData */
 
+#include "AI/ScriptDevAI/base/CombatAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "naxxramas.h"
+#include <chrono>
 
 enum
 {
-    EMOTE_AURA_BLOCKING     = -1533143,
-    EMOTE_AURA_WANE         = -1533144,
-    EMOTE_AURA_FADING       = -1533145,
+    EMOTE_AURA_BLOCKING     = 32334,
+    EMOTE_AURA_WANE         = 32805,
+    EMOTE_AURA_FADING       = 32335,
 
     SPELL_DEATHBLOOM        = 29865,
     SPELL_DEATHBLOOM_H      = 55053,
@@ -41,51 +43,39 @@ enum
     NPC_SPORE               = 16286
 };
 
-struct boss_loathebAI : public ScriptedAI
+enum LoathebActions
 {
-    boss_loathebAI(Creature* pCreature) : ScriptedAI(pCreature)
+    LOATHEB_DEATHBLOOM,
+    LOATHEB_INEVITABLE_DOOM,
+    LOATHEB_NECROTIC_AURA,
+    LOATHEB_SUMMON_SPORE,
+    LOATHEB_BERSERK,
+    LOATHEB_ACTIONS_MAX,
+};
+
+struct boss_loathebAI : public CombatAI
+{
+    boss_loathebAI(Creature* creature) : CombatAI(creature, LOATHEB_ACTIONS_MAX),
+    m_instance(static_cast<instance_naxxramas*>(creature->GetInstanceData())),
+    m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
+        SetDataType(TYPE_LOATHEB);
+        AddCombatAction(LOATHEB_DEATHBLOOM, 5s);
+        AddCombatAction(LOATHEB_NECROTIC_AURA, 12s);
+        AddCombatAction(LOATHEB_INEVITABLE_DOOM, 2min);
+        AddCombatAction(LOATHEB_SUMMON_SPORE, RandomTimer(10s, 15s));
+        if (!m_isRegularMode)
+            AddCombatAction(LOATHEB_BERSERK, 12min);
     }
 
-    instance_naxxramas* m_pInstance;
-    bool m_bIsRegularMode;
+    instance_naxxramas* m_instance;
+    bool m_isRegularMode;
 
-    uint32 m_uiDeathbloomTimer;
-    uint32 m_uiNecroticAuraTimer;
-    uint32 m_uiInevitableDoomTimer;
-    uint32 m_uiSummonTimer;
-    uint32 m_uiBerserkTimer;
     uint8  m_uiNecroticAuraCount;                           // Used for emotes, 5min check
 
     void Reset() override
     {
-        m_uiDeathbloomTimer = 5000;
-        m_uiNecroticAuraTimer = 12000;
-        m_uiInevitableDoomTimer = MINUTE * 2 * IN_MILLISECONDS;
-        m_uiSummonTimer = urand(10000, 15000);              // first seen in vid after approx 12s
-        m_uiBerserkTimer = MINUTE * 12 * IN_MILLISECONDS;   // only in heroic, after 12min
         m_uiNecroticAuraCount = 0;
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_LOATHEB, IN_PROGRESS);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_LOATHEB, DONE);
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_LOATHEB, NOT_STARTED);
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -99,91 +89,74 @@ struct boss_loathebAI : public ScriptedAI
 
     void SummonedCreatureJustDied(Creature* pSummoned) override
     {
-        if (pSummoned->GetEntry() == NPC_SPORE && m_pInstance)
-            m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_SPORE_LOSER, false);
+        if (pSummoned->GetEntry() == NPC_SPORE && m_instance)
+            m_instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_SPORE_LOSER, false);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    std::chrono::milliseconds GetSubsequentActionTimer(uint32 action)
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        // Berserk (only heroic)
-        if (!m_bIsRegularMode)
+        switch (action)
         {
-            if (m_uiBerserkTimer < uiDiff)
+            case LOATHEB_NECROTIC_AURA:
             {
+                switch (m_uiNecroticAuraCount % 3)
+                {
+                    case 0:
+                        return 14s;
+                    case 1:
+                    case 2:
+                        return 3s;
+                }
+            }
+            case LOATHEB_INEVITABLE_DOOM: return (m_uiNecroticAuraCount <= 40) ? 30s : 15s;
+            case LOATHEB_SUMMON_SPORE: return m_isRegularMode ? 36s : 18s;
+            case LOATHEB_DEATHBLOOM: 30s;
+            case LOATHEB_BERSERK: 5min;
+        }
+        return 0s;
+    }
+
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
+        {
+            case LOATHEB_NECROTIC_AURA:
+                switch (m_uiNecroticAuraCount % 3)
+                {
+                    case 0:
+                        DoCastSpellIfCan(m_creature, SPELL_NECROTIC_AURA);
+                        DoBroadcastText(EMOTE_AURA_BLOCKING, m_creature);
+                        break;
+                    case 1:
+                        DoBroadcastText(EMOTE_AURA_WANE, m_creature);
+                        break;
+                    case 2:
+                        DoBroadcastText(EMOTE_AURA_FADING, m_creature);
+                        break;
+                }
+                ++m_uiNecroticAuraCount;
+                break;
+            case LOATHEB_INEVITABLE_DOOM:
+                DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_INEVITABLE_DOOM : SPELL_INEVITABLE_DOOM_H);
+                break;
+            case LOATHEB_SUMMON_SPORE:
+                DoCastSpellIfCan(m_creature, SPELL_SUMMON_SPORE);
+                break;
+            case LOATHEB_DEATHBLOOM:
+                DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_DEATHBLOOM : SPELL_DEATHBLOOM_H);
+                break;
+            case LOATHEB_BERSERK:
                 DoCastSpellIfCan(m_creature, SPELL_BERSERK);
-                m_uiBerserkTimer = 300000;
-            }
-            else
-                m_uiBerserkTimer -= uiDiff;
+                break;
         }
-
-        // Inevitable Doom
-        if (m_uiInevitableDoomTimer < uiDiff)
-        {
-            DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_INEVITABLE_DOOM : SPELL_INEVITABLE_DOOM_H);
-            m_uiInevitableDoomTimer = (m_uiNecroticAuraCount <= 40) ? 30000 : 15000;
-        }
-        else
-            m_uiInevitableDoomTimer -= uiDiff;
-
-        // Necrotic Aura
-        if (m_uiNecroticAuraTimer < uiDiff)
-        {
-            switch (m_uiNecroticAuraCount % 3)
-            {
-                case 0:
-                    DoCastSpellIfCan(m_creature, SPELL_NECROTIC_AURA);
-                    DoScriptText(EMOTE_AURA_BLOCKING, m_creature);
-                    m_uiNecroticAuraTimer = 14000;
-                    break;
-                case 1:
-                    DoScriptText(EMOTE_AURA_WANE, m_creature);
-                    m_uiNecroticAuraTimer = 3000;
-                    break;
-                case 2:
-                    DoScriptText(EMOTE_AURA_FADING, m_creature);
-                    m_uiNecroticAuraTimer = 3000;
-                    break;
-            }
-            ++m_uiNecroticAuraCount;
-        }
-        else
-            m_uiNecroticAuraTimer -= uiDiff;
-
-        // Summon
-        if (m_uiSummonTimer < uiDiff)
-        {
-            DoCastSpellIfCan(m_creature, SPELL_SUMMON_SPORE);
-            m_uiSummonTimer = m_bIsRegularMode ? 36000 : 18000;
-        }
-        else
-            m_uiSummonTimer -= uiDiff;
-
-        // Deathbloom
-        if (m_uiDeathbloomTimer < uiDiff)
-        {
-            DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_DEATHBLOOM : SPELL_DEATHBLOOM_H);
-            m_uiDeathbloomTimer = 30000;
-        }
-        else
-            m_uiDeathbloomTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
+        ResetCombatAction(action, GetSubsequentActionTimer(action));
     }
 };
-
-UnitAI* GetAI_boss_loatheb(Creature* pCreature)
-{
-    return new boss_loathebAI(pCreature);
-}
 
 void AddSC_boss_loatheb()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_loatheb";
-    pNewScript->GetAI = &GetAI_boss_loatheb;
+    pNewScript->GetAI = &GetNewAIInstance<boss_loathebAI>;
     pNewScript->RegisterSelf();
 }
