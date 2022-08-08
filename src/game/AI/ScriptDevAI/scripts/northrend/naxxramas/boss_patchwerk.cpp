@@ -58,10 +58,10 @@ struct boss_patchwerkAI : public CombatAI
     boss_patchwerkAI(Creature* creature) : CombatAI(creature, PATCHWERK_ACTION_MAX),
     m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
+        SetDataType(TYPE_PATCHWERK);
         AddOnKillText(SAY_SLAY);
         AddOnDeathText(SAY_DEATH);
         AddOnAggroText(SAY_AGGRO1, SAY_AGGRO2);
-        SetDataType(TYPE_PATCHWERK);
         AddTimerlessCombatAction(PATCHWERK_ENRAGE_LOW, true);
         AddCustomAction(PATCHWERK_BERSERK, true, [&]()
         {
@@ -79,28 +79,10 @@ struct boss_patchwerkAI : public CombatAI
         m_creature->SetSpellList(SPELLSET_NORMAL);
     }
 
-        void JustDied(Unit* /*victim*/) override
-    {
-        DoBroadcastText(SAY_DEATH, m_creature);
-
-        if (m_instance)
-            m_instance->SetData(TYPE_PATCHWERK, DONE);
-    }
-
     void Aggro(Unit* /*who*/) override
     {
-        DoBroadcastText(urand(0, 1) ? SAY_AGGRO1 : SAY_AGGRO2, m_creature);
-
-        ResetTimer(PATCHWERK_BERSERK, MINUTE * 6u * IN_MILLISECONDS);
-
-        if (m_instance)
-            m_instance->SetData(TYPE_PATCHWERK, IN_PROGRESS);
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_instance)
-            m_instance->SetData(TYPE_PATCHWERK, FAIL);
+        CombatAI::Aggro();
+        ResetTimer(PATCHWERK_BERSERK, 6min);
     }
 
     void ExecuteAction(uint32 action) override
