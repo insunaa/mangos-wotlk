@@ -125,8 +125,11 @@ struct boss_faerlinaAI : public CombatAI
 
             // In any case we prevent Frenzy and Poison Bolt Volley for Widow's Embrace Duration (30s)
             // We do this be setting the timers to at least bigger than 30s
-            DelayCombatAction(FAERLINA_ENRAGE, 30s);
-            DelayCombatAction(FAERLINA_POISON_BOLT, RandomTimer(33s, 38s));
+            if (bIsFrenzyRemove || !m_gracePeriodActive)
+            {
+                DelayCombatAction(FAERLINA_ENRAGE, 30s);
+                DelayCombatAction(FAERLINA_POISON_BOLT, RandomTimer(33s, 38s));
+            }
         }
     }
 
