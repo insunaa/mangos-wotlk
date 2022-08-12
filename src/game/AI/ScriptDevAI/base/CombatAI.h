@@ -45,6 +45,24 @@ class CombatAI : public ScriptedAI
             AddOnKillText(value);
             AddOnKillText(fargs...);
         }
+        
+        void KilledUnit(Unit* /*victim*/) override;
+        
+        // virtual void ExecuteAction(uint32 action) {}
+    private:
+        ObjectGuid m_storedTarget;
+
+        std::vector<int32> m_onDeathTexts;
+        bool m_onKillCooldown;
+
+        bool m_stopTargeting;
+};
+
+class BossAI : public CombatAI
+{
+    public:
+        BossAI(Creature* creature, uint32 combatActions) : CombatAI(creature, combatActions)
+        {}
         /**
         * Adds one or more Broadcast Texts to possibly emit when Unit dies
         * This function is not called if JustDied is overridden. Add CombatAI::JustDied(); to your overriding function.
@@ -70,22 +88,22 @@ class CombatAI : public ScriptedAI
             AddOnAggroText(fargs...);
         }
         void SetDataType(uint32 type) { m_instanceDataType = type; }
-        void KilledUnit(Unit* /*victim*/) override;
+
         void JustDied(Unit* killer = nullptr) override;
         void JustReachedHome() override;
         void Aggro(Unit* who = nullptr) override;
 
-        // virtual void ExecuteAction(uint32 action) {}
+        std::chrono::seconds TimeSinceEncounterStart()
+        {
+            return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - m_combatStartTimestamp);
+        }
     private:
-        ObjectGuid m_storedTarget;
-
-        std::vector<int32> m_onDeathTexts;
         std::vector<uint32> m_onKilledTexts;
         std::vector<uint32> m_onAggroTexts;
-        uint32 m_instanceDataType = 0;
-        bool m_onKillCooldown;
 
-        bool m_stopTargeting;
+        uint32 m_instanceDataType = 0;
+
+        std::chrono::steady_clock::time_point m_combatStartTimestamp;
 };
 
 #endif

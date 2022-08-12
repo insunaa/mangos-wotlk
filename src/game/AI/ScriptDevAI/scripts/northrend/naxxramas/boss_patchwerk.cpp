@@ -53,9 +53,9 @@ enum PatchwerkActions
     PATCHWERK_BERSERK,
 };
 
-struct boss_patchwerkAI : public CombatAI
+struct boss_patchwerkAI : public BossAI
 {
-    boss_patchwerkAI(Creature* creature) : CombatAI(creature, PATCHWERK_ACTION_MAX),
+    boss_patchwerkAI(Creature* creature) : BossAI(creature, PATCHWERK_ACTION_MAX),
     m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
         SetDataType(TYPE_PATCHWERK);
@@ -81,7 +81,7 @@ struct boss_patchwerkAI : public CombatAI
 
     void Aggro(Unit* /*who*/) override
     {
-        CombatAI::Aggro();
+        BossAI::Aggro();
         ResetTimer(PATCHWERK_BERSERK, 6min);
     }
 

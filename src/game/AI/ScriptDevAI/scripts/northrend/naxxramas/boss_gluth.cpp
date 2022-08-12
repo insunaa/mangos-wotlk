@@ -69,9 +69,9 @@ enum GluthActions
     GLUTH_ACTIONS_MAX,
 };
 
-struct boss_gluthAI : public CombatAI
+struct boss_gluthAI : public BossAI
 {
-    boss_gluthAI(Creature* creature) : CombatAI(creature, GLUTH_ACTIONS_MAX), 
+    boss_gluthAI(Creature* creature) : BossAI(creature, GLUTH_ACTIONS_MAX), 
     m_instance(static_cast<instance_naxxramas*>(creature->GetInstanceData()))
     {
         SetDataType(TYPE_GLUTH);

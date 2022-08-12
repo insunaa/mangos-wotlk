@@ -53,9 +53,9 @@ enum LoathebActions
     LOATHEB_ACTIONS_MAX,
 };
 
-struct boss_loathebAI : public CombatAI
+struct boss_loathebAI : public BossAI
 {
-    boss_loathebAI(Creature* creature) : CombatAI(creature, LOATHEB_ACTIONS_MAX),
+    boss_loathebAI(Creature* creature) : BossAI(creature, LOATHEB_ACTIONS_MAX),
     m_instance(static_cast<instance_naxxramas*>(creature->GetInstanceData())),
     m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {

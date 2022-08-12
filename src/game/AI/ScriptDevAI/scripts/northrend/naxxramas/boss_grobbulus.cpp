@@ -66,9 +66,9 @@ enum GrobbulusActions
     GROBBULUS_ACTION_MAX,
 };
 
-struct boss_grobbulusAI : public CombatAI
+struct boss_grobbulusAI : public BossAI
 {
-    boss_grobbulusAI(Creature* creature) : CombatAI(creature, GROBBULUS_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
+    boss_grobbulusAI(Creature* creature) : BossAI(creature, GROBBULUS_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
         SetDataType(TYPE_GROBBULUS);
         m_bIsRegularMode = creature->GetMap()->IsRegularDifficulty();
@@ -102,7 +102,7 @@ struct boss_grobbulusAI : public CombatAI
         // Clean-up stage
         DoCastSpellIfCan(m_creature, SPELL_DESPAWN_SUMMONS, CAST_TRIGGERED);
 
-        CombatAI::EnterEvadeMode();
+        BossAI::EnterEvadeMode();
     }
 
     void SpellHitTarget(Unit* target, const SpellEntry* spell) override
@@ -192,11 +192,6 @@ struct boss_grobbulusAI : public CombatAI
     }
 };
 
-UnitAI* GetAI_boss_grobbulus(Creature* pCreature)
-{
-    return new boss_grobbulusAI(pCreature);
-}
-
 struct MutatingInjection : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
@@ -223,7 +218,7 @@ void AddSC_boss_grobbulus()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_grobbulus";
-    pNewScript->GetAI = &GetAI_boss_grobbulus;
+    pNewScript->GetAI = &GetNewAIInstance<boss_grobbulusAI>;
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<MutatingInjection>("spell_grobbulus_mutating_injection");

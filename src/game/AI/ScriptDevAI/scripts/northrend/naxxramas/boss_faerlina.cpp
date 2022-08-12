@@ -59,9 +59,9 @@ enum FaerlinaActions
     FAERLINA_ACHIEVEMENT_TIMER,
 };
 
-struct boss_faerlinaAI : public CombatAI
+struct boss_faerlinaAI : public BossAI
 {
-    boss_faerlinaAI(Creature* creature) : CombatAI(creature, FAERLINA_ACTIONS_MAX),
+    boss_faerlinaAI(Creature* creature) : BossAI(creature, FAERLINA_ACTIONS_MAX),
     m_instance(static_cast<instance_naxxramas *>(creature->GetInstanceData())),
     m_hasTaunted(false)
     {
@@ -131,6 +131,7 @@ struct boss_faerlinaAI : public CombatAI
                 DelayCombatAction(FAERLINA_POISON_BOLT, RandomTimer(33s, 38s));
             }
         }
+        static_cast<BossAI*>(m_creature->AI())->TimeSinceEncounterStart();
     }
 
     std::chrono::milliseconds GetSubsequentActionTimer(uint32 action)

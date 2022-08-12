@@ -60,9 +60,9 @@ enum RazuviousActions
     RAZUVIOUS_MAX_ACTIONS
 };
 
-struct boss_razuviousAI : public CombatAI
+struct boss_razuviousAI : public BossAI
 {
-    boss_razuviousAI(Creature* creature) : CombatAI(creature, RAZUVIOUS_MAX_ACTIONS),
+    boss_razuviousAI(Creature* creature) : BossAI(creature, RAZUVIOUS_MAX_ACTIONS),
     m_instance (static_cast<instance_naxxramas*>(creature->GetInstanceData()))
     {
         m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float, float, float z) { return z > resetZ; });
@@ -81,7 +81,7 @@ struct boss_razuviousAI : public CombatAI
 
     void JustDied(Unit* /*pKiller*/) override
     {
-        CombatAI::JustDied();
+        BossAI::JustDied();
         DoCastSpellIfCan(m_creature, SPELL_HOPELESS, CAST_TRIGGERED);
     }
 

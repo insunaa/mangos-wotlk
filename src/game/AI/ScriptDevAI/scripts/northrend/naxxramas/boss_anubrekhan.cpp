@@ -77,9 +77,9 @@ enum AnubRekhanActions
     ANUBREKHAN_SUMMON,
 };
 
-struct boss_anubrekhanAI : public CombatAI
+struct boss_anubrekhanAI : public BossAI
 {
-    boss_anubrekhanAI(Creature* creature) : CombatAI(creature, ANUBREKHAN_ACTIONS_MAX),
+    boss_anubrekhanAI(Creature* creature) : BossAI(creature, ANUBREKHAN_ACTIONS_MAX),
         m_introDialogue(aIntroDialogue),
         m_instance(static_cast<instance_naxxramas*>(creature->GetInstanceData())),
         m_isRegularMode(creature->GetMap()->IsRegularDifficulty())

@@ -81,44 +81,6 @@ void CombatAI::AddOnKillText(int32 text)
     m_onDeathTexts.push_back(text);
 }
 
-void CombatAI::AddOnDeathText(uint32 text)
-{
-    m_onKilledTexts.push_back(text);
-}
-
-void CombatAI::AddOnAggroText(uint32 text)
-{
-    m_onAggroTexts.push_back(text);
-}
-
-void CombatAI::JustDied(Unit* killer)
-{
-    if (!m_onKilledTexts.empty())
-        DoBroadcastText(m_onKilledTexts[urand(0, m_onAggroTexts.size() - 1)], m_creature, killer);
-    if (!m_instanceDataType)
-        return;
-    if (ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
-        instance->SetData(m_instanceDataType, DONE);
-}
-
-void CombatAI::JustReachedHome()
-{
-    if (!m_instanceDataType)
-        return;
-    if (ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
-        instance->SetData(m_instanceDataType, FAIL);
-}
-
-void CombatAI::Aggro(Unit* who)
-{
-    if (!m_onAggroTexts.empty())
-        DoBroadcastText(m_onAggroTexts[urand(0, m_onAggroTexts.size() - 1)], m_creature, who);
-    if (!m_instanceDataType)
-        return;
-    if (ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
-        instance->SetData(m_instanceDataType, IN_PROGRESS);
-}
-
 void CombatAI::KilledUnit(Unit* victim)
 {
     if (!m_creature->IsAlive() || !victim->IsPlayer())
@@ -132,3 +94,42 @@ void CombatAI::KilledUnit(Unit* victim)
     }
 }
 
+void BossAI::AddOnDeathText(uint32 text)
+{
+    m_onKilledTexts.push_back(text);
+}
+
+void BossAI::AddOnAggroText(uint32 text)
+{
+    m_onAggroTexts.push_back(text);
+}
+
+void BossAI::JustDied(Unit* killer)
+{
+    if (!m_onKilledTexts.empty())
+        DoBroadcastText(m_onKilledTexts[urand(0, m_onAggroTexts.size() - 1)], m_creature, killer);
+    if (!m_instanceDataType)
+        return;
+    if (ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
+        instance->SetData(m_instanceDataType, DONE);
+}
+
+void BossAI::JustReachedHome()
+{
+    if (!m_instanceDataType)
+        return;
+    if (ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
+        instance->SetData(m_instanceDataType, FAIL);
+}
+
+void BossAI::Aggro(Unit* who)
+{
+    m_combatStartTimestamp = std::chrono::steady_clock::now();
+
+    if (!m_onAggroTexts.empty())
+        DoBroadcastText(m_onAggroTexts[urand(0, m_onAggroTexts.size() - 1)], m_creature, who);
+    if (!m_instanceDataType)
+        return;
+    if (ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
+        instance->SetData(m_instanceDataType, IN_PROGRESS);
+}
