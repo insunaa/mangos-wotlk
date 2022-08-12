@@ -87,6 +87,7 @@ class BossAI : public CombatAI
             AddOnAggroText(value);
             AddOnAggroText(fargs...);
         }
+
         void SetDataType(uint32 type) { m_instanceDataType = type; }
 
         void JustDied(Unit* killer = nullptr) override;

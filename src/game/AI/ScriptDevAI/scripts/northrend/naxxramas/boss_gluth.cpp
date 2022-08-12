@@ -72,10 +72,10 @@ enum GluthActions
 struct boss_gluthAI : public BossAI
 {
     boss_gluthAI(Creature* creature) : BossAI(creature, GLUTH_ACTIONS_MAX), 
-    m_instance(static_cast<instance_naxxramas*>(creature->GetInstanceData()))
+    m_instance(static_cast<instance_naxxramas*>(creature->GetInstanceData())),
+    m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
         SetDataType(TYPE_GLUTH);
-        m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
         AddCombatAction(GLUTH_MORTAL_WOUND, 10s);
         AddCombatAction(GLUTH_DECIMATE, 110s);
         AddCombatAction(GLUTH_ENRAGE, 25s);

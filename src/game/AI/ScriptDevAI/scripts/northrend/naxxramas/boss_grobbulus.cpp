@@ -68,54 +68,32 @@ enum GrobbulusActions
 
 struct boss_grobbulusAI : public BossAI
 {
-    boss_grobbulusAI(Creature* creature) : BossAI(creature, GROBBULUS_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
+    boss_grobbulusAI(Creature* creature) : BossAI(creature, GROBBULUS_ACTION_MAX),
+    m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())),
+    m_bIsRegularMode(creature->GetMap()->IsRegularDifficulty()),
+    m_berserkTimer(m_bIsRegularMode ? 12min : 9min)
     {
         SetDataType(TYPE_GROBBULUS);
-        m_bIsRegularMode = creature->GetMap()->IsRegularDifficulty();
-        m_uiBerserkTimeSecs = m_bIsRegularMode ? 12 * MINUTE : 9 * MINUTE;
-        m_uiBerserkTimer = m_uiBerserkTimeSecs * IN_MILLISECONDS;
         AddCombatAction(GROBBULUS_SLIME_STREAM, true);
-        AddCombatAction(GROBBULUS_SLIME_SPRAY, 20u * IN_MILLISECONDS, 30u * IN_MILLISECONDS); //Spell List
-        AddCombatAction(GROBBULUS_INJECTION, 13u * IN_MILLISECONDS);
-        AddCombatAction(GROBBULUS_POISON_CLOUD, 20u * IN_MILLISECONDS, 25u * IN_MILLISECONDS); //Spell List
-        AddCombatAction(GROBBULUS_BERSERK, m_uiBerserkTimer);
-        AddCombatAction(GROBBULUS_CHECK_MELEE, 5u * IN_MILLISECONDS);
+        AddCombatAction(GROBBULUS_SLIME_SPRAY, 20s, 30s); //Spell List
+        AddCombatAction(GROBBULUS_INJECTION, 13s);
+        AddCombatAction(GROBBULUS_POISON_CLOUD, 20s, 25s); //Spell List
+        AddCombatAction(GROBBULUS_BERSERK, m_berserkTimer);
+        AddCombatAction(GROBBULUS_CHECK_MELEE, 5s);
     }
 
     ScriptedInstance* m_instance;
     bool m_bIsRegularMode;
-    uint32 m_uiBerserkTimer, m_uiBerserkTimeSecs;
-
-    void Aggro(Unit* /*who*/) override
-    {
-        if (m_instance)
-            m_instance->SetData(TYPE_GROBBULUS, IN_PROGRESS);
-
-        //ResetIfNotStarted(GROBBULUS_SLIME_STREAM, 5u * IN_MILLISECONDS);
-    }
-
-    void EnterEvadeMode() override
-    {
-        if (m_instance)
-            m_instance->SetData(TYPE_GROBBULUS, FAIL);
-
-        // Clean-up stage
-        DoCastSpellIfCan(m_creature, SPELL_DESPAWN_SUMMONS, CAST_TRIGGERED);
-
-        BossAI::EnterEvadeMode();
-    }
+    std::chrono::milliseconds m_berserkTimer;
 
     void SpellHitTarget(Unit* target, const SpellEntry* spell) override
     {
         // Summon a Fallout Slime for every player hit by Slime Spray
-        //if ((spell->Id == SPELL_SLIME_SPRAY) && target->GetTypeId() == TYPEID_PLAYER)
-            //DoCastSpellIfCan(target, SPELL_SUMMON_FALLOUT_SLIME, TRIGGERED_OLD_TRIGGERED);
-
         if ((spell->Id == SPELL_SLIME_SPRAY || spell->Id == SPELL_SLIME_SPRAY_H) && target->GetTypeId() == TYPEID_PLAYER)
             m_creature->SummonCreature(NPC_FALLOUT_SLIME, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 10 * IN_MILLISECONDS);
     }
 
-    uint32 GetSubsequentActionTimer(uint32 id)
+    std::chrono::milliseconds GetSubsequentActionTimer(uint32 id)
     {
         switch (id)
         {
@@ -123,14 +101,14 @@ struct boss_grobbulusAI : public BossAI
             case GROBBULUS_INJECTION:
             {
                 if (m_bIsRegularMode)
-                    return urand(10 * IN_MILLISECONDS, 13 * IN_MILLISECONDS) -  5 * (m_uiBerserkTimeSecs * IN_MILLISECONDS - m_uiBerserkTimer) / m_uiBerserkTimeSecs;
+                    return RandomTimer(10s, 13s) - 5 * std::chrono::milliseconds((m_berserkTimer - TimeSinceEncounterStart()) / m_berserkTimer);
                 else
-                    return urand(10 * IN_MILLISECONDS, 13 * IN_MILLISECONDS) -  8 * (m_uiBerserkTimeSecs * IN_MILLISECONDS - m_uiBerserkTimer) / m_uiBerserkTimeSecs;
+                    return RandomTimer(10s, 13s) - 8 * std::chrono::milliseconds((m_berserkTimer - TimeSinceEncounterStart()) / m_berserkTimer);
             }
-            case GROBBULUS_POISON_CLOUD: return 15u * IN_MILLISECONDS;
-            case GROBBULUS_SLIME_SPRAY: return urand(20, 30) * IN_MILLISECONDS;
-            case GROBBULUS_CHECK_MELEE: return 1u * IN_MILLISECONDS;
-            default: return 0;
+            case GROBBULUS_POISON_CLOUD: return 15s;
+            case GROBBULUS_SLIME_SPRAY: return RandomTimer(20s, 30s);
+            case GROBBULUS_CHECK_MELEE: return 1s;
+            default: return 0s;
         }
     }
 
@@ -142,7 +120,7 @@ struct boss_grobbulusAI : public BossAI
             {
                 if (!m_creature->CanReachWithMeleeAttack(m_creature->GetVictim()))
                 {
-                    ResetCombatAction(GROBBULUS_SLIME_STREAM, 5u * IN_MILLISECONDS);
+                    ResetCombatAction(GROBBULUS_SLIME_STREAM, 5s);
                     DisableCombatAction(action);
                     break;
                 }

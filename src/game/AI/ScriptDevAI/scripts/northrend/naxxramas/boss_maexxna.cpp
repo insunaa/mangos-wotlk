@@ -16,8 +16,10 @@
 
 /* ScriptData
 SDName: Boss_Maexxna
-SD%Complete: 100
-SDComment:
+SD%Complete: 90
+SDComment: Web Wrap works incorrectly: The way it's supposed to work is Maexxna throws the player into one of several directions against the wall.
+    The player is then supposed to drop down from the wall and when the player stops moving, the Web Wrap NPC spawns on the player location.
+    While thrown the Web Wrap visual already starts running on the player.
 SDCategory: Naxxramas
 EndScriptData */
 
@@ -83,61 +85,6 @@ enum
 /*###################
 #   npc_web_wrap
 ###################*/
-
-// This NPC is summoned by the web wrapped player and act as a visual target for other raid members to free the player
-/*struct npc_web_wrapAI : public ScriptedAI
-{
-    npc_web_wrapAI(Creature* creature) : ScriptedAI(creature) { Reset(); }
-
-    Player* m_player;
-    uint32 m_checkVictimAliveTimer;
-
-    void Reset() override
-    {
-        SetCombatMovement(false);
-        m_player = nullptr;
-        m_checkVictimAliveTimer = 1 * IN_MILLISECONDS;
-
-        DoCastSpellIfCan(m_creature, SPELL_SELF_STUN, CAST_TRIGGERED);
-    }
-
-    void JustDied(Unit* killer) override
-    {
-        // Remove polymporph and DoT auras from web wrapped player
-        if (m_player)
-        {
-            if (m_player->IsAlive())
-                DoCastSpellIfCan(m_player, SPELL_CLEAR_WEB_WRAP_TARGET, CAST_TRIGGERED);
-        }
-        m_creature->ForcedDespawn(5000);
-    }
-
-    void UpdateAI(const uint32 diff) override
-    {
-        // The nearest player is the one that summoned the NPC
-        if (!m_player)
-        {
-            PlayerList closestPlayersList;
-            GetPlayerListWithEntryInWorld(closestPlayersList, m_creature, 2.0f);
-            if (!closestPlayersList.empty())
-                m_player = closestPlayersList.front();
-        }
-
-        if (m_player)
-        {
-            // Check if the web wrapped player is still alive, if not, clear ourselves
-            if (m_checkVictimAliveTimer <= diff)
-            {
-                if (!m_player->IsAlive())
-                    DoCastSpellIfCan(m_creature, SPELL_CLEAR_WEB_WRAP_SELF, CAST_TRIGGERED);
-                m_checkVictimAliveTimer = 1 * IN_MILLISECONDS;
-            }
-            else
-                m_checkVictimAliveTimer -= diff;
-        }
-    }
-};
-*/
 struct npc_web_wrapAI : public ScriptedAI
 {
     npc_web_wrapAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
@@ -157,7 +104,6 @@ struct npc_web_wrapAI : public ScriptedAI
     {
         if (pVictim)
         {
-            sLog.outError("SetVictim called");
             // Vanilla spell 28618, 28619, 28620, 28621 had effect SPELL_EFFECT_PULL_TOWARDS with EffectMiscValue = 200, 300, 400 and 500
             // All these spells trigger 28622 after 1 or 2 seconds
             // the EffectMiscValue may have been based on the distance between the victim and the target
@@ -254,17 +200,18 @@ static const float aWebWrapLoc[MAX_WEB_WRAP_POSITIONS][3] =
     {3497.067f, -3843.384f, 302.384f}
 };
 
-struct boss_maexxnaAI : public CombatAI
+struct boss_maexxnaAI : public BossAI
 {
-    boss_maexxnaAI(Creature* creature) : CombatAI(creature, MAEXXNA_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
+    boss_maexxnaAI(Creature* creature) : BossAI(creature, MAEXXNA_ACTION_MAX),
+    m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())),
+    m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
         AddTimerlessCombatAction(MAEXXNA_ENRAGE_HP_CHECK, true);         // Soft enrage à 30%
-        AddCombatAction(MAEXXNA_WEBWRAP, 20000u);
-        AddCombatAction(MAEXXNA_WEBSPRAY, 40000u);
-        AddCombatAction(MAEXXNA_POISON_SHOCK, 10000u, 20000u);
-        AddCombatAction(MAEXXNA_NECROTIC_POISON, 20000u, 30000u);
-        AddCombatAction(MAEXXNA_SUMMON_SPIDERLING, 30000u);
+        AddCombatAction(MAEXXNA_WEBWRAP, 20s);
+        AddCombatAction(MAEXXNA_WEBSPRAY, 40s);
+        AddCombatAction(MAEXXNA_POISON_SHOCK, 10s, 20s);
+        AddCombatAction(MAEXXNA_NECROTIC_POISON, 20s, 30s);
+        AddCombatAction(MAEXXNA_SUMMON_SPIDERLING, 30s);
     }
 
     ScriptedInstance* m_instance;
@@ -283,16 +230,16 @@ struct boss_maexxnaAI : public CombatAI
         DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
-    uint32 GetSubsequentActionTimer(uint32 action)
+    std::chrono::milliseconds GetSubsequentActionTimer(uint32 action)
     {
         switch (action)
         {
             case MAEXXNA_WEBWRAP: //fall through
-            case MAEXXNA_WEBSPRAY: return 40u * IN_MILLISECONDS;
-            case MAEXXNA_POISON_SHOCK: return urand(10u, 20u) * IN_MILLISECONDS;
-            case MAEXXNA_NECROTIC_POISON: return urand(20u, 30u) * IN_MILLISECONDS;
-            case MAEXXNA_SUMMON_SPIDERLING: return 30u * IN_MILLISECONDS;
-            default: return 0;
+            case MAEXXNA_WEBSPRAY: return 40s;
+            case MAEXXNA_POISON_SHOCK: return RandomTimer(10s, 20s);
+            case MAEXXNA_NECROTIC_POISON: return RandomTimer(10s, 30s);
+            case MAEXXNA_SUMMON_SPIDERLING: return 30s;
+            default: return 0s;
         }
     }
 
@@ -383,40 +330,6 @@ struct boss_maexxnaAI : public CombatAI
             }
             case MAEXXNA_WEBWRAP:
             {
-                // Web Wrap
-                // ToDo: the targets and triggers selection is probably done through spells 29280, 29281, 29282, 29283, 29285 & 29287
-                // But because we are walking in Guessland until more reliable data are available, let's do the selection manually here
-                // Randomly pick 2 targets on 25, 1 on 10, excluding current victim (main tank)
-                /*std::vector<Unit*> targets;
-                m_creature->SelectAttackingTargets(targets, ATTACKING_TARGET_ALL_SUITABLE, 0, nullptr, SELECT_FLAG_PLAYER | SELECT_FLAG_SKIP_TANK, m_webWrapParams);
-
-                uint32 t_webWrap = m_isRegularMode ? MAX_PLAYERS_WEB_WRAP : MAX_PLAYERS_WEB_WRAP_H;
-                if (targets.size() > t_webWrap)
-                {
-                    std::shuffle(targets.begin(), targets.end(), *GetRandomGenerator());
-                    targets.resize(t_webWrap);
-                }
-
-                if (!targets.empty())
-                {
-                    // Check we have enough summoning NPCs spawned in regards of player targets
-                    if (m_summoningTriggers.size() < targets.size())
-                    {
-                        script_error_log("Error in script Naxxramas::boss_maexxna: less summoning NPCs (entry %u) than expected targets (%u) for Web Wrap ability. Check your DB", NPC_INVISIBLE_MAN, t_webWrap);
-                        break;
-                    }
-
-                    // Randomly pick up to the trigger NPCs
-                    std::vector<Unit*> invisibleMen(m_summoningTriggers.begin(), m_summoningTriggers.end());
-                    std::shuffle(invisibleMen.begin(), invisibleMen.end(), *GetRandomGenerator());
-                    invisibleMen.resize(targets.size());
-
-                    for (uint8 i = 0; i < targets.size(); i++)
-                        targets[i]->CastSpell(invisibleMen[i], SPELL_WEB_WRAP_INIT, TRIGGERED_IGNORE_UNSELECTABLE_FLAG, nullptr, nullptr, m_creature->GetObjectGuid());
-
-                    ResetCombatAction(action, GetSubsequentActionTimer(action));
-                    break;
-                }*/
                 if (DoCastWebWrap())
                     ResetCombatAction(action, GetSubsequentActionTimer(action));
                 break;
@@ -450,124 +363,6 @@ struct boss_maexxnaAI : public CombatAI
     }
 };
 
-/*###################
-#   npc_invible_man
-###################*/
-
-// This NPC handles the spell sync between the player that is web wrapped (with a DoT) and the related Web Wrap NPC
-/*struct npc_invisible_manAI : public ScriptedAI
-{
-    npc_invisible_manAI(Creature* creature) : ScriptedAI(creature) {
-        AddCustomAction(1, true, [&]() { HandleVictimCheck(); });
-        SetReactState(REACT_PASSIVE);
-        Reset();
-    }
-
-    ObjectGuid m_victimGuid;
-
-    void Reset() override
-    {
-        m_victimGuid.Clear();
-    }
-
-    void HandleVictimCheck() {
-        if (Player* victim = m_creature->GetMap()->GetPlayer(m_victimGuid))
-        {
-            if (victim->IsAlive())
-            {
-                // Make the player cast the visual effects spells with a delay to ensure he/she has reach his/her destination
-                victim->CastSpell(victim, SPELL_WEB_WRAP_SUMMON, TRIGGERED_OLD_TRIGGERED);
-                DisableTimer(1);
-            }
-            else
-                m_victimGuid.Clear();
-        }
-    };
-
-    void MoveInLineOfSight(Unit* who) override {}
-    void AttackStart(Unit* who) override {}
-
-    // Store the GUID of the player that was pulled for later use
-    void SpellHitTarget(Unit* target, const SpellEntry* spell) override
-    {
-        switch (spell->Id)
-        {
-            case SPELL_WEB_WRAP_200:
-            case SPELL_WEB_WRAP_300:
-            case SPELL_WEB_WRAP_400:
-            case SPELL_WEB_WRAP_500:
-            {
-                m_victimGuid = target->GetObjectGuid();
-                ResetTimer(1, (spell->Id == SPELL_WEB_WRAP_200 ? 5 : 6) * IN_MILLISECONDS);
-                break;
-            }
-            default:
-                break;
-        }
-    }
-};
-*/
-// Web Wrap (Maexxna: pull spell initialiser)
-/*struct WebWrap : public SpellScript
-{
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
-    {
-        if (effIdx == EFFECT_INDEX_0)
-        {
-            if (!spell->GetAffectiveCasterObject())
-                return;
-
-            Unit* unitTarget = spell->GetUnitTarget();
-            if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || spell->GetCaster()->GetTypeId() != TYPEID_PLAYER)
-                return;
-
-            float dist = spell->GetCaster()->GetDistance(unitTarget, false);
-            // Switch the pull target spell based on the distance from the web wrap position
-            uint32 pullSpellId = SPELL_WEB_WRAP_500;
-            if (dist < 25.0f)
-                pullSpellId = SPELL_WEB_WRAP_200;
-            else if (dist < 50.0f)
-                pullSpellId = SPELL_WEB_WRAP_300;
-            else if (dist < 75.0f)
-                pullSpellId = SPELL_WEB_WRAP_400;
-
-            unitTarget->CastSpell(spell->GetCaster(), pullSpellId, TRIGGERED_INSTANT_CAST, nullptr, nullptr, spell->GetAffectiveCasterObject()->GetObjectGuid());
-        }
-    }
-};
-
-// Clear Web Wrap
-struct ClearWebWrap : public SpellScript
-{
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
-    {
-        if (effIdx == EFFECT_INDEX_0)
-        {
-            Unit* unitTarget = spell->GetUnitTarget();
-            switch(spell->m_spellInfo->Id)
-            {
-                case SPELL_CLEAR_WEB_WRAP_TARGET:   // Clear Web Wrap (Maexxna: clear effects on player)
-                {
-                    if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER)
-                    {
-                        unitTarget->RemoveAurasDueToSpell(SPELL_WEB_WRAP_SUMMON);   // Web Wrap polymorph
-                        unitTarget->RemoveAurasDueToSpell(SPELL_WEBWRAP_STUN);      // Web Wrap stun and DoT
-                    }
-                    break;
-                }
-                case SPELL_CLEAR_WEB_WRAP_SELF:     // Clear Web Wrap (Maexxna: kill Web Wrap NPC)
-                {
-                    if (unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT)
-                        unitTarget->CastSpell(nullptr, SPELL_KILL_WEBWRAP, TRIGGERED_OLD_TRIGGERED);  // Kill Web Wrap
-                    break;
-                }
-                default:
-                    break;
-            }
-        }
-    }
-};*/
-
 void AddSC_boss_maexxna()
 {
     Script* newScript = new Script;
@@ -579,12 +374,4 @@ void AddSC_boss_maexxna()
     newScript->Name = "npc_web_wrap";
     newScript->GetAI = &GetNewAIInstance<npc_web_wrapAI>;
     newScript->RegisterSelf();
-
-/*    newScript = new Script;
-    newScript->Name = "npc_invible_man";
-    newScript->GetAI = &GetNewAIInstance<npc_invisible_manAI>;
-    newScript->RegisterSelf();*/
-
-//    RegisterSpellScript<WebWrap>("spell_web_wrap");
-//    RegisterSpellScript<ClearWebWrap>("spell_clear_web_wrap");
 }

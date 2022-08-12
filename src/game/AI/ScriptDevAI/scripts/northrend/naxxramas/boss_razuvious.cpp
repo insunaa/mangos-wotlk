@@ -63,10 +63,10 @@ enum RazuviousActions
 struct boss_razuviousAI : public BossAI
 {
     boss_razuviousAI(Creature* creature) : BossAI(creature, RAZUVIOUS_MAX_ACTIONS),
-    m_instance (static_cast<instance_naxxramas*>(creature->GetInstanceData()))
+    m_instance (static_cast<instance_naxxramas*>(creature->GetInstanceData())),
+    m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
         m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float, float, float z) { return z > resetZ; });
-        m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
         SetDataType(TYPE_RAZUVIOUS);
         AddOnKillText(SAY_SLAY1, SAY_SLAY2);
         AddOnAggroText(SAY_AGGRO1, SAY_AGGRO2, SAY_AGGRO3, SAY_AGGRO4);

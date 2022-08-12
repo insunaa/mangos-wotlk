@@ -56,39 +56,27 @@ enum FaerlinaActions
     FAERLINA_RAIN_OF_FIRE,
     FAERLINA_ENRAGE,
     FAERLINA_ACTIONS_MAX,
-    FAERLINA_ACHIEVEMENT_TIMER,
 };
 
 struct boss_faerlinaAI : public BossAI
 {
     boss_faerlinaAI(Creature* creature) : BossAI(creature, FAERLINA_ACTIONS_MAX),
     m_instance(static_cast<instance_naxxramas *>(creature->GetInstanceData())),
+    m_isRegularMode(creature->GetMap()->IsRegularDifficulty()),
     m_hasTaunted(false)
     {
         SetDataType(TYPE_FAERLINA);
         AddOnAggroText(SAY_AGGRO_1, SAY_AGGRO_2, SAY_AGGRO_3, SAY_AGGRO_4);
         AddOnKillText(SAY_SLAY_1, SAY_SLAY_2);
         AddOnDeathText(SAY_DEATH);
-        m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
         AddCombatAction(FAERLINA_POISON_BOLT, 8s);
         AddCombatAction(FAERLINA_RAIN_OF_FIRE, 16s);
         AddCombatAction(FAERLINA_ENRAGE, 60s);
-        AddCustomAction(FAERLINA_ACHIEVEMENT_TIMER, true, [&](){
-            m_gracePeriodActive = false;
-        });
     }
 
     instance_naxxramas* m_instance;
     bool m_isRegularMode;
     bool m_hasTaunted;
-    bool m_gracePeriodActive;
-
-    void Aggro(Unit* who) override
-    {
-        CombatAI::Aggro(who);
-        m_gracePeriodActive = true;
-        ResetTimer(FAERLINA_ACHIEVEMENT_TIMER, 30s);
-    }
 
     void MoveInLineOfSight(Unit* pWho) override
     {
@@ -120,18 +108,17 @@ struct boss_faerlinaAI : public BossAI
             }
 
             // Achievement 'Momma said Knock you out': If we removed OR delayed the frenzy, the criteria is failed
-            if ((bIsFrenzyRemove || !m_gracePeriodActive) && m_instance)
+            if ((bIsFrenzyRemove || TimeSinceEncounterStart() > 30s) && m_instance)
                 m_instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_KNOCK_YOU_OUT, false);
 
             // In any case we prevent Frenzy and Poison Bolt Volley for Widow's Embrace Duration (30s)
             // We do this be setting the timers to at least bigger than 30s
-            if (bIsFrenzyRemove || !m_gracePeriodActive)
+            if (bIsFrenzyRemove || TimeSinceEncounterStart() > 30s)
             {
                 DelayCombatAction(FAERLINA_ENRAGE, 30s);
                 DelayCombatAction(FAERLINA_POISON_BOLT, RandomTimer(33s, 38s));
             }
         }
-        static_cast<BossAI*>(m_creature->AI())->TimeSinceEncounterStart();
     }
 
     std::chrono::milliseconds GetSubsequentActionTimer(uint32 action)
