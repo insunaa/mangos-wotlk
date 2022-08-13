@@ -98,7 +98,7 @@ enum GothikActions
 struct boss_gothikAI : public BossAI, private DialogueHelper
 {
     boss_gothikAI(Creature* creature) : BossAI(creature, GOTHIK_ACTIONS_MAX),
-    m_instance(static_cast<instance_naxxramas*>(creature->GetInstanceData())),
+    m_instance(dynamic_cast<instance_naxxramas*>(creature->GetInstanceData())),
     m_isRegularMode(creature->GetMap()->IsRegularDifficulty()),
     DialogueHelper(aIntroDialogue)
     {
@@ -199,6 +199,8 @@ struct boss_gothikAI : public BossAI, private DialogueHelper
 
     void Aggro(Unit* /*pWho*/) override
     {
+        if (!m_instance)
+            return;
         BossAI::Aggro();
 
         // Make immune
@@ -247,6 +249,8 @@ struct boss_gothikAI : public BossAI, private DialogueHelper
 
     void EnterEvadeMode() override
     {
+        if (!m_instance)
+            return;
         Map::PlayerList const& lPlayers = m_instance->instance->GetPlayers();
 
         if (!lPlayers.isEmpty())
@@ -389,6 +393,11 @@ struct boss_gothikAI : public BossAI, private DialogueHelper
 
     void ExecuteAction(uint32 action) override
     {
+        if (!m_instance)
+        {
+            DisableCombatAction(action);
+            return;
+        }
         switch (action)
         {
             case GOTHIK_OPEN_GATES:
@@ -467,8 +476,10 @@ struct boss_gothikAI : public BossAI, private DialogueHelper
 
     void UpdateAI(const uint32 diff) override
     {
+        if (!m_instance)
+            return;
         // Update only the intro related stuff
-        if (m_instance && m_uiPhase == PHASE_SPEECH)
+        if (m_uiPhase == PHASE_SPEECH)
             DialogueUpdate(diff); // Dialogue updates outside of combat too
 
         CombatAI::UpdateAI(diff);
