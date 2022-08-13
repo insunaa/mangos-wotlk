@@ -167,7 +167,8 @@ struct boss_nothAI : public BossAI
             summoned->CastSpell(summoned, 384152, TRIGGERED_OLD_TRIGGERED);
         const ObjectGuid& summonedGuid = summoned->GetObjectGuid();
         Map* creatureMap = summoned->GetMap();
-        summoned->AI()->AddCustomAction(0, 3s, [summonedGuid, creatureMap](){
+        summoned->AI()->AddCustomAction(0, 3s, [summonedGuid, creatureMap]()
+        {
             if (Creature* creature = creatureMap->GetCreature(summonedGuid))
                 creature->AI()->ClearSelfRoot();
         });
