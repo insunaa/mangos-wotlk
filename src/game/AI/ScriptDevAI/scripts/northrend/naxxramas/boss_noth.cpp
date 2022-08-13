@@ -113,6 +113,7 @@ struct boss_nothAI : public BossAI
         AddCombatAction(NOTH_CURSE, 4s);
         AddCombatAction(NOTH_SUMMON, 12s);
         AddCombatAction(NOTH_PHASE_BALCONY, 90s);
+        AddCombatAction(NOTH_PHASE_GROUND, true);
         Reset();
     }
 
@@ -160,16 +161,16 @@ struct boss_nothAI : public BossAI
         m_creature->Respawn();
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
-        if (!pSummoned->HasAura(384152)) //Custom spell for 30% increased difficulty. *NOT* accurate to 3.3.5a
-            pSummoned->CastSpell(pSummoned, 384152, TRIGGERED_OLD_TRIGGERED);
-        AddCustomAction(pSummoned->GetObjectGuid().GetCounter(), 3s, [&](){
-            if (pSummoned && pSummoned->AI())
-                pSummoned->AI()->ClearSelfRoot();
+        if (!summoned->HasAura(384152)) //Custom spell for 30% increased difficulty. *NOT* accurate to 3.3.5a
+            summoned->CastSpell(summoned, 384152, TRIGGERED_OLD_TRIGGERED);
+        AddCustomAction(summoned->GetObjectGuid().GetCounter(), 3s, [&](){
+            if (summoned && summoned->AI())
+                summoned->AI()->ClearSelfRoot();
         });
-        pSummoned->AI()->SetRootSelf(true);
-        pSummoned->SetInCombatWithZone();
+        summoned->AI()->SetRootSelf(true);
+        summoned->SetInCombatWithZone();
     }
 
     void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override

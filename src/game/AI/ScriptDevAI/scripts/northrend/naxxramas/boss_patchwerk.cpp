@@ -123,7 +123,8 @@ struct HatefulStrikePrimer : public SpellScript
                 threat.push_back(hatedTarget);
         }
 
-        uint32 diffTargets = caster->GetMap()->GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL ? 2 : 3;
+        const Difficulty diff = caster->GetMap()->GetDifficulty();
+        uint32 diffTargets = diff == RAID_DIFFICULTY_10MAN_NORMAL ? 2 : 3;
 
         if (threat.size() > diffTargets)
             threat.resize(diffTargets);
@@ -137,7 +138,6 @@ struct HatefulStrikePrimer : public SpellScript
                 target = hRef->getTarget();
         }
 
-        Difficulty diff = caster->GetMap()->GetDifficulty();
         caster->CastSpell(target, diff == RAID_DIFFICULTY_10MAN_NORMAL ? SPELL_HATEFULSTRIKE : SPELL_HATEFULSTRIKE_H, TRIGGERED_INSTANT_CAST | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL);
     }
 };
