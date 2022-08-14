@@ -515,7 +515,8 @@ struct boss_thaddiusAddsAI : public BossAI
 
     void JustPreventedDeath(Unit* attacker) override
     {
-        // prevent death
+        if (!m_instance)
+            return;
         m_isFakingDeath = true;
 
         m_creature->InterruptNonMeleeSpells(false);
