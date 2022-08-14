@@ -283,6 +283,8 @@ struct npc_tesla_coilAI : public Scripted_NoMovementAI
     bool m_bToFeugen;
 
     void Reset() override {
+        if (!m_instance || m_instance->GetData(TYPE_THADDIUS) == DONE)
+            return;
         AddCustomAction(TESLA_COIL_SETUP_CHAIN, 1s, [&](){
             if (!SetupChain())
                 ResetTimer(TESLA_COIL_SETUP_CHAIN, 1s);
