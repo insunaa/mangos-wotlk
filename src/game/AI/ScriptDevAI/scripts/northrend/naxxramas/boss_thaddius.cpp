@@ -534,6 +534,8 @@ struct boss_thaddiusAddsAI : public BossAI
 
         JustDied(attacker);                                  // Texts
         AddCustomAction(THADDIUS_ADD_REVIVE, 5s, [&](){
+            if(!GetOtherAdd())
+                return;
             if (auto otherAI = dynamic_cast<boss_thaddiusAddsAI*>(GetOtherAdd()->AI()))
             {
                 if (otherAI->IsCountingDead())
