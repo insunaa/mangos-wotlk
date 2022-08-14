@@ -410,6 +410,8 @@ struct boss_thaddiusAddsAI : public BossAI
         {
             if (Creature* pTesla = m_instance->instance->GetCreature(*itr))
             {
+                if (pTesla->GetDistance(m_creature) > 30.f)
+                    continue;
                 if (npc_tesla_coilAI* pTeslaAI = dynamic_cast<npc_tesla_coilAI*>(pTesla->AI()))
                     pTeslaAI->ReApplyChain(m_creature->GetEntry());
             }
