@@ -745,6 +745,8 @@ struct ThaddiusChargeDamage : public SpellScript
                     break;
             }
         }
+        if (auto* instance = dynamic_cast<instance_naxxramas*>(target->GetInstanceData()))
+            instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_SHOCKING, false);
         return true;
     }
 };
