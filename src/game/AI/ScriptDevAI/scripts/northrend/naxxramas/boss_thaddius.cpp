@@ -87,6 +87,8 @@ enum
     SPELL_STALAGG_CHAIN             = 28096,
     SPELL_FEUGEN_TESLA_PASSIVE      = 28109,
     SPELL_STALAGG_TESLA_PASSIVE     = 28097,
+    SPELL_FEUGEN_TESLA_EFFECT       = 28110,
+    SPELL_STALAGG_TESLA_EFFECT      = 28098,
     SPELL_SHOCK_OVERLOAD            = 28159,
     SPELL_SHOCK                     = 28099,
     SPELL_TRIGGER_TESLAS            = 28359,
@@ -318,17 +320,14 @@ struct npc_tesla_coilAI : public Scripted_NoMovementAI
 
         m_bToFeugen = m_creature->GetDistanceOrder(pNoxTeslaFeugen, pNoxTeslaStalagg);
 
-        return ReApplyChain(m_bToFeugen ? NPC_FEUGEN : NPC_STALAGG);
-        /*
         if (auto* add = m_instance->GetSingleCreatureFromStorage(m_bToFeugen ? NPC_FEUGEN : NPC_STALAGG))
             return DoCastSpellIfCan(add, m_bToFeugen ? SPELL_FEUGEN_CHAIN : SPELL_STALAGG_CHAIN) == CAST_OK;
         return false;
-        */
     }
 
     bool ReApplyChain(uint32 uiEntry)
     {
-        return DoCastSpellIfCan(m_creature, m_bToFeugen ? SPELL_FEUGEN_TESLA_PASSIVE : SPELL_STALAGG_TESLA_PASSIVE);
+        return SetupChain();
     }
 };
 
@@ -403,9 +402,10 @@ struct boss_thaddiusAddsAI : public BossAI
     {
         Reset();                                            // Needed to reset the flags properly
 
-        GuidList lTeslaGUIDList;
-        if (!m_instance)
+        if (!m_instance || m_creature->HasAura(SPELL_FEUGEN_TESLA_EFFECT) || m_creature->HasAura(SPELL_STALAGG_TESLA_EFFECT))
             return;
+
+        GuidList lTeslaGUIDList;
 
         m_instance->GetThadTeslaCreatures(lTeslaGUIDList);
         if (lTeslaGUIDList.empty())
