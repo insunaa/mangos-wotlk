@@ -95,11 +95,22 @@ class TimerManager
         {
             DelayTimer(index, timer.count());
         }
+        virtual void ReduceTimerBy(uint32 index, uint32 timer);
+        virtual void ReduceTimerBy(uint32 index, std::chrono::milliseconds timer)
+        {
+            ReduceTimerBy(index, timer.count());
+        }
+        virtual void DelayTimerBy(uint32 index, uint32 timer);
+        virtual void DelayTimerBy(uint32 index, std::chrono::milliseconds timer)
+        {
+            DelayTimerBy(index, timer.count());
+        }
         virtual void ResetIfNotStarted(uint32 index, uint32 timer);
         virtual void ResetIfNotStarted(uint32 index, std::chrono::milliseconds timer)
         {
             ResetIfNotStarted(index, timer.count());
         }
+        virtual std::chrono::milliseconds GetTimer(uint32 index);
 
         virtual void UpdateTimers(const uint32 diff);
         virtual void ResetAllTimers();
@@ -156,6 +167,16 @@ class CombatActions : public TimerManager
         {
             DelayTimer(index, timer.count());
         }
+        virtual void ReduceTimerBy(uint32 index, uint32 timer);
+        virtual void ReduceTimerBy(uint32 index, std::chrono::milliseconds timer)
+        {
+            ReduceTimerBy(index, timer.count());
+        }
+        virtual void DelayTimerBy(uint32 index, uint32 timer);
+        virtual void DelayTimerBy(uint32 index, std::chrono::milliseconds timer)
+        {
+            DelayTimerBy(index, timer.count());
+        }
         virtual void ResetIfNotStarted(uint32 index, uint32 timer) override;
         virtual void ResetIfNotStarted(uint32 index, std::chrono::milliseconds timer)
         {
@@ -187,6 +208,21 @@ class CombatActions : public TimerManager
         void DelayCombatAction(uint32 index, std::chrono::milliseconds timer)
         {
             DelayCombatAction(index, timer.count());
+        }
+
+        void DelayCombatActionBy(uint32 index, uint32 timer)
+        {
+            if (GetActionReadyStatus(index))
+            {
+                SetActionReadyStatus(index, false);
+                ResetTimer(index, timer);
+            }
+            else
+                DelayTimerBy(index, timer);
+        }
+        void DelayCombatActionBy(uint32 index, std::chrono::milliseconds timer)
+        {
+            DelayCombatActionBy(index, timer.count());
         }
 
         inline void SetActionReadyStatus(uint32 index, bool state) { m_actionReadyStatus[index] = state; }

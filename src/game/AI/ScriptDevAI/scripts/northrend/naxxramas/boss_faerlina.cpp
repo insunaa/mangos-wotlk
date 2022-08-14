@@ -101,7 +101,7 @@ struct boss_faerlinaAI : public BossAI
             // If we remove the Frenzy, the Enrage Timer is reseted to 60s
             if (m_creature->HasAura(m_isRegularMode ? SPELL_ENRAGE : SPELL_ENRAGE_H))
             {
-                ResetCombatAction(FAERLINA_ENRAGE, 60s);
+                ResetCombatAction(FAERLINA_ENRAGE, 30s);
                 m_creature->RemoveAurasDueToSpell(m_isRegularMode ? SPELL_ENRAGE : SPELL_ENRAGE_H);
 
                 bIsFrenzyRemove = true;
@@ -115,8 +115,8 @@ struct boss_faerlinaAI : public BossAI
             // We do this be setting the timers to at least bigger than 30s
             if (bIsFrenzyRemove || TimeSinceEncounterStart() > 30s)
             {
-                DelayCombatAction(FAERLINA_ENRAGE, 30s);
-                DelayCombatAction(FAERLINA_POISON_BOLT, RandomTimer(33s, 38s));
+                DelayCombatActionBy(FAERLINA_ENRAGE, 30s);
+                DelayCombatActionBy(FAERLINA_POISON_BOLT, RandomTimer(33s, 38s));
             }
         }
     }

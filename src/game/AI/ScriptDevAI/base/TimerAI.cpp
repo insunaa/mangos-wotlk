@@ -129,6 +129,29 @@ void TimerManager::DelayTimer(uint32 index, uint32 timer)
         (*data).second.timer = (*data).second.timer > timer ? (*data).second.timer : timer;
 }
 
+void TimerManager::ReduceTimerBy(uint32 index, uint32 timer)
+{
+    auto data = m_timers.find(index);
+    if (data == m_timers.end())
+    {
+        sLog.outError("Timer index %u does not exist.", index);
+        return;
+    }
+    (*data).second.timer = std::max((*data).second.timer - timer, 0u);
+}
+
+void TimerManager::DelayTimerBy(uint32 index, uint32 timer)
+{
+    auto data = m_timers.find(index);
+    if (data == m_timers.end())
+    {
+        sLog.outError("Timer index %u does not exist.", index);
+        return;
+    }
+    if (!(*data).second.disabled)
+        (*data).second.timer = (*data).second.timer + timer;
+}
+
 void TimerManager::ResetIfNotStarted(uint32 index, uint32 timer)
 {
     auto data = m_timers.find(index);
@@ -142,6 +165,21 @@ void TimerManager::ResetIfNotStarted(uint32 index, uint32 timer)
         (*data).second.timer = timer;
         (*data).second.disabled = false;
     }
+}
+
+std::chrono::milliseconds TimerManager::GetTimer(uint32 index)
+{
+    auto data = m_timers.find(index);
+    if (data == m_timers.end())
+    {
+        sLog.outError("Timer index %u does not exist.", index);
+        return 0s;
+    }
+    if ((*data).second.disabled)
+    {
+        return std::chrono::milliseconds((*data).second.timer);
+    }
+    return 0s;
 }
 
 void TimerManager::UpdateTimers(const uint32 diff)
@@ -262,6 +300,24 @@ void CombatActions::DelayTimer(uint32 index, uint32 timer)
         TimerManager::DelayTimer(index, timer);
     else if (!(*data).second.disabled)
         (*data).second.timer = (*data).second.timer > timer ? (*data).second.timer : timer;
+}
+
+void CombatActions::ReduceTimerBy(uint32 index, uint32 timer)
+{
+    auto data = m_CombatActions.find(index);
+    if (data == m_CombatActions.end())
+        TimerManager::ReduceTimerBy(index, timer);
+    else
+        (*data).second.timer = std::max((*data).second.timer - timer, 0u);
+}
+
+void CombatActions::DelayTimerBy(uint32 index, uint32 timer)
+{
+    auto data = m_CombatActions.find(index);
+    if (data == m_CombatActions.end())
+        TimerManager::DelayTimerBy(index, timer);
+    else if (!(*data).second.disabled)
+        (*data).second.timer = (*data).second.timer + timer;
 }
 
 void CombatActions::ResetIfNotStarted(uint32 index, uint32 timer)
