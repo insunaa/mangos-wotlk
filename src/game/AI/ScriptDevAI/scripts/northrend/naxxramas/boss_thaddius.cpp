@@ -74,7 +74,6 @@ enum
     SPELL_CLEAR_CHARGES             = 63133,                // TODO NYI, cast on death, most likely to remove remaining buffs
 
     // Stalagg & Feugen Spells
-    // SPELL_WARSTOMP                  = 28125,             // Not used in Wotlk Version
     SPELL_MAGNETIC_PULL_A           = 28338,
     SPELL_MAGNETIC_PULL_B           = 54517,                // used by Feugen (wotlk)
     SPELL_MAGNETIC_PULL_EFFECT      = 30010,
@@ -89,7 +88,7 @@ enum
     SPELL_FEUGEN_TESLA_PASSIVE      = 28109,
     SPELL_STALAGG_TESLA_PASSIVE     = 28097,
     SPELL_SHOCK_OVERLOAD            = 28159,
-    //SPELL_SHOCK                     = 28099,
+    SPELL_SHOCK                     = 28099,
     SPELL_TRIGGER_TESLAS            = 28359,
 };
 
@@ -177,6 +176,7 @@ struct boss_thaddiusAI : public BossAI
             if (pStalagg)
                 pStalagg->ForcedDespawn();
         }
+        DoCastSpellIfCan(nullptr, SPELL_CLEAR_CHARGES);
     }
 
     std::chrono::milliseconds GetSubsequentActionTimer(uint32 action)
@@ -535,7 +535,7 @@ struct boss_thaddiusAddsAI : public BossAI
         AddCustomAction(THADDIUS_ADD_REVIVE, 5s, [&](){
             if (auto otherAI = dynamic_cast<boss_thaddiusAddsAI*>(GetOtherAdd()->AI()))
             {
-                if (otherAI->m_isFakingDeath)
+                if (otherAI->IsCountingDead())
                 {
                     otherAI->DisableTimer(THADDIUS_ADD_REVIVE);
                     AddCustomAction(THADDIUS_ADD_SHOCK_OVERLOAD, 14s, [&](){
