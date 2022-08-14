@@ -25,6 +25,7 @@ EndScriptData */
 // - will intro mobs, not sent to center, despawn when phase 2 start?
 // - what happens if raid fail, can they start the event as soon after as they want?
 
+#include "AI/ScriptDevAI/base/CombatAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "naxxramas.h"
 
@@ -88,35 +89,96 @@ enum Phase
     PHASE_GUARDIANS,
 };
 
-struct boss_kelthuzadAI : public ScriptedAI
+enum KelThuzadActions
 {
-    boss_kelthuzadAI(Creature* pCreature) : ScriptedAI(pCreature)
-    {
-        m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+    KELTHUZAD_FROSTBOLT,
+    KELTHUZAD_FROSTBOLT_NOVA,
+    KELTHUZAD_CHAINS,
+    KELTHUZAD_SHADOW_FISSURE,
+    KELTHUZAD_MANA_DETONATION,
+    KELTHUZAD_FROST_BLAST,
+    KELTHUZAD_SUMMON_GUARDIAN,
+    KELTHUZAD_PHASE_GUARDIANS,
+    KELTHUZAD_ACTIONS_MAX,
+    KELTHUZAD_COMBAT_PHASE,
+    KELTHUZAD_SUMMON_INTRO,
+    KELTHUZAD_SUMMON_SOLDIER,
+    KELTHUZAD_SUMMON_WEAVER,
+    KELTHUZAD_SUMMON_ABO,
+};
 
-        m_uiGuardiansCountMax = m_bIsRegularMode ? 2 : 4;
+struct boss_kelthuzadAI : public BossAI
+{
+    boss_kelthuzadAI(Creature* creature) : BossAI(creature, KELTHUZAD_ACTIONS_MAX),
+    m_instance(dynamic_cast<instance_naxxramas*>(creature->GetInstanceData())),
+    m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
+    {
+        SetDataType(TYPE_KELTHUZAD);
+        AddOnKillText(SAY_SLAY1, SAY_SLAY2);
+        AddOnDeathText(SAY_DEATH);
+        AddOnAggroText(SAY_AGGRO1, SAY_AGGRO2, SAY_AGGRO3);
+        AddCombatAction(KELTHUZAD_FROSTBOLT, 1s, 60s);
+        AddCombatAction(KELTHUZAD_FROSTBOLT_NOVA, 15s);
+        AddCombatAction(KELTHUZAD_CHAINS, 30s, 60s);
+        AddCombatAction(KELTHUZAD_MANA_DETONATION, 20s);
+        AddCombatAction(KELTHUZAD_SHADOW_FISSURE, 25s);
+        AddCombatAction(KELTHUZAD_FROST_BLAST, 30s, 60s);
+        AddCombatAction(KELTHUZAD_SUMMON_GUARDIAN, true);
+        AddTimerlessCombatAction(KELTHUZAD_PHASE_GUARDIANS, false);
+        AddCustomAction(KELTHUZAD_COMBAT_PHASE, true, [&]()
+        {
+            SetCombatScriptStatus(false);
+            m_uiPhase = PHASE_NORMAL;
+            DespawnIntroCreatures();
+
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING | UNIT_FLAG_UNINTERACTIBLE);
+            SetCombatMovement(true);
+            m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
+
+            DoScriptText(EMOTE_PHASE2, m_creature);
+
+            BossAI::Aggro();
+        });
+        AddCustomAction(KELTHUZAD_SUMMON_SOLDIER, true, [&]()
+        {
+            if (m_uiSoldierCount >= MAX_SOLDIER_COUNT || m_uiPhase != PHASE_INTRO)
+            {
+                DisableTimer(KELTHUZAD_SUMMON_SOLDIER);
+                return;
+            }
+            SummonMob(NPC_SOLDIER_FROZEN);
+            ResetTimer(KELTHUZAD_SUMMON_SOLDIER, 3s);
+        });
+        AddCustomAction(KELTHUZAD_SUMMON_WEAVER, true, [&]()
+        {
+            if (m_uiBansheeCount >= MAX_BANSHEE_COUNT || m_uiPhase != PHASE_INTRO)
+            {
+                DisableTimer(KELTHUZAD_SUMMON_WEAVER);
+                return;
+            }
+            SummonMob(NPC_SOUL_WEAVER);
+            ResetTimer(KELTHUZAD_SUMMON_WEAVER, 25s);
+        });
+        AddCustomAction(KELTHUZAD_SUMMON_ABO, true, [&]()
+        {
+            if (m_uiAbominationCount >= MAX_ABOMINATION_COUNT || m_uiPhase != PHASE_INTRO)
+            {
+                DisableTimer(KELTHUZAD_SUMMON_ABO);
+                return;
+            }
+            SummonMob(NPC_UNSTOPPABLE_ABOM);
+            ResetTimer(KELTHUZAD_SUMMON_ABO, 3s);
+        });
+        m_uiGuardiansCountMax = m_isRegularMode ? 2 : 4;
         Reset();
     }
 
-    instance_naxxramas* m_pInstance;
-    bool m_bIsRegularMode;
+    instance_naxxramas* m_instance;
+    bool m_isRegularMode;
 
     uint32 m_uiGuardiansCount;
     uint32 m_uiGuardiansCountMax;
-    uint32 m_uiGuardiansTimer;
-    uint32 m_uiLichKingAnswerTimer;
-    uint32 m_uiFrostBoltTimer;
-    uint32 m_uiFrostBoltNovaTimer;
-    uint32 m_uiChainsTimer;
-    uint32 m_uiManaDetonationTimer;
-    uint32 m_uiShadowFissureTimer;
-    uint32 m_uiFrostBlastTimer;
 
-    uint32 m_uiPhase1Timer;
-    uint32 m_uiSoldierTimer;
-    uint32 m_uiBansheeTimer;
-    uint32 m_uiAbominationTimer;
     uint8  m_uiPhase;
     uint32 m_uiSoldierCount;
     uint32 m_uiBansheeCount;
@@ -130,22 +192,10 @@ struct boss_kelthuzadAI : public ScriptedAI
 
     void Reset() override
     {
-        m_uiFrostBoltTimer      = urand(1000, 60000);       // It won't be more than a minute without cast it
-        m_uiFrostBoltNovaTimer  = 15000;                    // Cast every 15 seconds
-        m_uiChainsTimer         = urand(30000, 60000);      // Cast no sooner than once every 30 seconds
-        m_uiManaDetonationTimer = 20000;                    // Seems to cast about every 20 seconds
-        m_uiShadowFissureTimer  = 25000;                    // 25 seconds
-        m_uiFrostBlastTimer     = urand(30000, 60000);      // Random time between 30-60 seconds
-        m_uiGuardiansTimer      = 5000;                     // 5 seconds for summoning each Guardian of Icecrown in phase 3
-        m_uiLichKingAnswerTimer = 4000;
         m_uiGuardiansCount      = 0;
         m_uiSummonIntroTimer    = 0;
         m_uiIntroPackCount      = 0;
 
-        m_uiPhase1Timer         = 228000;                   // Phase 1 lasts "3 minutes and 48 seconds"
-        m_uiSoldierTimer        = 5000;
-        m_uiBansheeTimer        = 5000;
-        m_uiAbominationTimer    = 5000;
         m_uiSoldierCount        = 0;
         m_uiBansheeCount        = 0;
         m_uiAbominationCount    = 0;
@@ -153,6 +203,7 @@ struct boss_kelthuzadAI : public ScriptedAI
         m_uiPhase               = PHASE_INTRO;
 
         // it may be some spell should be used instead, to control the intro phase
+        SetCombatScriptStatus(true);
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING | UNIT_FLAG_UNINTERACTIBLE);
         m_creature->CastStop();
         SetCombatMovement(false);
@@ -172,8 +223,8 @@ struct boss_kelthuzadAI : public ScriptedAI
         DoScriptText(SAY_DEATH, m_creature);
         DespawnAdds();
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_KELTHUZAD, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_KELTHUZAD, DONE);
     }
 
     void JustReachedHome() override
@@ -181,13 +232,31 @@ struct boss_kelthuzadAI : public ScriptedAI
         DespawnIntroCreatures();
         DespawnAdds();
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_KELTHUZAD, NOT_STARTED);
+        if (m_instance)
+            m_instance->SetData(TYPE_KELTHUZAD, NOT_STARTED);
+    }
+
+    void Aggro(Unit* pWho) override
+    {
+        if (m_uiPhase != PHASE_INTRO)
+            return;
+        ResetTimer(KELTHUZAD_COMBAT_PHASE, 3min + 48s);
+        DoScriptText(SAY_SUMMON_MINIONS, m_creature);
+        DoCastSpellIfCan(nullptr, SPELL_CHANNEL_VISUAL);
+        AddCustomAction(KELTHUZAD_SUMMON_INTRO, 2s, [&](){
+            SummonIntroCreatures(m_uiIntroPackCount);
+            ++m_uiIntroPackCount;
+            if (m_uiIntroPackCount < 8)
+                ResetTimer(KELTHUZAD_SUMMON_INTRO, 2s);
+        });
+        ResetTimer(KELTHUZAD_SUMMON_SOLDIER, 5s);
+        ResetTimer(KELTHUZAD_SUMMON_WEAVER, 5s);
+        ResetTimer(KELTHUZAD_SUMMON_ABO, 5s);
     }
 
     void MoveInLineOfSight(Unit* pWho) override
     {
-        if (m_pInstance && m_pInstance->GetData(TYPE_KELTHUZAD) != IN_PROGRESS)
+        if (m_instance && m_instance->GetData(TYPE_KELTHUZAD) != IN_PROGRESS)
             return;
 
         ScriptedAI::MoveInLineOfSight(pWho);
@@ -195,11 +264,11 @@ struct boss_kelthuzadAI : public ScriptedAI
 
     void DespawnIntroCreatures()
     {
-        if (m_pInstance)
+        if (m_instance)
         {
             for (auto itr : m_lIntroMobsSet)
             {
-                if (Creature* pCreature = m_pInstance->instance->GetCreature(itr))
+                if (Creature* pCreature = m_instance->instance->GetCreature(itr))
                     pCreature->ForcedDespawn();
             }
         }
@@ -209,11 +278,11 @@ struct boss_kelthuzadAI : public ScriptedAI
 
     void DespawnAdds()
     {
-        if (m_pInstance)
+        if (m_instance)
         {
             for (auto itr : m_lAddsSet)
             {
-                if (Creature* pCreature = m_pInstance->instance->GetCreature(itr))
+                if (Creature* pCreature = m_instance->instance->GetCreature(itr))
                 {
                     if (pCreature->IsAlive())
                     {
@@ -245,13 +314,13 @@ struct boss_kelthuzadAI : public ScriptedAI
 
     void SummonIntroCreatures(uint32 packId)
     {
-        if (!m_pInstance)
+        if (!m_instance)
             return;
 
         float fAngle = GetLocationAngle(packId + 1);
 
         float fX, fY, fZ;
-        m_pInstance->GetChamberCenterCoords(fX, fY, fZ);
+        m_instance->GetChamberCenterCoords(fX, fY, fZ);
 
         fX += M_F_RANGE * cos(fAngle);
         fY += M_F_RANGE * sin(fAngle);
@@ -281,13 +350,13 @@ struct boss_kelthuzadAI : public ScriptedAI
 
     void SummonMob(uint32 uiType)
     {
-        if (!m_pInstance)
+        if (!m_instance)
             return;
 
         float fAngle = GetLocationAngle(urand(1, 7));
 
         float fX, fY, fZ;
-        m_pInstance->GetChamberCenterCoords(fX, fY, fZ);
+        m_instance->GetChamberCenterCoords(fX, fY, fZ);
 
         fX += M_F_RANGE * cos(fAngle);
         fY += M_F_RANGE * sin(fAngle);
@@ -323,10 +392,10 @@ struct boss_kelthuzadAI : public ScriptedAI
                 {
                     m_lAddsSet.insert(pSummoned->GetObjectGuid());
 
-                    if (m_pInstance)
+                    if (m_instance)
                     {
                         float fX, fY, fZ;
-                        m_pInstance->GetChamberCenterCoords(fX, fY, fZ);
+                        m_instance->GetChamberCenterCoords(fX, fY, fZ);
                         pSummoned->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
                     }
                 }
@@ -350,7 +419,7 @@ struct boss_kelthuzadAI : public ScriptedAI
 
                 ++m_uiKilledAbomination;
                 if (m_uiKilledAbomination >= ACHIEV_REQ_KILLED_ABOMINATIONS)
-                    m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_GET_ENOUGH, true);
+                    m_instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_GET_ENOUGH, true);
 
                 break;
         }
@@ -362,112 +431,48 @@ struct boss_kelthuzadAI : public ScriptedAI
             pSummoned->SetInCombatWithZone();
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    std::chrono::milliseconds GetSubsequentActionTimer(uint32 action)
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (!m_pInstance || m_pInstance->GetData(TYPE_KELTHUZAD) != IN_PROGRESS)
-            return;
-
-        if (m_uiPhase == PHASE_INTRO)
+        switch (action)
         {
-            if (m_uiIntroPackCount < 7)
-            {
-                if (m_uiSummonIntroTimer < uiDiff)
-                {
-                    if (!m_uiIntroPackCount)
-                    {
-                        DoScriptText(SAY_SUMMON_MINIONS, m_creature);
-                        DoCastSpellIfCan(nullptr, SPELL_CHANNEL_VISUAL);
-                    }
-
-                    SummonIntroCreatures(m_uiIntroPackCount);
-                    ++m_uiIntroPackCount;
-                    m_uiSummonIntroTimer = 2000;
-                }
-                else
-                    m_uiSummonIntroTimer -= uiDiff;
-            }
-            else
-            {
-                if (m_uiPhase1Timer < uiDiff)
-                {
-                    m_uiPhase = PHASE_NORMAL;
-                    DespawnIntroCreatures();
-
-                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING | UNIT_FLAG_UNINTERACTIBLE);
-                    SetCombatMovement(true);
-                    m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
-
-                    DoScriptText(EMOTE_PHASE2, m_creature);
-
-                    switch (urand(0, 2))
-                    {
-                        case 0: DoScriptText(SAY_AGGRO1, m_creature); break;
-                        case 1: DoScriptText(SAY_AGGRO2, m_creature); break;
-                        case 2: DoScriptText(SAY_AGGRO3, m_creature); break;
-                    }
-                }
-                else
-                    m_uiPhase1Timer -= uiDiff;
-
-                if (m_uiSoldierCount < MAX_SOLDIER_COUNT)
-                {
-                    if (m_uiSoldierTimer < uiDiff)
-                    {
-                        SummonMob(NPC_SOLDIER_FROZEN);
-                        ++m_uiSoldierCount;
-                        m_uiSoldierTimer = 3000;
-                    }
-                    else
-                        m_uiSoldierTimer -= uiDiff;
-                }
-
-                if (m_uiAbominationCount < MAX_ABOMINATION_COUNT)
-                {
-                    if (m_uiAbominationTimer < uiDiff)
-                    {
-                        SummonMob(NPC_UNSTOPPABLE_ABOM);
-                        ++m_uiAbominationCount;
-                        m_uiAbominationTimer = 25000;
-                    }
-                    else
-                        m_uiAbominationTimer -= uiDiff;
-                }
-
-                if (m_uiBansheeCount < MAX_BANSHEE_COUNT)
-                {
-                    if (m_uiBansheeTimer < uiDiff)
-                    {
-                        SummonMob(NPC_SOUL_WEAVER);
-                        ++m_uiBansheeCount;
-                        m_uiBansheeTimer = 25000;
-                    }
-                    else
-                        m_uiBansheeTimer -= uiDiff;
-                }
-            }
+            case KELTHUZAD_FROSTBOLT: return RandomTimer(1s, 60s);
+            case KELTHUZAD_FROSTBOLT_NOVA: return 15s;
+            case KELTHUZAD_MANA_DETONATION: return 20s;
+            case KELTHUZAD_SHADOW_FISSURE: return 25s;
+            case KELTHUZAD_FROST_BLAST: return RandomTimer(30s, 60s);
+            case KELTHUZAD_CHAINS: return RandomTimer(30s, 60s);
+            case KELTHUZAD_SUMMON_GUARDIAN: return 5s;
+            default: return 0s;
         }
-        else // normal or guardian phase
+    }
+
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
         {
-            if (m_uiFrostBoltTimer < uiDiff)
+            case KELTHUZAD_PHASE_GUARDIANS:
             {
-                if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_FROST_BOLT : SPELL_FROST_BOLT_H) == CAST_OK)
-                    m_uiFrostBoltTimer = urand(1000, 60000);
+                if (m_creature->GetHealthPercent() < 45.0f)
+                {
+                    ResetCombatAction(KELTHUZAD_SUMMON_GUARDIAN, GetSubsequentActionTimer(KELTHUZAD_SUMMON_GUARDIAN));
+                    DoScriptText(SAY_REQUEST_AID, m_creature);
+                    DisableCombatAction(action);
+                }
+                return;
             }
-            else
-                m_uiFrostBoltTimer -= uiDiff;
-
-            if (m_uiFrostBoltNovaTimer < uiDiff)
+            case KELTHUZAD_FROSTBOLT:
             {
-                if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_FROST_BOLT_NOVA : SPELL_FROST_BOLT_NOVA_H) == CAST_OK)
-                    m_uiFrostBoltNovaTimer = 15000;
+                if (DoCastSpellIfCan(m_creature->GetVictim(), m_isRegularMode ? SPELL_FROST_BOLT : SPELL_FROST_BOLT_H) == CAST_OK)
+                    break;
+                return;
             }
-            else
-                m_uiFrostBoltNovaTimer -= uiDiff;
-
-            if (m_uiManaDetonationTimer < uiDiff)
+            case KELTHUZAD_FROSTBOLT_NOVA:
+            {
+                if (DoCastSpellIfCan(m_creature->GetVictim(), m_isRegularMode ? SPELL_FROST_BOLT_NOVA : SPELL_FROST_BOLT_NOVA_H) == CAST_OK)
+                    break;
+                return;
+            }
+            case KELTHUZAD_MANA_DETONATION:
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_MANA_DETONATION, SELECT_FLAG_PLAYER | SELECT_FLAG_POWER_MANA))
                 {
@@ -476,14 +481,12 @@ struct boss_kelthuzadAI : public ScriptedAI
                         if (urand(0, 1))
                             DoScriptText(SAY_SPECIAL1_MANA_DET, m_creature);
 
-                        m_uiManaDetonationTimer = 20000;
+                        break;
                     }
                 }
+                return;
             }
-            else
-                m_uiManaDetonationTimer -= uiDiff;
-
-            if (m_uiShadowFissureTimer < uiDiff)
+            case KELTHUZAD_SHADOW_FISSURE:
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
@@ -492,87 +495,56 @@ struct boss_kelthuzadAI : public ScriptedAI
                         if (urand(0, 1))
                             DoScriptText(SAY_SPECIAL3_MANA_DET, m_creature);
 
-                        m_uiShadowFissureTimer = 25000;
+                        break;
                     }
                 }
+                return;
             }
-            else
-                m_uiShadowFissureTimer -= uiDiff;
-
-            if (m_uiFrostBlastTimer < uiDiff)
+            case KELTHUZAD_FROST_BLAST:
             {
                 if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FROST_BLAST) == CAST_OK)
                 {
                     if (urand(0, 1))
                         DoScriptText(SAY_FROST_BLAST, m_creature);
 
-                    m_uiFrostBlastTimer = urand(30000, 60000);
+                    break;
                 }
+                return;
             }
-            else
-                m_uiFrostBlastTimer -= uiDiff;
-
-            if (!m_bIsRegularMode)
+            case KELTHUZAD_CHAINS:
             {
-                if (m_uiChainsTimer < uiDiff)
+                if (m_isRegularMode)
                 {
-                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CHAINS_OF_KELTHUZAD) == CAST_OK)
-                    {
-                        DoScriptText(urand(0, 1) ? SAY_CHAIN1 : SAY_CHAIN2, m_creature);
-
-                        m_uiChainsTimer = urand(30000, 60000);
-                    }
+                    DisableCombatAction(action);
+                    return;
                 }
-                else
-                    m_uiChainsTimer -= uiDiff;
-            }
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CHAINS_OF_KELTHUZAD) == CAST_OK)
+                {
+                    DoScriptText(urand(0, 1) ? SAY_CHAIN1 : SAY_CHAIN2, m_creature);
 
-            if (m_uiPhase == PHASE_NORMAL)
+                    break;
+                }
+                return;
+            }
+            case KELTHUZAD_SUMMON_GUARDIAN:
             {
-                if (m_creature->GetHealthPercent() < 45.0f)
+                if (m_uiGuardiansCount >= m_uiGuardiansCountMax)
                 {
-                    m_uiPhase = PHASE_GUARDIANS;
-                    DoScriptText(SAY_REQUEST_AID, m_creature);
+                    DisableCombatAction(action);
+                    return;
                 }
+                SummonMob(NPC_GUARDIAN);
+                break;
             }
-            else if (m_uiPhase == PHASE_GUARDIANS && m_uiGuardiansCount < m_uiGuardiansCountMax)
-            {
-                if (m_uiGuardiansTimer < uiDiff)
-                {
-                    // Summon a Guardian of Icecrown in a random alcove
-                    SummonMob(NPC_GUARDIAN);
-                    m_uiGuardiansTimer = 5000;
-                }
-                else
-                    m_uiGuardiansTimer -= uiDiff;
-
-                if (m_uiLichKingAnswerTimer && m_pInstance)
-                {
-                    if (m_uiLichKingAnswerTimer <= uiDiff)
-                    {
-                        if (Creature* pLichKing = m_pInstance->GetSingleCreatureFromStorage(NPC_THE_LICHKING))
-                            DoScriptText(SAY_ANSWER_REQUEST, pLichKing);
-                        m_uiLichKingAnswerTimer = 0;
-                    }
-                    else
-                        m_uiLichKingAnswerTimer -= uiDiff;
-                }
-            }
-
-            DoMeleeAttackIfReady();
         }
+        ResetCombatAction(action, GetSubsequentActionTimer(action));
     }
 };
-
-UnitAI* GetAI_boss_kelthuzad(Creature* pCreature)
-{
-    return new boss_kelthuzadAI(pCreature);
-}
 
 void AddSC_boss_kelthuzad()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_kelthuzad";
-    pNewScript->GetAI = &GetAI_boss_kelthuzad;
+    pNewScript->GetAI = &GetNewAIInstance<boss_kelthuzadAI>;
     pNewScript->RegisterSelf();
 }
