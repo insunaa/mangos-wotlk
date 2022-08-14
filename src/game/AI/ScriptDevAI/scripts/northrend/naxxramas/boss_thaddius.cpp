@@ -266,25 +266,28 @@ bool EffectDummyNPC_spell_thaddius_encounter(Unit* /*pCaster*/, uint32 uiSpellId
 ** npc_tesla_coil
 ************/
 
+enum TeslaCoilActions
+{
+    TESLA_COIL_SETUP_CHAIN,
+};
+
 struct npc_tesla_coilAI : public Scripted_NoMovementAI
 {
-    npc_tesla_coilAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+    npc_tesla_coilAI(Creature* creature) : Scripted_NoMovementAI(creature),
+    m_instance(dynamic_cast<instance_naxxramas*>(creature->GetInstanceData()))
     {
-        m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
-        m_uiSetupTimer = 1 * IN_MILLISECONDS;
-        m_uiOverloadTimer = 0;
-        m_bReapply = false;
         Reset();
     }
 
-    instance_naxxramas* m_pInstance;
+    instance_naxxramas* m_instance;
     bool m_bToFeugen;
-    bool m_bReapply;
 
-    uint32 m_uiSetupTimer;
-    uint32 m_uiOverloadTimer;
-
-    void Reset() override {}
+    void Reset() override {
+        AddCustomAction(TESLA_COIL_SETUP_CHAIN, 1s, [&](){
+            if (!SetupChain())
+                ResetTimer(TESLA_COIL_SETUP_CHAIN, 1s);
+        });
+    }
     void MoveInLineOfSight(Unit* /*pWho*/) override {}
 
     void Aggro(Unit* /*pWho*/) override
@@ -303,11 +306,11 @@ struct npc_tesla_coilAI : public Scripted_NoMovementAI
     bool SetupChain()
     {
         // Check, if instance_ script failed or encounter finished
-        if (!m_pInstance || m_pInstance->GetData(TYPE_THADDIUS) == DONE)
+        if (!m_instance || m_instance->GetData(TYPE_THADDIUS) == DONE)
             return true;
 
-        GameObject* pNoxTeslaFeugen  = m_pInstance->GetSingleGameObjectFromStorage(GO_CONS_NOX_TESLA_FEUGEN);
-        GameObject* pNoxTeslaStalagg = m_pInstance->GetSingleGameObjectFromStorage(GO_CONS_NOX_TESLA_STALAGG);
+        GameObject* pNoxTeslaFeugen  = m_instance->GetSingleGameObjectFromStorage(GO_CONS_NOX_TESLA_FEUGEN);
+        GameObject* pNoxTeslaStalagg = m_instance->GetSingleGameObjectFromStorage(GO_CONS_NOX_TESLA_STALAGG);
 
         // Try again, till Tesla GOs are spawned
         if (!pNoxTeslaFeugen || !pNoxTeslaStalagg)
@@ -320,63 +323,7 @@ struct npc_tesla_coilAI : public Scripted_NoMovementAI
 
     void ReApplyChain(uint32 uiEntry)
     {
-        if (uiEntry)                                        // called from Stalagg/Feugen with their entry
-        {
-            // Only apply chain to own add
-            if ((uiEntry == NPC_FEUGEN && !m_bToFeugen) || (uiEntry == NPC_STALAGG && m_bToFeugen))
-                return;
-
-            m_bReapply = true;                              // Reapply Chains on next tick
-        }
-        else                                                // if called from next tick, needed because otherwise the spell doesn't bind
-        {
-            m_bReapply = false;
-            m_creature->InterruptNonMeleeSpells(true);
-            GameObject* pGo = m_pInstance->GetSingleGameObjectFromStorage(m_bToFeugen ? GO_CONS_NOX_TESLA_FEUGEN : GO_CONS_NOX_TESLA_STALAGG);
-
-            if (pGo && pGo->GetGoType() == GAMEOBJECT_TYPE_BUTTON && pGo->GetLootState() == GO_ACTIVATED)
-                pGo->ResetDoorOrButton();
-
-            DoCastSpellIfCan(m_creature, m_bToFeugen ? SPELL_FEUGEN_CHAIN : SPELL_STALAGG_CHAIN);
-        }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        m_creature->SelectHostileTarget();
-
-        if (!m_uiOverloadTimer && !m_uiSetupTimer && !m_bReapply)
-            return;                                         // Nothing to do this tick
-
-        if (m_uiSetupTimer)
-        {
-            if (m_uiSetupTimer <= uiDiff)
-            {
-                if (SetupChain())
-                    m_uiSetupTimer = 0;
-                else
-                    m_uiSetupTimer = 5 * IN_MILLISECONDS;
-            }
-            else
-                m_uiSetupTimer -= uiDiff;
-        }
-
-        if (m_uiOverloadTimer)
-        {
-            if (m_uiOverloadTimer <=  uiDiff)
-            {
-                m_uiOverloadTimer = 0;
-                m_creature->RemoveAurasDueToSpell(m_bToFeugen ? SPELL_FEUGEN_TESLA_PASSIVE : SPELL_STALAGG_TESLA_PASSIVE);
-                DoCastSpellIfCan(m_creature,  SPELL_SHOCK_OVERLOAD, CAST_INTERRUPT_PREVIOUS);
-                DoScriptText(EMOTE_TESLA_OVERLOAD, m_creature);
-                m_pInstance->DoUseDoorOrButton(m_bToFeugen ? GO_CONS_NOX_TESLA_FEUGEN : GO_CONS_NOX_TESLA_STALAGG);
-            }
-            else
-                m_uiOverloadTimer -= uiDiff;
-        }
-
-        if (m_bReapply)
-            ReApplyChain(0);
+        DoCastSpellIfCan(m_creature, m_bToFeugen ? SPELL_FEUGEN_TESLA_PASSIVE : SPELL_STALAGG_TESLA_PASSIVE);
     }
 };
 
