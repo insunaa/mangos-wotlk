@@ -283,8 +283,6 @@ struct npc_tesla_coilAI : public Scripted_NoMovementAI
     bool m_bToFeugen;
 
     void Reset() override {
-        if (!m_instance || m_instance->GetData(TYPE_THADDIUS) == DONE)
-            return;
         AddCustomAction(TESLA_COIL_SETUP_CHAIN, 1s, [&](){
             if (!SetupChain())
                 ResetTimer(TESLA_COIL_SETUP_CHAIN, 1s);
@@ -320,12 +318,17 @@ struct npc_tesla_coilAI : public Scripted_NoMovementAI
 
         m_bToFeugen = m_creature->GetDistanceOrder(pNoxTeslaFeugen, pNoxTeslaStalagg);
 
-        return DoCastSpellIfCan(m_creature, m_bToFeugen ? SPELL_FEUGEN_CHAIN : SPELL_STALAGG_CHAIN) == CAST_OK;
+        return ReApplyChain(m_bToFeugen ? NPC_FEUGEN : NPC_STALAGG);
+        /*
+        if (auto* add = m_instance->GetSingleCreatureFromStorage(m_bToFeugen ? NPC_FEUGEN : NPC_STALAGG))
+            return DoCastSpellIfCan(add, m_bToFeugen ? SPELL_FEUGEN_CHAIN : SPELL_STALAGG_CHAIN) == CAST_OK;
+        return false;
+        */
     }
 
-    void ReApplyChain(uint32 uiEntry)
+    bool ReApplyChain(uint32 uiEntry)
     {
-        DoCastSpellIfCan(m_creature, m_bToFeugen ? SPELL_FEUGEN_TESLA_PASSIVE : SPELL_STALAGG_TESLA_PASSIVE);
+        return DoCastSpellIfCan(m_creature, m_bToFeugen ? SPELL_FEUGEN_TESLA_PASSIVE : SPELL_STALAGG_TESLA_PASSIVE);
     }
 };
 
