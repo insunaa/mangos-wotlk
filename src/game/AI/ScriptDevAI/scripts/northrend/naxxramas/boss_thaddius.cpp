@@ -421,6 +421,7 @@ struct boss_thaddiusAddsAI : public BossAI
         m_creature->SetHealth(m_creature->GetMaxHealth());
         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
         SetDeathPrevention(true);
+        SetCombatScriptStatus(false);
     }
 
     Creature* GetOtherAdd() const
@@ -494,6 +495,7 @@ struct boss_thaddiusAddsAI : public BossAI
 
     void Revive()
     {
+        SetCombatScriptStatus(false);
         DoResetThreat();
         PauseCombatMovement();
         Reset();
@@ -531,6 +533,7 @@ struct boss_thaddiusAddsAI : public BossAI
         m_creature->GetMotionMaster()->Clear();
         m_creature->GetMotionMaster()->MoveIdle();
         m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
+        SetCombatScriptStatus(true);
 
         JustDied(attacker);                                  // Texts
         AddCustomAction(THADDIUS_ADD_REVIVE, 5s, [&](){
