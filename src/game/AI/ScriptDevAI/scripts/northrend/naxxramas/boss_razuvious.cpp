@@ -167,6 +167,7 @@ bool NpcSpellClick_npc_obedienceCrystal(Player* pPlayer, Creature* pClickedCreat
             if (understudy->GetCharmer() && understudy->GetCharmer()->GetObjectGuid() == pPlayer->GetObjectGuid())
                 pClickedCreature->CastSpell(understudy, SPELL_OBEDIENCE_CHAINS, TRIGGERED_OLD_TRIGGERED);
         }
+        pClickedCreature->RemoveAllCooldowns();
         return true;
     }
 
@@ -193,6 +194,7 @@ struct ForcedObedience : public AuraScript, public SpellScript
         {
             if (aura->GetId() == SPELL_FORCED_OBEDIENCE)
             {
+                aura->GetTarget()->RemoveAurasDueToSpell(SPELL_OBEDIENCE_CHAINS);
                 aura->GetCaster()->InterruptSpellsCastedOnMe();
                 aura->GetTarget()->InterruptNonMeleeSpells(true);
                 //aura->GetTarget()->RemoveAllCooldowns();
