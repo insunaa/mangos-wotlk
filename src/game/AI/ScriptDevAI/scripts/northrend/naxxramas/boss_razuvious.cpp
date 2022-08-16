@@ -195,7 +195,8 @@ struct ForcedObedience : public AuraScript, public SpellScript
             {
                 aura->GetCaster()->InterruptSpellsCastedOnMe();
                 aura->GetTarget()->InterruptNonMeleeSpells(true);
-                aura->GetTarget()->RemoveAllCooldowns();
+                //aura->GetTarget()->RemoveAllCooldowns();
+                sLog.outError("Caster: %s, Target: %s", aura->GetCaster()->GetName(), aura->GetTarget()->GetName());
             }
         }
     }
