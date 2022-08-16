@@ -193,9 +193,9 @@ struct ForcedObedience : public AuraScript, public SpellScript
         {
             if (aura->GetId() == SPELL_FORCED_OBEDIENCE)
             {
-                aura->GetTarget()->InterruptSpellsCastedOnMe();
-                aura->GetCaster()->InterruptNonMeleeSpells(true);
-                aura->GetCaster()->RemoveAllCooldowns();
+                aura->GetCaster()->InterruptSpellsCastedOnMe();
+                aura->GetTarget()->InterruptNonMeleeSpells(true);
+                aura->GetTarget()->RemoveAllCooldowns();
             }
         }
     }
