@@ -190,8 +190,12 @@ struct ForcedObedience : public AuraScript, public SpellScript
     void OnApply(Aura* aura, bool apply) const override
     {
         if (!apply)
+        {
+            sLog.outError("Aura Unapplied");
             if (aura->GetId() == SPELL_FORCED_OBEDIENCE)
                 aura->GetTarget()->InterruptSpellsCastedOnMe();
+            aura->GetCaster()->InterruptNonMeleeSpells(true);
+        }
     }
 };
 
