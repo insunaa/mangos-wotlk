@@ -191,10 +191,12 @@ struct ForcedObedience : public AuraScript, public SpellScript
     {
         if (!apply)
         {
-            sLog.outError("Aura Unapplied");
             if (aura->GetId() == SPELL_FORCED_OBEDIENCE)
+            {
                 aura->GetTarget()->InterruptSpellsCastedOnMe();
-            aura->GetCaster()->InterruptNonMeleeSpells(true);
+                aura->GetCaster()->InterruptNonMeleeSpells(true);
+                aura->GetCaster()->RemoveAllCooldowns();
+            }
         }
     }
 };
