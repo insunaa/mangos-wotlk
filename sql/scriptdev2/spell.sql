@@ -523,6 +523,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (28089,'spell_thaddius_polarity_shift'),
 (28728,'spell_feigh_death_pos_aura'),
 (28404,'spell_zombie_chow_search_instakill_aoe'),
+(28798,'spell_widows_embrace'),
+(54100,'spell_widows_embrace'),
 (41253,'spell_greater_invisibility_mob'),
 (42672,'spell_frost_tomb_aura'),
 (42793,'spell_burn_body'),

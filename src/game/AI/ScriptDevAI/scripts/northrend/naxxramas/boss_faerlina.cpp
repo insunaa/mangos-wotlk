@@ -159,10 +159,34 @@ struct boss_faerlinaAI : public BossAI
     }
 };
 
+struct WidowsEmbrace : public AuraScript, public SpellScript
+{
+    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex idx) const override
+    {
+        if (idx == EFFECT_INDEX_0)
+            return true;
+        if (target->GetEntry() == NPC_FAERLINA)
+            return true;
+        return false;
+    }
+
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (Creature* target = dynamic_cast<Creature*>(aura->GetTarget()))
+        {
+            bool isRegularDifficulty = target->GetMap()->IsRegularDifficulty();
+            target->LockOutSpells(SPELL_SCHOOL_MASK_NATURE, aura->GetAuraDuration());
+            target->RemoveAurasDueToSpell(isRegularDifficulty ? SPELL_ENRAGE : SPELL_ENRAGE_H);
+        }
+    }
+};
+
 void AddSC_boss_faerlina()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_faerlina";
     pNewScript->GetAI = &GetNewAIInstance<boss_faerlinaAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<WidowsEmbrace>("spell_widows_embrace");
 }
