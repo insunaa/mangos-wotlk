@@ -178,11 +178,7 @@ struct WidowsEmbrace : public AuraScript, public SpellScript
         if (Creature* target = dynamic_cast<Creature*>(aura->GetTarget()))
         {
             bool isRegularDifficulty = target->GetMap()->IsRegularDifficulty();
-            const SpellEntry* enrage = GetSpellEntryByDifficulty(SPELL_ENRAGE, target->GetMap()->GetDifficulty(), true);
-            target->AddCooldown(*enrage, nullptr, false, 30 * IN_MILLISECONDS);
-            const SpellEntry* poison = GetSpellEntryByDifficulty(SPELL_POISONBOLT_VOLLEY, target->GetMap()->GetDifficulty(), true);
-            target->AddCooldown(*poison, nullptr, false, 30 * IN_MILLISECONDS);
-            //target->LockOutSpells(SPELL_SCHOOL_MASK_NATURE, aura->GetAuraDuration());
+            target->LockOutSpells(SPELL_SCHOOL_MASK_NATURE, aura->GetAuraDuration());
             target->RemoveAurasDueToSpell(isRegularDifficulty ? SPELL_ENRAGE : SPELL_ENRAGE_H);
         }
     }
