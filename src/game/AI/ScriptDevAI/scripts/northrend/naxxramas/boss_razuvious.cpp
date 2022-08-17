@@ -191,16 +191,8 @@ struct ForcedObedience : public AuraScript, public SpellScript
     void OnApply(Aura* aura, bool apply) const override
     {
         if (!apply)
-        {
             if (aura->GetId() == SPELL_FORCED_OBEDIENCE)
-            {
                 aura->GetTarget()->RemoveAurasDueToSpell(SPELL_OBEDIENCE_CHAINS);
-                aura->GetCaster()->InterruptSpellsCastedOnMe();
-                aura->GetTarget()->InterruptNonMeleeSpells(true);
-                //aura->GetTarget()->RemoveAllCooldowns();
-                sLog.outError("Caster: %s, Target: %s", aura->GetCaster()->GetName(), aura->GetTarget()->GetName());
-            }
-        }
     }
 };
 
