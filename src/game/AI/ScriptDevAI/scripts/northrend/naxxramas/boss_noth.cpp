@@ -159,6 +159,7 @@ struct boss_nothAI : public BossAI
         m_creature->ForcedDespawn();
         m_creature->SetRespawnDelay(10 * IN_MILLISECONDS, true);
         m_creature->Respawn();
+        JustReachedHome();
     }
 
     void JustSummoned(Creature* summoned) override
@@ -167,10 +168,10 @@ struct boss_nothAI : public BossAI
             summoned->CastSpell(summoned, 384152, TRIGGERED_OLD_TRIGGERED);
         const ObjectGuid& summonedGuid = summoned->GetObjectGuid();
         Map* creatureMap = summoned->GetMap();
-        summoned->AI()->AddCustomAction(0, 3s, [summonedGuid, creatureMap]()
+        summoned->AI()->AddCustomAction(0, 3s, [summoned]()
         {
-            if (Creature* creature = creatureMap->GetCreature(summonedGuid))
-                creature->AI()->ClearSelfRoot();
+            if (summoned && summoned->AI())
+                summoned->AI()->ClearSelfRoot();
         });
         summoned->AI()->SetRootSelf(true);
         summoned->SetInCombatWithZone();
