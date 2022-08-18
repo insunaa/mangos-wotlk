@@ -121,7 +121,6 @@ struct WidowsEmbrace : public AuraScript, public SpellScript
         {
             DoBroadcastText(EMOTE_WIDOWS_EMBRACE, target);
             bool isRegularDifficulty = target->GetMap()->IsRegularDifficulty();
-            target->LockOutSpells(SPELL_SCHOOL_MASK_NATURE, aura->GetAuraDuration());
             target->AddCooldown(*(aura->GetSpellProto()));
             target->RemoveAurasDueToSpell(isRegularDifficulty ? SPELL_ENRAGE : SPELL_ENRAGE_H);
         }
