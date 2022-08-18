@@ -112,6 +112,7 @@ void BossAI::JustDied(Unit* killer)
         return;
     if (ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
         instance->SetData(m_instanceDataType, DONE);
+    CombatAI::JustDied(killer);
 }
 
 void BossAI::JustReachedHome()
@@ -120,6 +121,7 @@ void BossAI::JustReachedHome()
         return;
     if (ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
         instance->SetData(m_instanceDataType, FAIL);
+    CombatAI::JustReachedHome();
 }
 
 void BossAI::Aggro(Unit* who)
@@ -132,4 +134,5 @@ void BossAI::Aggro(Unit* who)
         return;
     if (ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
         instance->SetData(m_instanceDataType, IN_PROGRESS);
+    CombatAI::Aggro(who);
 }
