@@ -87,6 +87,12 @@ struct boss_faerlinaAI : public BossAI
         });
     }
 
+    void Reset() override
+    {
+        BossAI::Reset();
+        m_creature->SetSpellList(SPELLSET_NORMAL);
+    }
+
     void MoveInLineOfSight(Unit* pWho) override
     {
         if (!m_hasTaunted && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 80.0f) &&  m_creature->IsWithinLOSInMap(pWho))
