@@ -48,21 +48,16 @@ enum
     SPELL_OBEDIENCE_CHAINS   = 55520,
     
     SPELL_TAUNT              = 29060,
+
+    SPELLSET_10N             = 1606101,
+    SPELLSET_25N             = 2835701,
 };
 
 static const float resetZ = 285.0f;         // Above this altitude, Razuvious is outside his combat area (in the stairs) and should reset (leashing)
 
-enum RazuviousActions
-{
-    RAZUVIOUS_UNBALANCING_STRIKE,
-    RAZUVIOUS_DISRUPTING_SHOUT,
-    RAZUVIOUS_JAGGED_KNIFE,
-    RAZUVIOUS_MAX_ACTIONS
-};
-
 struct boss_razuviousAI : public BossAI
 {
-    boss_razuviousAI(Creature* creature) : BossAI(creature, RAZUVIOUS_MAX_ACTIONS),
+    boss_razuviousAI(Creature* creature) : BossAI(creature, 0),
     m_instance (static_cast<instance_naxxramas*>(creature->GetInstanceData())),
     m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
@@ -71,13 +66,15 @@ struct boss_razuviousAI : public BossAI
         AddOnKillText(SAY_SLAY1, SAY_SLAY2);
         AddOnAggroText(SAY_AGGRO1, SAY_AGGRO2, SAY_AGGRO3, SAY_AGGRO4);
         AddOnDeathText(SAY_DEATH);
-        AddCombatAction(RAZUVIOUS_UNBALANCING_STRIKE, 30s);
-        AddCombatAction(RAZUVIOUS_DISRUPTING_SHOUT, 15s);
-        AddCombatAction(RAZUVIOUS_JAGGED_KNIFE, 10s, 15s);
     }
 
     instance_naxxramas* m_instance;
     bool m_isRegularMode;
+
+    void Reset() override
+    {
+        m_creature->SetSpellList(m_isRegularMode ? SPELLSET_10N : SPELLSET_25N);
+    }
 
     void JustDied(Unit* /*pKiller*/) override
     {
@@ -97,43 +94,6 @@ struct boss_razuviousAI : public BossAI
                 case 2: DoBroadcastText(SAY_COMMAND3, m_creature); break;
             }
         }
-    }
-
-    std::chrono::milliseconds GetSubsequentActionTimer(uint32 action)
-    {
-        switch (action)
-        {
-            case RAZUVIOUS_UNBALANCING_STRIKE: return 30s;
-            case RAZUVIOUS_DISRUPTING_SHOUT: return 25s;
-            case RAZUVIOUS_JAGGED_KNIFE: return 10s;
-        }
-        return 0s;
-    }
-
-    void ExecuteAction(uint32 action) override
-    {
-        switch (action)
-        {
-            case RAZUVIOUS_UNBALANCING_STRIKE:
-                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_UNBALANCING_STRIKE) == CAST_OK)
-                    break;
-                return;
-            case RAZUVIOUS_DISRUPTING_SHOUT:
-                if (DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_DISRUPTING_SHOUT : SPELL_DISRUPTING_SHOUT_H) == CAST_OK)
-                {
-                    DoBroadcastText(EMOTE_TRIUMPH, m_creature);
-                    break;
-                }
-                return;
-            case RAZUVIOUS_JAGGED_KNIFE:
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                {
-                    if (DoCastSpellIfCan(pTarget, SPELL_JAGGED_KNIFE) == CAST_OK)
-                        break;
-                }
-                return;
-        }
-        ResetCombatAction(action, GetSubsequentActionTimer(action));
     }
 };
 
