@@ -67,6 +67,11 @@ struct boss_faerlinaAI : public BossAI
         AddOnAggroText(SAY_AGGRO_1, SAY_AGGRO_2, SAY_AGGRO_3, SAY_AGGRO_4);
         AddOnKillText(SAY_SLAY_1, SAY_SLAY_2);
         AddOnDeathText(SAY_DEATH);
+        AddCustomAction(FAERLINA_CATEGORY_CD, true, [&]()
+        {
+            if (m_creature)
+                m_creature->RemoveSpellCategoryCooldown(FAERLINA_ENRAGE_CATEGORY);
+        });
     }
 
     instance_naxxramas* m_instance;
@@ -122,10 +127,7 @@ struct WidowsEmbrace : public AuraScript, public SpellScript
             target->AddCooldown(*(aura->GetSpellProto()));
             if (!target->HasAura(isRegularDifficulty ? SPELL_ENRAGE : SPELL_ENRAGE_H))
             {
-                target->AI()->AddCustomAction(FAERLINA_CATEGORY_CD, 30s, [target](){
-                    if (target)
-                        target->RemoveSpellCategoryCooldown(FAERLINA_ENRAGE_CATEGORY);
-                });
+                target->AI()->ResetTimer(FAERLINA_ENRAGE_CATEGORY, 30s);
             }
             target->RemoveAurasDueToSpell(isRegularDifficulty ? SPELL_ENRAGE : SPELL_ENRAGE_H);
         }
