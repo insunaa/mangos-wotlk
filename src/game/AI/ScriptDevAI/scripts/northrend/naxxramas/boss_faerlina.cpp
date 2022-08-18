@@ -180,6 +180,11 @@ struct WidowsEmbrace : public AuraScript, public SpellScript
             bool isRegularDifficulty = target->GetMap()->IsRegularDifficulty();
             target->LockOutSpells(SPELL_SCHOOL_MASK_NATURE, aura->GetAuraDuration());
             target->RemoveAurasDueToSpell(isRegularDifficulty ? SPELL_ENRAGE : SPELL_ENRAGE_H);
+            target->ApplySpellImmune(nullptr, IMMUNITY_MECHANIC, MECHANIC_ENRAGED, true);
+            if (target->AI())
+                target->AI()->AddCustomAction(997, uint32(aura->GetAuraDuration()), [target](){
+                    target->ApplySpellImmune(nullptr, IMMUNITY_MECHANIC, MECHANIC_ENRAGED, false);
+                });
         }
     }
 };
