@@ -49,6 +49,9 @@ enum
     SPELL_WIDOWS_EMBRACE_H      = 54097,
 
     FAERLINA_GRACE_TIMER        = 0,
+    FAERLINA_CATEGORY_CD        = 1,
+
+    FAERLINA_ENRAGE_CATEGORY    = 1152,
 
     SPELLSET_NORMAL             = 1595301,
 };
@@ -116,15 +119,15 @@ struct WidowsEmbrace : public AuraScript, public SpellScript
             DoBroadcastText(EMOTE_WIDOWS_EMBRACE, target);
             bool isRegularDifficulty = target->GetMap()->IsRegularDifficulty();
             target->LockOutSpells(SPELL_SCHOOL_MASK_NATURE, aura->GetAuraDuration());
-            if (target->HasAura(isRegularDifficulty ? SPELL_ENRAGE : SPELL_ENRAGE_H))
+            target->AddCooldown(*(aura->GetSpellProto()));
+            if (!target->HasAura(isRegularDifficulty ? SPELL_ENRAGE : SPELL_ENRAGE_H))
             {
-                target->RemoveAurasDueToSpell(isRegularDifficulty ? SPELL_ENRAGE : SPELL_ENRAGE_H);
-                target->AddCooldown(*(aura->GetSpellProto()));
+                target->AI()->AddCustomAction(FAERLINA_CATEGORY_CD, 30s, [target](){
+                    if (target)
+                        target->RemoveSpellCategoryCooldown(FAERLINA_ENRAGE_CATEGORY);
+                });
             }
-            else
-            {
-                target->AddCooldown(*(aura->GetSpellProto()), nullptr, false, 30 * IN_MILLISECONDS);
-            }
+            target->RemoveAurasDueToSpell(isRegularDifficulty ? SPELL_ENRAGE : SPELL_ENRAGE_H);
         }
     }
 };
