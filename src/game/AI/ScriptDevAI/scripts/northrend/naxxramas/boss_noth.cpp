@@ -166,12 +166,10 @@ struct boss_nothAI : public BossAI
     {
         if (!summoned->HasAura(384152)) //Custom spell for 30% increased difficulty. *NOT* accurate to 3.3.5a
             summoned->CastSpell(summoned, 384152, TRIGGERED_OLD_TRIGGERED);
-        const ObjectGuid& summonedGuid = summoned->GetObjectGuid();
-        Map* creatureMap = summoned->GetMap();
         summoned->AI()->AddCustomAction(0, 3s, [summoned]()
         {
             if (summoned && summoned->AI())
-                summoned->AI()->ClearSelfRoot();
+                summoned->AI()->SetRootSelf(false);
         });
         summoned->AI()->SetRootSelf(true);
         summoned->SetInCombatWithZone();
