@@ -38,7 +38,7 @@ Enrages 26527*/
 enum
 {
     EMOTE_SPRAY_SLIME               = 32318,
-    //EMOTE_INJECTION                 = -1533158, // unused
+    EMOTE_INJECTION                 = 32319,
 
     SPELL_SLIME_STREAM              = 28137,
     SPELL_MUTATING_INJECTION        = 28169,
@@ -188,6 +188,14 @@ struct MutatingInjection : public AuraScript
                 target->CastSpell(target, SPELL_MUTAGEN_EXPLOSION, TRIGGERED_OLD_TRIGGERED, nullptr, aura);
             // Poison Cloud
             target->CastSpell(target, SPELL_POISON_CLOUD, TRIGGERED_OLD_TRIGGERED, nullptr, aura);
+        }
+        else
+        {
+            Unit* target = aura->GetTarget();
+            Unit* caster = aura->GetCaster();
+            if (!target || caster)
+                return;
+            DoBroadcastText(EMOTE_INJECTION, caster, target);
         }
     }
 };
