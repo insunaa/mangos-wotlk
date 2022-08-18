@@ -121,6 +121,10 @@ struct WidowsEmbrace : public AuraScript, public SpellScript
                 target->RemoveAurasDueToSpell(isRegularDifficulty ? SPELL_ENRAGE : SPELL_ENRAGE_H);
                 target->AddCooldown(*(aura->GetSpellProto()));
             }
+            else
+            {
+                target->AddCooldown(*(aura->GetSpellProto()), nullptr, false, 30 * IN_MILLISECONDS);
+            }
         }
     }
 };
