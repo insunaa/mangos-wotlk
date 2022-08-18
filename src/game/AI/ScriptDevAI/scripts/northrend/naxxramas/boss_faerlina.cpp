@@ -133,7 +133,7 @@ struct WidowsEmbrace : public AuraScript, public SpellScript
             target->AddCooldown(*(aura->GetSpellProto()));
             if (!target->HasAura(isRegularDifficulty ? SPELL_ENRAGE : SPELL_ENRAGE_H))
             {
-                target->AI()->ResetTimer(FAERLINA_ENRAGE_CATEGORY, 30s);
+                target->AI()->ResetTimer(FAERLINA_CATEGORY_CD, 30s);
             }
             target->RemoveAurasDueToSpell(isRegularDifficulty ? SPELL_ENRAGE : SPELL_ENRAGE_H);
         }
