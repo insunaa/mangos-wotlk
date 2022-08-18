@@ -240,7 +240,7 @@ struct boss_nothAI : public BossAI
             }
             case NOTH_SUMMON:
             {
-                if (m_uiPhase == NOTH_PHASE_GROUND)
+                if (m_uiPhase == PHASE_GROUND)
                 {
                     DoBroadcastText(SAY_SUMMON, m_creature);
                     DoBroadcastText(EMOTE_WARRIOR, m_creature);
@@ -323,6 +323,7 @@ struct boss_nothAI : public BossAI
                     m_creature->AttackStop(false, true);
                     m_creature->SetTarget(nullptr);
                     ++m_uiPhaseSub;
+                    m_uiPhase = PHASE_BALCONY;
 
                     ResetCombatAction(NOTH_PHASE_GROUND, GetSubsequentActionTimer(NOTH_PHASE_GROUND));
                 }
@@ -345,6 +346,7 @@ struct boss_nothAI : public BossAI
                         DisableCombatAction(action);
                         return;
                     }
+                    m_uiPhase = PHASE_GROUND;
                     ResetCombatAction(NOTH_PHASE_BALCONY, GetSubsequentActionTimer(NOTH_PHASE_BALCONY));
                     ResetCombatAction(NOTH_CURSE, GetSubsequentActionTimer(NOTH_CURSE));
                     if (!m_isRegularMode)
