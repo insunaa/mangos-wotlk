@@ -50,7 +50,8 @@ enum
 
     FAERLINA_GRACE_TIMER        = 0,
 
-    SPELLSET_NORMAL             = 1595301,
+    SPELLSET_10N                = 1595301,
+    SPELLSET_25N                = 2926801,
 };
 
 struct boss_faerlinaAI : public BossAI
@@ -82,7 +83,7 @@ struct boss_faerlinaAI : public BossAI
     void Reset() override
     {
         BossAI::Reset();
-        m_creature->SetSpellList(SPELLSET_NORMAL);
+        m_creature->SetSpellList(m_creature->GetMap()->IsRegularDifficulty() ? SPELLSET_10N : SPELLSET_25N);
     }
 
     void MoveInLineOfSight(Unit* pWho) override
