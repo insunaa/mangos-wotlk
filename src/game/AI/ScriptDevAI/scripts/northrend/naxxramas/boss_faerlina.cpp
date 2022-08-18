@@ -63,6 +63,7 @@ struct boss_faerlinaAI : public BossAI
         AddOnAggroText(SAY_AGGRO_1, SAY_AGGRO_2, SAY_AGGRO_3, SAY_AGGRO_4);
         AddOnKillText(SAY_SLAY_1, SAY_SLAY_2);
         AddOnDeathText(SAY_DEATH);
+        Reset();
     }
 
     instance_naxxramas* m_instance;
