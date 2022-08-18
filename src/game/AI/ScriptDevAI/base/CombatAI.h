@@ -102,7 +102,7 @@ class BossAI : public CombatAI
         std::vector<uint32> m_onKilledTexts;
         std::vector<uint32> m_onAggroTexts;
 
-        uint32 m_instanceDataType = 0;
+        uint32 m_instanceDataType = -1;
 
         std::chrono::steady_clock::time_point m_combatStartTimestamp;
 };

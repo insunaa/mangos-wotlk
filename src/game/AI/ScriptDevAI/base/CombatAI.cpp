@@ -108,7 +108,7 @@ void BossAI::JustDied(Unit* killer)
 {
     if (!m_onKilledTexts.empty())
         DoBroadcastText(m_onKilledTexts[urand(0, m_onAggroTexts.size() - 1)], m_creature, killer);
-    if (!m_instanceDataType)
+    if (m_instanceDataType == -1)
         return;
     if (ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
         instance->SetData(m_instanceDataType, DONE);
@@ -116,7 +116,7 @@ void BossAI::JustDied(Unit* killer)
 
 void BossAI::JustReachedHome()
 {
-    if (!m_instanceDataType)
+    if (m_instanceDataType == -1)
         return;
     if (ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
         instance->SetData(m_instanceDataType, FAIL);
@@ -128,7 +128,7 @@ void BossAI::Aggro(Unit* who)
 
     if (!m_onAggroTexts.empty())
         DoBroadcastText(m_onAggroTexts[urand(0, m_onAggroTexts.size() - 1)], m_creature, who);
-    if (!m_instanceDataType)
+    if (m_instanceDataType == -1)
         return;
     if (ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
         instance->SetData(m_instanceDataType, IN_PROGRESS);
