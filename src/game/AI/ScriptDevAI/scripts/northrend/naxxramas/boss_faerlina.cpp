@@ -48,11 +48,13 @@ enum
     SPELL_WIDOWS_EMBRACE_H      = 54097,
 
     FAERLINA_GRACE_TIMER        = 0,
+
+    SPELLSET_NORMAL             = 1595301,
 };
 
 struct boss_faerlinaAI : public BossAI
 {
-    boss_faerlinaAI(Creature* creature) : BossAI(creature, 3),
+    boss_faerlinaAI(Creature* creature) : BossAI(creature, 0),
     m_instance(static_cast<instance_naxxramas *>(creature->GetInstanceData())),
     m_hasTaunted(false),
     m_inGracePeriod(false)
@@ -74,6 +76,12 @@ struct boss_faerlinaAI : public BossAI
         AddCustomAction(FAERLINA_GRACE_TIMER, 30s, [&](){
             m_inGracePeriod = false;
         });
+    }
+
+    void Reset() override
+    {
+        CombatAI::Reset();
+        m_creature->SetSpellList(SPELLSET_NORMAL);
     }
 
     void MoveInLineOfSight(Unit* pWho) override
