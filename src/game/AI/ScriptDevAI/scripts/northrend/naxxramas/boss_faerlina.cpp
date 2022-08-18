@@ -37,6 +37,7 @@ enum
     SAY_AGGRO_4                 = 12859,
 
     EMOTE_BOSS_GENERIC_FRENZY   = 1191,
+    EMOTE_WIDOWS_EMBRACE        = 31019,
 
     SPELL_POISONBOLT_VOLLEY     = 28796,
     SPELL_POISONBOLT_VOLLEY_H   = 54098,
@@ -112,6 +113,7 @@ struct WidowsEmbrace : public AuraScript, public SpellScript
             return;
         if (Creature* target = dynamic_cast<Creature*>(aura->GetTarget()))
         {
+            DoBroadcastText(EMOTE_WIDOWS_EMBRACE, target);
             bool isRegularDifficulty = target->GetMap()->IsRegularDifficulty();
             target->LockOutSpells(SPELL_SCHOOL_MASK_NATURE, aura->GetAuraDuration());
             target->RemoveAurasDueToSpell(isRegularDifficulty ? SPELL_ENRAGE : SPELL_ENRAGE_H);
