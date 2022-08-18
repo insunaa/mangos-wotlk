@@ -175,6 +175,8 @@ struct WidowsEmbrace : public AuraScript, public SpellScript
         if (Creature* caster = dynamic_cast<Creature*>(aura->GetCaster()))
             if (caster->IsAlive() && caster->GetEntry() == NPC_FAERLINA_FOLLOWER)
                 caster->Suicide();
+        if (!apply)
+            return;
         if (Creature* target = dynamic_cast<Creature*>(aura->GetTarget()))
         {
             bool isRegularDifficulty = target->GetMap()->IsRegularDifficulty();
