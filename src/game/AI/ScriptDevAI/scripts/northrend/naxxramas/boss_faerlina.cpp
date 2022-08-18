@@ -38,8 +38,6 @@ enum
 
     EMOTE_BOSS_GENERIC_FRENZY   = 1191,
 
-    // SOUND_RANDOM_AGGRO       = 8955,                     // soundId containing the 4 aggro sounds, we not using this
-
     SPELL_POISONBOLT_VOLLEY     = 28796,
     SPELL_POISONBOLT_VOLLEY_H   = 54098,
     SPELL_ENRAGE                = 28798,
@@ -48,35 +46,35 @@ enum
     SPELL_RAIN_OF_FIRE_H        = 54099,
     SPELL_WIDOWS_EMBRACE        = 28732,
     SPELL_WIDOWS_EMBRACE_H      = 54097,
-};
 
-enum FaerlinaActions
-{
-    FAERLINA_POISON_BOLT,
-    FAERLINA_RAIN_OF_FIRE,
-    FAERLINA_ENRAGE,
-    FAERLINA_ACTIONS_MAX,
+    FAERLINA_GRACE_TIMER        = 0,
 };
 
 struct boss_faerlinaAI : public BossAI
 {
-    boss_faerlinaAI(Creature* creature) : BossAI(creature, FAERLINA_ACTIONS_MAX),
+    boss_faerlinaAI(Creature* creature) : BossAI(creature, 0),
     m_instance(static_cast<instance_naxxramas *>(creature->GetInstanceData())),
-    m_isRegularMode(creature->GetMap()->IsRegularDifficulty()),
-    m_hasTaunted(false)
+    m_hasTaunted(false),
+    m_inGracePeriod(false)
     {
         SetDataType(TYPE_FAERLINA);
         AddOnAggroText(SAY_AGGRO_1, SAY_AGGRO_2, SAY_AGGRO_3, SAY_AGGRO_4);
         AddOnKillText(SAY_SLAY_1, SAY_SLAY_2);
         AddOnDeathText(SAY_DEATH);
-        AddCombatAction(FAERLINA_POISON_BOLT, 8s);
-        AddCombatAction(FAERLINA_RAIN_OF_FIRE, 16s);
-        AddCombatAction(FAERLINA_ENRAGE, 60s);
     }
 
     instance_naxxramas* m_instance;
-    bool m_isRegularMode;
     bool m_hasTaunted;
+    bool m_inGracePeriod;
+
+    void Aggro(Player* who) override
+    {
+        BossAI::Aggro(who);
+        m_inGracePeriod = true;
+        AddCustomAction(FAERLINA_GRACE_TIMER, 30s, [&](){
+            m_inGracePeriod = false;
+        });
+    }
 
     void MoveInLineOfSight(Unit* pWho) override
     {
@@ -89,73 +87,15 @@ struct boss_faerlinaAI : public BossAI
         ScriptedAI::MoveInLineOfSight(pWho);
     }
 
-    // Widow's Embrace prevents frenzy and poison bolt, if it removes frenzy, next frenzy is sceduled in 60s
-    // It is likely that this _should_ be handled with some dummy aura(s) - but couldn't find any
     void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpellEntry) override
     {
         // Check if we hit with Widow's Embrave
         if (pSpellEntry->Id == SPELL_WIDOWS_EMBRACE || pSpellEntry->Id == SPELL_WIDOWS_EMBRACE_H)
         {
-            bool bIsFrenzyRemove = false;
-
-            // If we remove the Frenzy, the Enrage Timer is reseted to 60s
-            if (m_creature->HasAura(m_isRegularMode ? SPELL_ENRAGE : SPELL_ENRAGE_H))
-            {
-                ResetCombatAction(FAERLINA_ENRAGE, 30s);
-                m_creature->RemoveAurasDueToSpell(m_isRegularMode ? SPELL_ENRAGE : SPELL_ENRAGE_H);
-
-                bIsFrenzyRemove = true;
-            }
-
             // Achievement 'Momma said Knock you out': If we removed OR delayed the frenzy, the criteria is failed
-            if ((bIsFrenzyRemove || TimeSinceEncounterStart() > 30s) && m_instance)
+            if ((!m_inGracePeriod) && m_instance)
                 m_instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_KNOCK_YOU_OUT, false);
-
-            // In any case we prevent Frenzy and Poison Bolt Volley for Widow's Embrace Duration (30s)
-            // We do this be setting the timers to at least bigger than 30s
-            if (bIsFrenzyRemove || TimeSinceEncounterStart() > 30s)
-            {
-                DelayCombatActionBy(FAERLINA_ENRAGE, 30s);
-                DelayCombatActionBy(FAERLINA_POISON_BOLT, RandomTimer(33s, 38s));
-            }
         }
-    }
-
-    std::chrono::milliseconds GetSubsequentActionTimer(uint32 action)
-    {
-        switch (action)
-        {
-            case FAERLINA_POISON_BOLT: return 11s;
-            case FAERLINA_RAIN_OF_FIRE: return 16s;
-            case FAERLINA_ENRAGE: return 60s;
-        }
-        return 0s;
-    }
-
-    void ExecuteAction(uint32 action) override
-    {
-        switch (action)
-        {
-            case FAERLINA_POISON_BOLT:
-                if (DoCastSpellIfCan(m_creature->GetVictim(), m_isRegularMode ? SPELL_POISONBOLT_VOLLEY : SPELL_POISONBOLT_VOLLEY_H) == CAST_OK)
-                    break;
-                return;
-            case FAERLINA_RAIN_OF_FIRE:
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                {
-                    if (DoCastSpellIfCan(pTarget, m_isRegularMode ? SPELL_RAIN_OF_FIRE : SPELL_RAIN_OF_FIRE_H) == CAST_OK)
-                        break;
-                }
-                return;
-            case FAERLINA_ENRAGE:
-                if (DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_ENRAGE : SPELL_ENRAGE_H) == CAST_OK)
-                {
-                    DoBroadcastText(EMOTE_BOSS_GENERIC_FRENZY, m_creature);
-                    break;
-                }
-                return;
-        }
-        ResetCombatAction(action, GetSubsequentActionTimer(action));
     }
 };
 
