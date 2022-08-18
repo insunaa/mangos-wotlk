@@ -112,6 +112,7 @@ void BossAI::JustDied(Unit* killer)
         return;
     if (ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
         instance->SetData(m_instanceDataType, DONE);
+    CombatAI::JustDied(killer);
 }
 
 void BossAI::JustReachedHome()
