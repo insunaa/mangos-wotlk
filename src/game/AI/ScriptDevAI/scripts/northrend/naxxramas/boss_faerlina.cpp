@@ -52,7 +52,7 @@ enum
 
 struct boss_faerlinaAI : public BossAI
 {
-    boss_faerlinaAI(Creature* creature) : BossAI(creature, 0),
+    boss_faerlinaAI(Creature* creature) : BossAI(creature, 3),
     m_instance(static_cast<instance_naxxramas *>(creature->GetInstanceData())),
     m_hasTaunted(false),
     m_inGracePeriod(false)
