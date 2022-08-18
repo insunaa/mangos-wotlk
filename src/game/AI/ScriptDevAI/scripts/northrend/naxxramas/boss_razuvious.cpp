@@ -153,6 +153,9 @@ struct ForcedObedience : public AuraScript, public SpellScript
         if (!apply)
             if (aura->GetId() == SPELL_FORCED_OBEDIENCE)
                 aura->GetTarget()->RemoveAurasDueToSpell(SPELL_OBEDIENCE_CHAINS);
+        if (apply)
+            if (Unit* target = aura->GetTarget())
+                target->UpdateSpeed(MOVE_RUN, true);
     }
 };
 
