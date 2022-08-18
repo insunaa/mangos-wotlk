@@ -119,6 +119,7 @@ struct boss_nothAI : public BossAI
 
     instance_naxxramas* m_instance;
     bool m_isRegularMode;
+    GuidList m_lUndeadSummonGuidList;
 
     uint8 m_uiPhase, m_uiPhaseSub;
 
@@ -159,6 +160,14 @@ struct boss_nothAI : public BossAI
         m_creature->ForcedDespawn();
         m_creature->SetRespawnDelay(10 * IN_MILLISECONDS, true);
         m_creature->Respawn();
+
+        for (GuidList::const_iterator itr = m_lUndeadSummonGuidList.begin(); itr != m_lUndeadSummonGuidList.end(); ++itr)
+        {
+            if (Creature* summon = m_creature->GetMap()->GetCreature(*itr))
+            {
+                summon->ForcedDespawn(2000);
+            }
+        }
         JustReachedHome();
     }
 
@@ -166,13 +175,19 @@ struct boss_nothAI : public BossAI
     {
         if (!summoned->HasAura(384152)) //Custom spell for 30% increased difficulty. *NOT* accurate to 3.3.5a
             summoned->CastSpell(summoned, 384152, TRIGGERED_OLD_TRIGGERED);
-        summoned->AI()->AddCustomAction(0, 3s, [summoned]()
+        summoned->AI()->AddCustomAction(SUMMONED_UNROOT, 3s + 500ms, [summoned]()
         {
             if (summoned && summoned->AI())
                 summoned->AI()->SetRootSelf(false);
         });
         summoned->AI()->SetRootSelf(true);
         summoned->SetInCombatWithZone();
+        m_lUndeadSummonGuidList.push_back(summoned->GetObjectGuid());
+    }
+
+    void SummonedCreatureDespawn(Creature* summoned) override
+    {
+        m_lUndeadSummonGuidList.remove(summoned->GetObjectGuid());
     }
 
     void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
