@@ -278,6 +278,15 @@ struct npc_tesla_coilAI : public Scripted_NoMovementAI
     npc_tesla_coilAI(Creature* creature) : Scripted_NoMovementAI(creature),
     m_instance(dynamic_cast<instance_naxxramas*>(creature->GetInstanceData()))
     {
+        AddCustomAction(0, 5s, [&]()
+        {
+            EstablishTarget();
+            int auras = 0;
+            auras += m_creature->HasAura(SPELL_STALAGG_TESLA_PASSIVE);
+            auras += m_creature->HasAura(SPELL_FEUGEN_TESLA_PASSIVE);
+            sLog.outError("Aura vorhanden: %d, Rechts: %d", auras, m_bToFeugen);
+            ResetTimer(0, 5s);
+        });
         Reset();
     }
 
