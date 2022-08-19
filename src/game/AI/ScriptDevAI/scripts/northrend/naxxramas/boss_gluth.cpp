@@ -166,7 +166,7 @@ struct boss_gluthAI : public BossAI
             Creature* pZombie = zombiesInRange.front();
             if (!pZombie)
                 return;
-            m_creature->GetMotionMaster()->MoveCharge(*pZombie, 15.f, EVENT_CHARGE);
+            m_creature->GetMotionMaster()->MoveCharge(*pZombie, 30.f, EVENT_CHARGE);
             DoCastSpellIfCan(pZombie, SPELL_ZOMBIE_CHOW_SEARCH_INSTAKILL_TARGETED);
             return;
         }
