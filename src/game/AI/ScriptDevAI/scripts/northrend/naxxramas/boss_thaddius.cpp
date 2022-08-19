@@ -456,7 +456,7 @@ struct boss_thaddiusAddsAI : public BossAI
     void PauseCombatMovement()
     {
         SetRootSelf(true);
-        ResetTimer(THADDIUS_ADD_HOLD, 1s + 500ms);
+        ResetTimer(THADDIUS_ADD_HOLD, 1500ms);
     }
 
     void JustPreventedDeath(Unit* attacker) override
