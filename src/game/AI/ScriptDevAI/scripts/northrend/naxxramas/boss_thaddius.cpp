@@ -321,7 +321,8 @@ struct npc_tesla_coilAI : public Scripted_NoMovementAI
         m_bToFeugen = m_creature->GetDistanceOrder(pNoxTeslaFeugen, pNoxTeslaStalagg);
 
         if (auto* add = m_instance->GetSingleCreatureFromStorage(m_bToFeugen ? NPC_FEUGEN : NPC_STALAGG))
-            return DoCastSpellIfCan(add, m_bToFeugen ? SPELL_FEUGEN_CHAIN : SPELL_STALAGG_CHAIN) == CAST_OK;
+            if (add->IsWithinDistInMap(m_creature, 60.f))
+                return DoCastSpellIfCan(add, m_bToFeugen ? SPELL_FEUGEN_CHAIN : SPELL_STALAGG_CHAIN) == CAST_OK;
         return false;
     }
 
