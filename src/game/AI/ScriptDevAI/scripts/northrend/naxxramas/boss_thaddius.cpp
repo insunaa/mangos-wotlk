@@ -338,8 +338,7 @@ struct boss_thaddiusAddsAI : public BossAI
     {
         SetDataType(TYPE_THADDIUS);
         AddCustomAction(THADDIUS_ADD_HOLD, true, [&](){
-            sLog.outError("HOLD CALLED!");
-            SetRootSelf(false);
+            SetCombatMovement(true);
             m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
         });
         AddCustomAction(THADDIUS_ADD_SHOCK_OVERLOAD, true, [&](){
@@ -455,8 +454,8 @@ struct boss_thaddiusAddsAI : public BossAI
 
     void PauseCombatMovement()
     {
-        SetRootSelf(true);
-        ResetTimer(THADDIUS_ADD_HOLD, 1500ms);
+        SetCombatMovement(false);
+        ResetTimer(THADDIUS_ADD_HOLD, 1s + 500ms);
     }
 
     void JustPreventedDeath(Unit* attacker) override
