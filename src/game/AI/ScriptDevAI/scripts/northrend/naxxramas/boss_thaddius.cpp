@@ -383,6 +383,7 @@ struct boss_thaddiusAddsAI : public BossAI
     void JustRespawned() override
     {
         Reset();                                            // Needed to reset the flags properly
+        JustReachedHome();
     }
 
     void JustReachedHome() override
