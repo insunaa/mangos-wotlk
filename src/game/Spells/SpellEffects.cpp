@@ -1722,6 +1722,8 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         sLog.outError("Caster: %s, Target: %s", m_caster->GetName(), unitTarget->GetName());
                     if (unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT && unitTarget->IsAlive())
                     {
+                        if (!(unitTarget->GetEntry() == 15929 || unitTarget->GetEntry() == 15930))
+                            return;
                         if (!m_caster->hasUnitState(UNIT_STAT_ROOT))    // This state is found in sniffs and is probably caused by another aura like 23973
                             m_caster->addUnitState(UNIT_STAT_ROOT);     // but as we are not sure (the aura does not show up in sniffs), we handle the state here
 
