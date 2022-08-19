@@ -285,6 +285,7 @@ struct npc_tesla_coilAI : public Scripted_NoMovementAI
     bool m_bToFeugen = false;
 
     void Reset() override {
+        m_creature->SetImmuneToPlayer(true);
         EstablishTarget();
         if (!m_instance || m_instance->GetData(TYPE_THADDIUS) == DONE)
             return;
