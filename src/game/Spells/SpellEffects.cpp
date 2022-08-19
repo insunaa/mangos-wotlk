@@ -1737,9 +1737,10 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         {
                             unitTarget->RemoveAurasDueToSpell(chainSpellId);
                             m_caster->SetImmuneToPlayer(false);
-
-                            if (Unit* target = ((Creature*)m_caster)->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                                m_caster->CastSpell(target, 28099, TRIGGERED_NONE);
+                            
+                            //if (Unit* target = ((Creature*)m_caster)->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                            //    m_caster->CastSpell(target, 28099, TRIGGERED_NONE);
+                            m_caster->CastSpell(m_caster->SelectRandomUnfriendlyTarget(), 28099, TRIGGERED_IGNORE_UNSELECTABLE_FLAG | TRIGGERED_IGNORE_COOLDOWNS);
                         }
                         // else: in range and already have aura: do nothing
                     }
