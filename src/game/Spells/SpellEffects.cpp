@@ -1718,14 +1718,14 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 case 28098:                                 // Stalagg Tesla Effect
                 case 28110:                                 // Feugen Tesla Effect
                 {
-                    if (m_caster && unitTarget)
-                        sLog.outError("Caster: %s, Target: %s", m_caster->GetName(), unitTarget->GetName());
                     if (unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT && unitTarget->IsAlive())
                     {
                         if (!(unitTarget->GetEntry() == 15929 || unitTarget->GetEntry() == 15930))
                             return;
                         if (!m_caster->hasUnitState(UNIT_STAT_ROOT))    // This state is found in sniffs and is probably caused by another aura like 23973
                             m_caster->addUnitState(UNIT_STAT_ROOT);     // but as we are not sure (the aura does not show up in sniffs), we handle the state here
+                        if (m_caster && unitTarget)
+                            sLog.outError("Caster: %s, Target: %s", m_caster->GetName(), unitTarget->GetName());
 
                         // Cast chain (Stalagg Chain or Feugen Chain)
                         uint32 chainSpellId = m_spellInfo->Id == 28098 ? 28096 : 28111;
@@ -1735,6 +1735,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                             if (!m_caster->IsImmuneToPlayer())
                                 m_caster->SetImmuneToPlayer(true);
                             m_caster->CastSpell(unitTarget, chainSpellId, TRIGGERED_OLD_TRIGGERED);
+                            m_caster->CombatStop();
                         }
                         // Not in range and fight in progress: remove aura and cast Shock onto players
                         else if (!m_caster->IsWithinDistInMap(unitTarget, 60.0f) && m_caster)

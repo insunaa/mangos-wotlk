@@ -278,6 +278,17 @@ struct npc_tesla_coilAI : public Scripted_NoMovementAI
     npc_tesla_coilAI(Creature* creature) : Scripted_NoMovementAI(creature),
     m_instance(dynamic_cast<instance_naxxramas*>(creature->GetInstanceData()))
     {
+        if (!m_instance || m_instance->GetData(TYPE_THADDIUS) == DONE)
+            return;
+
+        GameObject* pNoxTeslaFeugen  = m_instance->GetSingleGameObjectFromStorage(GO_CONS_NOX_TESLA_FEUGEN);
+        GameObject* pNoxTeslaStalagg = m_instance->GetSingleGameObjectFromStorage(GO_CONS_NOX_TESLA_STALAGG);
+
+        // Try again, till Tesla GOs are spawned
+        if (!pNoxTeslaFeugen || !pNoxTeslaStalagg)
+            return;
+
+        m_bToFeugen = m_creature->GetDistanceOrder(pNoxTeslaFeugen, pNoxTeslaStalagg);
         Reset();
     }
 
@@ -285,10 +296,11 @@ struct npc_tesla_coilAI : public Scripted_NoMovementAI
     bool m_bToFeugen;
 
     void Reset() override {
-        AddCustomAction(TESLA_COIL_SETUP_CHAIN, 1s, [&](){
+        DoCastSpellIfCan(m_creature, m_bToFeugen ? SPELL_FEUGEN_TESLA_PASSIVE : SPELL_STALAGG_TESLA_PASSIVE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+/*        AddCustomAction(TESLA_COIL_SETUP_CHAIN, 1s, [&](){
             if (!SetupChain())
                 ResetTimer(TESLA_COIL_SETUP_CHAIN, 1s);
-        });
+        });*/
     }
     void MoveInLineOfSight(Unit* /*pWho*/) override {}
 
@@ -305,7 +317,7 @@ struct npc_tesla_coilAI : public Scripted_NoMovementAI
         m_creature->CombatStop();
     }
 
-    bool SetupChain()
+/*    bool SetupChain()
     {
         // Check, if instance_ script failed or encounter finished
         if (!m_instance || m_instance->GetData(TYPE_THADDIUS) == DONE)
@@ -329,7 +341,7 @@ struct npc_tesla_coilAI : public Scripted_NoMovementAI
     bool ReApplyChain(uint32 uiEntry)
     {
         return SetupChain();
-    }
+    }*/
 };
 
 /************
@@ -405,7 +417,7 @@ struct boss_thaddiusAddsAI : public BossAI
 
         if (!m_instance || m_creature->HasAura(SPELL_FEUGEN_TESLA_EFFECT) || m_creature->HasAura(SPELL_STALAGG_TESLA_EFFECT))
             return;
-
+/*
         GuidList lTeslaGUIDList;
 
         m_instance->GetThadTeslaCreatures(lTeslaGUIDList);
@@ -421,7 +433,7 @@ struct boss_thaddiusAddsAI : public BossAI
                 if (npc_tesla_coilAI* pTeslaAI = dynamic_cast<npc_tesla_coilAI*>(pTesla->AI()))
                     pTeslaAI->ReApplyChain(m_creature->GetEntry());
             }
-        }
+        }*/
     }
 
     void JustReachedHome() override
