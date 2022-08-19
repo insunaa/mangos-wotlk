@@ -356,6 +356,7 @@ struct boss_thaddiusAddsAI : public BossAI
         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
         SetDeathPrevention(true);
         SetCombatScriptStatus(false);
+        BossAI::Reset();
     }
 
     Creature* GetOtherAdd() const
