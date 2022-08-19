@@ -296,7 +296,7 @@ struct npc_tesla_coilAI : public Scripted_NoMovementAI
     bool m_bToFeugen;
 
     void Reset() override {
-        DoCastSpellIfCan(m_creature, m_bToFeugen ? SPELL_STALAGG_TESLA_PASSIVE : SPELL_FEUGEN_TESLA_PASSIVE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        DoCastSpellIfCan(m_creature, m_bToFeugen ? SPELL_FEUGEN_TESLA_PASSIVE : SPELL_STALAGG_TESLA_PASSIVE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
 /*        AddCustomAction(TESLA_COIL_SETUP_CHAIN, 1s, [&](){
             if (!SetupChain())
                 ResetTimer(TESLA_COIL_SETUP_CHAIN, 1s);
