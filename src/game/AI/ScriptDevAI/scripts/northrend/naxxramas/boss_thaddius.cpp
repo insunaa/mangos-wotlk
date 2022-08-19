@@ -337,6 +337,29 @@ struct boss_thaddiusAddsAI : public BossAI
     m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
         SetDataType(TYPE_THADDIUS);
+        AddCustomAction(THADDIUS_ADD_HOLD, true, [&](){
+            SetCombatMovement(true);
+            m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
+        });
+        AddCustomAction(THADDIUS_ADD_SHOCK_OVERLOAD, true, [&](){
+            DoCastSpellIfCan(m_creature, SPELL_TRIGGER_TESLAS, TRIGGERED_OLD_TRIGGERED);
+        });
+        AddCustomAction(THADDIUS_ADD_REVIVE, true, [&](){
+            if(!GetOtherAdd())
+                return;
+            if (auto* otherAI = dynamic_cast<boss_thaddiusAddsAI*>(GetOtherAdd()->AI()))
+            {
+                if (otherAI->IsCountingDead())
+                {
+                    otherAI->DisableTimer(THADDIUS_ADD_REVIVE);
+                    ResetTimer(THADDIUS_ADD_SHOCK_OVERLOAD, 14s);
+                    return;
+                }
+                Revive();
+                m_isFakingDeath = false;
+                DisableTimer(THADDIUS_ADD_REVIVE);
+            }
+        });
         Reset();
     }
 
@@ -431,10 +454,7 @@ struct boss_thaddiusAddsAI : public BossAI
     void PauseCombatMovement()
     {
         SetCombatMovement(false);
-        AddCustomAction(THADDIUS_ADD_HOLD, 1s + 500ms, [&](){
-            SetCombatMovement(true);
-            m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
-        });
+        ResetTimer(THADDIUS_ADD_HOLD, 1s + 500ms);
     }
 
     void JustPreventedDeath(Unit* attacker) override
@@ -458,24 +478,7 @@ struct boss_thaddiusAddsAI : public BossAI
         SetCombatScriptStatus(true);
 
         JustDied(attacker);                                  // Texts
-        AddCustomAction(THADDIUS_ADD_REVIVE, 5s, [&](){
-            if(!GetOtherAdd())
-                return;
-            if (auto* otherAI = dynamic_cast<boss_thaddiusAddsAI*>(GetOtherAdd()->AI()))
-            {
-                if (otherAI->IsCountingDead())
-                {
-                    otherAI->DisableTimer(THADDIUS_ADD_REVIVE);
-                    AddCustomAction(THADDIUS_ADD_SHOCK_OVERLOAD, 14s, [&](){
-                        DoCastSpellIfCan(m_creature, SPELL_TRIGGER_TESLAS, TRIGGERED_OLD_TRIGGERED);
-                    });
-                    return;
-                }
-                Revive();
-                m_isFakingDeath = false;
-                DisableTimer(THADDIUS_ADD_REVIVE);
-            }
-        });
+        ResetTimer(THADDIUS_ADD_REVIVE, 5s);
     }
 };
 
