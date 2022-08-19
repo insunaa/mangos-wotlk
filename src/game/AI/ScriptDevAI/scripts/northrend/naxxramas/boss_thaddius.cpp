@@ -132,6 +132,7 @@ struct boss_thaddiusAI : public BossAI
         SetCombatScriptStatus(true);
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
         DoCastSpellIfCan(m_creature, SPELL_THADIUS_SPAWN);
+        BossAI::Reset();
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -472,6 +473,7 @@ struct boss_thaddiusAddsAI : public BossAI
                 }
                 Revive();
                 m_isFakingDeath = false;
+                DisableTimer(THADDIUS_ADD_REVIVE);
             }
         });
     }
