@@ -152,33 +152,33 @@ class CombatActions : public TimerManager
         void AddTimerlessCombatAction(uint32 id, bool byDefault);
 
         virtual void ResetTimer(uint32 index, uint32 timer) override;
-        virtual void ResetTimer(uint32 index, std::chrono::milliseconds timer) override
+        virtual void ResetTimer(uint32 index, std::chrono::milliseconds timer)
         {
             ResetTimer(index, timer.count());
         }
         virtual void DisableTimer(uint32 index) override;
         virtual void ReduceTimer(uint32 index, uint32 timer) override;
-        virtual void ReduceTimer(uint32 index, std::chrono::milliseconds timer) override
+        virtual void ReduceTimer(uint32 index, std::chrono::milliseconds timer)
         {
             ReduceTimer(index, timer.count());
         }
         virtual void DelayTimer(uint32 index, uint32 timer) override;
-        virtual void DelayTimer(uint32 index, std::chrono::milliseconds timer) override
+        virtual void DelayTimer(uint32 index, std::chrono::milliseconds timer)
         {
             DelayTimer(index, timer.count());
         }
         virtual void ReduceTimerBy(uint32 index, uint32 timer);
-        virtual void ReduceTimerBy(uint32 index, std::chrono::milliseconds timer) override
+        virtual void ReduceTimerBy(uint32 index, std::chrono::milliseconds timer)
         {
             ReduceTimerBy(index, timer.count());
         }
         virtual void DelayTimerBy(uint32 index, uint32 timer);
-        virtual void DelayTimerBy(uint32 index, std::chrono::milliseconds timer) override
+        virtual void DelayTimerBy(uint32 index, std::chrono::milliseconds timer)
         {
             DelayTimerBy(index, timer.count());
         }
         virtual void ResetIfNotStarted(uint32 index, uint32 timer) override;
-        virtual void ResetIfNotStarted(uint32 index, std::chrono::milliseconds timer) override
+        virtual void ResetIfNotStarted(uint32 index, std::chrono::milliseconds timer)
         {
             ResetIfNotStarted(index, timer.count());
         }
