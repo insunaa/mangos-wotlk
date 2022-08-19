@@ -278,15 +278,16 @@ struct npc_tesla_coilAI : public Scripted_NoMovementAI
     npc_tesla_coilAI(Creature* creature) : Scripted_NoMovementAI(creature),
     m_instance(dynamic_cast<instance_naxxramas*>(creature->GetInstanceData()))
     {
-        EstablishTarget();
         Reset();
     }
 
     instance_naxxramas* m_instance;
-    bool m_bToFeugen;
+    bool m_bToFeugen = false;
 
     void Reset() override {
         EstablishTarget();
+        if (!m_instance || m_instance->GetData(TYPE_THADDIUS) == DONE)
+            return;
         DoCastSpellIfCan(m_creature, m_bToFeugen ? SPELL_FEUGEN_TESLA_PASSIVE : SPELL_STALAGG_TESLA_PASSIVE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
 /*        AddCustomAction(TESLA_COIL_SETUP_CHAIN, 1s, [&](){
             if (!SetupChain())
@@ -296,13 +297,14 @@ struct npc_tesla_coilAI : public Scripted_NoMovementAI
 
     void EstablishTarget()
     {
-        if (!m_instance || m_instance->GetData(TYPE_THADDIUS) == DONE)
-            return;
+        
 
-        GameObject* pNoxTeslaFeugen  = m_instance->GetSingleGameObjectFromStorage(GO_CONS_NOX_TESLA_FEUGEN);
-        GameObject* pNoxTeslaStalagg = m_instance->GetSingleGameObjectFromStorage(GO_CONS_NOX_TESLA_STALAGG);
+//        GameObject* pNoxTeslaFeugen  = m_instance->GetSingleGameObjectFromStorage(GO_CONS_NOX_TESLA_FEUGEN);
+//        GameObject* pNoxTeslaStalagg = m_instance->GetSingleGameObjectFromStorage(GO_CONS_NOX_TESLA_STALAGG);
 
-        m_bToFeugen = m_creature->GetDistanceOrder(pNoxTeslaFeugen, pNoxTeslaStalagg);
+//        m_bToFeugen = m_creature->GetDistanceOrder(pNoxTeslaFeugen, pNoxTeslaStalagg);
+        if (m_creature->GetPositionX() > 3500.f)
+            m_bToFeugen = true;
     }
 
     void MoveInLineOfSight(Unit* /*pWho*/) override {}
