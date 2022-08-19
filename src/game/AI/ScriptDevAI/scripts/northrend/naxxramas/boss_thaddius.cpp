@@ -45,8 +45,8 @@ enum
     SAY_FEUG_DEATH                  = -1533028,
 
     // Tesla Coils
-    EMOTE_LOSING_LINK               = -1533149,
-    EMOTE_TESLA_OVERLOAD            = -1533150,
+    EMOTE_LOSING_LINK               = 12156,
+    EMOTE_TESLA_OVERLOAD            = 12178,
 
     // Thaddus
     SAY_AGGRO_1                     = -1533030,
@@ -303,7 +303,7 @@ struct npc_tesla_coilAI : public Scripted_NoMovementAI
 
     void Aggro(Unit* /*pWho*/) override
     {
-        DoScriptText(EMOTE_LOSING_LINK, m_creature);
+        DoBroadcastText(EMOTE_LOSING_LINK, m_creature);
     }
 
     // Overwrite this function here to
@@ -337,14 +337,6 @@ struct boss_thaddiusAddsAI : public BossAI
     m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
         SetDataType(TYPE_THADDIUS);
-        AddCustomAction(THADDIUS_ADD_HOLD, true, [&](){
-            sLog.outError("HOLD CALLED!");
-            SetRootSelf(false);
-            m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
-        });
-        AddCustomAction(THADDIUS_ADD_SHOCK_OVERLOAD, true, [&](){
-            DoCastSpellIfCan(m_creature, SPELL_TRIGGER_TESLAS, TRIGGERED_OLD_TRIGGERED);
-        });
         AddCustomAction(THADDIUS_ADD_REVIVE, true, [&](){
             if(!GetOtherAdd())
                 return;
@@ -353,7 +345,11 @@ struct boss_thaddiusAddsAI : public BossAI
                 if (otherAI->IsCountingDead())
                 {
                     otherAI->DisableTimer(THADDIUS_ADD_REVIVE);
-                    ResetTimer(THADDIUS_ADD_SHOCK_OVERLOAD, 14s);
+                    AddCustomAction(THADDIUS_ADD_SHOCK_OVERLOAD, 14s, [&](){
+                        DoCastSpellIfCan(m_creature, SPELL_TRIGGER_TESLAS, TRIGGERED_OLD_TRIGGERED);
+                        DisableTimer(THADDIUS_ADD_SHOCK_OVERLOAD);
+                    });
+                    DisableTimer(THADDIUS_ADD_REVIVE);
                     return;
                 }
                 Revive();
@@ -456,7 +452,12 @@ struct boss_thaddiusAddsAI : public BossAI
     void PauseCombatMovement()
     {
         SetRootSelf(true);
-        ResetTimer(THADDIUS_ADD_HOLD, 1500ms);
+        AddCustomAction(THADDIUS_ADD_HOLD, 1s + 500ms, [&](){
+            SetRootSelf(false);
+            m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
+            DisableTimer(THADDIUS_ADD_HOLD);
+        });
+        ResetIfNotStarted(THADDIUS_ADD_HOLD, 1s + 500ms);
     }
 
     void JustPreventedDeath(Unit* attacker) override

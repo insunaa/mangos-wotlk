@@ -1757,7 +1757,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 {
                     if (unitTarget && !unitTarget->IsPlayer())
                     {
-                        DoScriptText(-1533150, unitTarget, unitTarget);
+                        DoBroadcastText(12156, unitTarget, unitTarget);
                         unitTarget->RemoveAllAuras();
                         unitTarget->CastSpell(unitTarget, 28159, TRIGGERED_NONE);   // Shock
                     }
