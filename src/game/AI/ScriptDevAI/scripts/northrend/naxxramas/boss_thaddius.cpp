@@ -321,13 +321,13 @@ struct npc_tesla_coilAI : public Scripted_NoMovementAI
 
 enum ThaddiusAddActions
 {
-    THADDIUS_ADD_REVIVE,
-    THADDIUS_ADD_SHOCK_OVERLOAD,
     THADDIUS_ADD_POWER_SURGE,
     THADDIUS_ADD_STATIC_FIELD,
     THADDIUS_ADD_MAGNETIC_PULL,
-    THADDIUS_ADD_HOLD,
     THADDIUS_ADD_ACTIONS_MAX,
+    THADDIUS_ADD_REVIVE,
+    THADDIUS_ADD_SHOCK_OVERLOAD,
+    THADDIUS_ADD_HOLD,
 };
 
 struct boss_thaddiusAddsAI : public BossAI
@@ -380,6 +380,7 @@ struct boss_thaddiusAddsAI : public BossAI
         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
         SetDeathPrevention(true);
         SetCombatScriptStatus(false);
+        SetCombatMovement(true);
         BossAI::Reset();
     }
 
