@@ -278,15 +278,6 @@ struct npc_tesla_coilAI : public Scripted_NoMovementAI
     npc_tesla_coilAI(Creature* creature) : Scripted_NoMovementAI(creature),
     m_instance(dynamic_cast<instance_naxxramas*>(creature->GetInstanceData()))
     {
-        AddCustomAction(0, 5s, [&]()
-        {
-            EstablishTarget();
-            int auras = 0;
-            auras += m_creature->HasAura(SPELL_STALAGG_TESLA_PASSIVE);
-            auras += m_creature->HasAura(SPELL_FEUGEN_TESLA_PASSIVE);
-            sLog.outError("Aura vorhanden: %d, Rechts: %d", auras, m_bToFeugen);
-            ResetTimer(0, 5s);
-        });
         Reset();
     }
 
@@ -298,20 +289,10 @@ struct npc_tesla_coilAI : public Scripted_NoMovementAI
         if (!m_instance || m_instance->GetData(TYPE_THADDIUS) == DONE)
             return;
         DoCastSpellIfCan(m_creature, m_bToFeugen ? SPELL_FEUGEN_TESLA_PASSIVE : SPELL_STALAGG_TESLA_PASSIVE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-/*        AddCustomAction(TESLA_COIL_SETUP_CHAIN, 1s, [&](){
-            if (!SetupChain())
-                ResetTimer(TESLA_COIL_SETUP_CHAIN, 1s);
-        });*/
     }
 
     void EstablishTarget()
     {
-        
-
-//        GameObject* pNoxTeslaFeugen  = m_instance->GetSingleGameObjectFromStorage(GO_CONS_NOX_TESLA_FEUGEN);
-//        GameObject* pNoxTeslaStalagg = m_instance->GetSingleGameObjectFromStorage(GO_CONS_NOX_TESLA_STALAGG);
-
-//        m_bToFeugen = m_creature->GetDistanceOrder(pNoxTeslaFeugen, pNoxTeslaStalagg);
         if (m_creature->GetPositionX() > 3500.f)
             m_bToFeugen = true;
     }
@@ -330,32 +311,6 @@ struct npc_tesla_coilAI : public Scripted_NoMovementAI
     {
         m_creature->CombatStop();
     }
-
-/*    bool SetupChain()
-    {
-        // Check, if instance_ script failed or encounter finished
-        if (!m_instance || m_instance->GetData(TYPE_THADDIUS) == DONE)
-            return true;
-
-        GameObject* pNoxTeslaFeugen  = m_instance->GetSingleGameObjectFromStorage(GO_CONS_NOX_TESLA_FEUGEN);
-        GameObject* pNoxTeslaStalagg = m_instance->GetSingleGameObjectFromStorage(GO_CONS_NOX_TESLA_STALAGG);
-
-        // Try again, till Tesla GOs are spawned
-        if (!pNoxTeslaFeugen || !pNoxTeslaStalagg)
-            return false;
-
-        m_bToFeugen = m_creature->GetDistanceOrder(pNoxTeslaFeugen, pNoxTeslaStalagg);
-
-        if (auto* add = m_instance->GetSingleCreatureFromStorage(m_bToFeugen ? NPC_FEUGEN : NPC_STALAGG))
-            if (add->IsWithinDistInMap(m_creature, 60.f))
-                return DoCastSpellIfCan(add, m_bToFeugen ? SPELL_FEUGEN_CHAIN : SPELL_STALAGG_CHAIN) == CAST_OK;
-        return false;
-    }
-
-    bool ReApplyChain(uint32 uiEntry)
-    {
-        return SetupChain();
-    }*/
 };
 
 /************
@@ -428,26 +383,6 @@ struct boss_thaddiusAddsAI : public BossAI
     void JustRespawned() override
     {
         Reset();                                            // Needed to reset the flags properly
-
-        if (!m_instance || m_creature->HasAura(SPELL_FEUGEN_TESLA_EFFECT) || m_creature->HasAura(SPELL_STALAGG_TESLA_EFFECT))
-            return;
-/*
-        GuidList lTeslaGUIDList;
-
-        m_instance->GetThadTeslaCreatures(lTeslaGUIDList);
-        if (lTeslaGUIDList.empty())
-            return;
-
-        for (GuidList::const_iterator itr = lTeslaGUIDList.begin(); itr != lTeslaGUIDList.end(); ++itr)
-        {
-            if (Creature* pTesla = m_instance->instance->GetCreature(*itr))
-            {
-                if (pTesla->GetDistance(m_creature) > 60.f)
-                    continue;
-                if (npc_tesla_coilAI* pTeslaAI = dynamic_cast<npc_tesla_coilAI*>(pTesla->AI()))
-                    pTeslaAI->ReApplyChain(m_creature->GetEntry());
-            }
-        }*/
     }
 
     void JustReachedHome() override
@@ -467,9 +402,11 @@ struct boss_thaddiusAddsAI : public BossAI
             }
         }
 
-        // Reapply Chains if needed
-        if (!m_creature->HasAura(SPELL_FEUGEN_CHAIN) && !m_creature->HasAura(SPELL_STALAGG_CHAIN))
-            JustRespawned();
+        if (Creature* tesla = GetClosestCreatureWithEntry(m_creature, NPC_TESLA_COIL, 50.f))
+        {
+            tesla->ForcedDespawn();
+            tesla->Respawn();
+        }
 
         m_instance->SetData(TYPE_THADDIUS, FAIL);
     }
