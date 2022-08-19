@@ -1718,6 +1718,8 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 case 28098:                                 // Stalagg Tesla Effect
                 case 28110:                                 // Feugen Tesla Effect
                 {
+                    if (m_caster && unitTarget)
+                        sLog.outError("Caster: %s, Target: %s", m_caster->GetName(), unitTarget->GetName());
                     if (unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT && unitTarget->IsAlive())
                     {
                         if (!m_caster->hasUnitState(UNIT_STAT_ROOT))    // This state is found in sniffs and is probably caused by another aura like 23973
