@@ -1735,7 +1735,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                             if (!m_caster->IsImmuneToPlayer())
                                 m_caster->SetImmuneToPlayer(true);
                             m_caster->CastSpell(unitTarget, chainSpellId, TRIGGERED_OLD_TRIGGERED);
-                            m_caster->CombatStop();
+                            m_caster->CombatStop(true);
                         }
                         // Not in range and fight in progress: remove aura and cast Shock onto players
                         else if (!m_caster->IsWithinDistInMap(unitTarget, 60.0f) && m_caster)
@@ -1747,6 +1747,8 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                             if (Unit* target = ((Creature*)m_caster)->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                                 m_caster->CastSpell(target, 28099, TRIGGERED_NONE);
                         }
+                        else
+                            m_caster->CombatStop(true);
                         // else: in range and already have aura: do nothing
                     }
                     return;
