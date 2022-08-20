@@ -663,6 +663,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (59915,'spell_discerning_eye_of_the_beast'),
 (60211,'spell_cauterize'),
 (60539,'spell_sapphiron_achievement_check'),
+(60929,'spell_loatheb_prewarn'),
+(59481,'spell_loatheb_warn'),
 (61071,'spell_vortex_aura'),
 (61072,'spell_vortex_aura'),
 (61073,'spell_vortex_aura'),
