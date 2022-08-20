@@ -43,6 +43,7 @@ enum
     SPELL_BERSERK           = 26662,
 
     NPC_SPORE               = 16286,
+    NPC_LOATHEB             = 16011,
 
     SPELLSET_10N            = 1601101,
     SPELLSET_10N_P2         = 1601102,
@@ -113,6 +114,19 @@ struct boss_loathebAI : public BossAI
     }
 };
 
+struct NecroticAura : public SpellScript
+{
+    void OnCast(Spell* spell) const override
+    {
+        if (Unit* caster = spell->GetCaster())
+            if (caster->GetEntry() == NPC_LOATHEB)
+            {
+                caster->CastSpell(caster, SPELL_NECROTIC_PRE_WARN, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD);
+                caster->CastSpell(caster, SPELL_NECROTIC_WARN, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD);
+            }
+    }
+};
+
 struct AuraPreWarning : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
@@ -140,6 +154,7 @@ void AddSC_boss_loatheb()
     pNewScript->GetAI = &GetNewAIInstance<boss_loathebAI>;
     pNewScript->RegisterSelf();
 
+    RegisterSpellScript<NecroticAura>("spell_loatheb_necrotic_aura");
     RegisterSpellScript<AuraPreWarning>("spell_loatheb_prewarn");
     RegisterSpellScript<AuraWarning>("spell_loatheb_warn");
 }
