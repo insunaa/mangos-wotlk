@@ -787,11 +787,35 @@ struct ThaddiusTeslaEffect : SpellScript
                         caster->SetImmuneToPlayer(false);
                         static_cast<Creature*>(caster)->SetInCombatWithZone(false);
                         
-                        if (Unit* teslaTarget = ((Creature*)caster)->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                        if (Unit* teslaTarget = (static_cast<Creature*>(caster))->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                             caster->CastSpell(teslaTarget, SPELL_SHOCK, TRIGGERED_NONE);
                     }
                     else
                         caster->CombatStop(true);
+                }
+            }
+        }
+    }
+};
+
+struct ThaddiusTeslaPassive : public AuraScript
+{
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
+    {
+        if (Creature* caster = static_cast<Creature*>(data.caster))
+        {
+            if (instance_naxxramas* instance = dynamic_cast<instance_naxxramas*>(caster->GetInstanceData()))
+            {
+                if (instance->GetData(TYPE_THADDIUS) == DONE)
+                {
+                    caster->RemoveAllAuras();
+                }
+                else
+                {
+                    if (Creature* target = dynamic_cast<Creature*>(data.target))
+                        if (target->IsAlive() && !caster->IsWithinDistInMap(target, 100.f))
+                            if (Unit* teslaTarget = (static_cast<Creature*>(caster))->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                                caster->CastSpell(teslaTarget, SPELL_SHOCK, TRIGGERED_NONE);
                 }
             }
         }
@@ -828,4 +852,5 @@ void AddSC_boss_thaddius()
     RegisterSpellScript<ThaddiusCharge>("spell_thaddius_charge_buff");
     RegisterSpellScript<TriggerTeslas>("spell_trigger_teslas");
     RegisterSpellScript<ThaddiusTeslaEffect>("spell_thaddius_tesla_effect");
+    RegisterSpellScript<ThaddiusTeslaPassive>("spell_thaddius_tesla_passive");
 }

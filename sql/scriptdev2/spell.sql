@@ -526,6 +526,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (28732,'spell_widows_embrace'),
 (54097,'spell_widows_embrace'),
 (28359,'spell_trigger_teslas'),
+(28109,'spell_thaddius_tesla_passive'),
+(28097,'spell_thaddius_tesla_passive'),
 (28098,'spell_thaddius_tesla_effect'),
 (28110,'spell_thaddius_tesla_effect'),
 (41253,'spell_greater_invisibility_mob'),
