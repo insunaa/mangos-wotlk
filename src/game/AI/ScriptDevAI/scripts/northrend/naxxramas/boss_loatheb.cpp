@@ -158,6 +158,7 @@ struct AuraPreWarning : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
     {
+        sLog.outError("Target: %s, apply: %d, aura: %d", aura->GetTarget()->GetName(), apply, aura->GetId());
         if(!apply)
             if (Unit* target = aura->GetTarget())
                 DoBroadcastText(EMOTE_AURA_WANE, target);
@@ -168,6 +169,7 @@ struct AuraWarning : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
     {
+        sLog.outError("Target: %s, apply: %d, aura: %d", aura->GetTarget()->GetName(), apply, aura->GetId());
         if (!apply)
             if (Unit* target = aura->GetTarget())
                 DoBroadcastText(EMOTE_AURA_FADING, target);
