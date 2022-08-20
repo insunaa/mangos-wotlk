@@ -5,7 +5,7 @@
 #ifndef DEF_NAXXRAMAS_H
 #define DEF_NAXXRAMAS_H
 
-#include "AI/ScriptDevAI/scripts/northrend/naxxramas/naxxramas.h"
+#include "AI/ScriptDevAI/include/sc_instance.h"
 #include <unordered_set>
 enum
 {
