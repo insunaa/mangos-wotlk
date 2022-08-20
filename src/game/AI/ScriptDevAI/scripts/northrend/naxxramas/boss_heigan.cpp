@@ -105,7 +105,7 @@ struct boss_heiganAI : public BossAI
     {
         m_phase = PHASE_GROUND;
         SetReactState(REACT_AGGRESSIVE);
-        SetRootSelf(false);
+        SetCombatMovement(true);
         SetMeleeEnabled(true);
         StopEruptions();
         BossAI::Reset();
@@ -178,7 +178,7 @@ struct boss_heiganAI : public BossAI
                 if (DoCastSpellIfCan(m_creature, SPELL_TELEPORT) == CAST_OK)
                 {
                     StopEruptions();
-                    SetRootSelf(true);
+                    SetCombatMovement(false);
                     DoBroadcastText(EMOTE_TELEPORT, m_creature);
                     m_creature->GetMotionMaster()->MoveIdle();
                     SetReactState(REACT_PASSIVE);
@@ -198,7 +198,7 @@ struct boss_heiganAI : public BossAI
             {
                 ResetAllTimers();
                 StopEruptions();
-                SetRootSelf(false);
+                SetCombatMovement(true);
                 SetReactState(REACT_AGGRESSIVE);
                 m_creature->InterruptNonMeleeSpells(true);
                 DoBroadcastText(EMOTE_RETURN, m_creature);
