@@ -173,9 +173,7 @@ struct boss_sapphironAI : public BossAI
     {
         if (type == POINT_MOTION_TYPE && m_phase == PHASE_LIFT_OFF)
         {
-            // Summon the Wing Buffet NPC and cast the triggered aura to despawn it
-            if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_WING_BUFFET) == CAST_OK)
-                DoCastSpellIfCan(nullptr, SPELL_DESPAWN_WING_BUFFET);
+            DoCastSpellIfCan(m_creature, SPELL_SUMMON_WING_BUFFET);
 
             // Actual take off
             m_creature->HandleEmote(EMOTE_ONESHOT_LIFTOFF);
@@ -290,9 +288,7 @@ struct boss_sapphironAI : public BossAI
                 m_creature->HandleEmote(EMOTE_ONESHOT_LAND);
                 DoBroadcastText(EMOTE_SAPPHIRON_LAND, m_creature);
                 if (Creature* buffetDummy = GetClosestCreatureWithEntry(m_creature, NPC_WING_BUFFET, 10.f))
-                {
                     buffetDummy->ForcedDespawn(); // Despawn Dummy manually due to different Air-Phase durations between 10 and 25 versions
-                }
                 ResetCombatAction(SAPPHIRON_GROUND_PHASE, 2s);
                 DisableCombatAction(SAPPHIRON_LANDING_PHASE);
                 return;
@@ -386,15 +382,6 @@ struct DespawnIceBlock : public SpellScript
     }
 };
 
-struct DespawnBuffet : public AuraScript
-{
-    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
-    {
-        if (Unit* target =  aura->GetTarget())
-            data.spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(SPELL_DESPAWN_BUFFET_EFFECT); // Despawn Ice Block
-    }
-};
-
 struct SapphironAchievementCheck : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex) const override
@@ -439,6 +426,5 @@ void AddSC_boss_sapphiron()
     RegisterSpellScript<PeriodicIceBolt>("spell_sapphiron_icebolt_aura");
     RegisterSpellScript<IceBolt>("spell_sapphiron_icebolt");
     RegisterSpellScript<DespawnIceBlock>("spell_sapphiron_iceblock");
-    RegisterSpellScript<DespawnBuffet>("spell_sapphiron_despawn_buffet");
     RegisterSpellScript<SapphironAchievementCheck>("spell_sapphiron_achievement_check");
 }
