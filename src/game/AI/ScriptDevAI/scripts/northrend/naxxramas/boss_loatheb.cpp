@@ -105,8 +105,8 @@ struct boss_loathebAI : public BossAI
             case LOATHEB_NECROTIC_AURA: return 20s;
             case LOATHEB_INEVITABLE_DOOM: return m_doomTimer;
             case LOATHEB_SUMMON_SPORE: return m_isRegularMode ? 36s : 18s;
-            case LOATHEB_DEATHBLOOM: 30s;
-            case LOATHEB_BERSERK: 5min;
+            case LOATHEB_DEATHBLOOM: return 30s;
+            case LOATHEB_BERSERK: return 5min;
         }
         return 0s;
     }
@@ -116,26 +116,38 @@ struct boss_loathebAI : public BossAI
         switch (action)
         {
             case LOATHEB_NECROTIC_AURA:
+            {
                 DoCastSpellIfCan(nullptr, SPELL_NECROTIC_AURA);
                 DoCastSpellIfCan(nullptr, SPELL_NECROTIC_PRE_WARN);
                 DoCastSpellIfCan(nullptr, SPELL_NECROTIC_WARN);
                 break;
+            }
             case LOATHEB_INEVITABLE_DOOM:
+            {
                 DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_INEVITABLE_DOOM : SPELL_INEVITABLE_DOOM_H);
                 break;
+            }
             case LOATHEB_SUMMON_SPORE:
+            {
                 DoCastSpellIfCan(m_creature, SPELL_SUMMON_SPORE);
                 break;
+            }
             case LOATHEB_DEATHBLOOM:
+            {
                 DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_DEATHBLOOM : SPELL_DEATHBLOOM_H);
                 break;
+            }
             case LOATHEB_BERSERK:
+            {
                 DoCastSpellIfCan(m_creature, SPELL_BERSERK);
                 break;
+            }
             case LOATHEB_SOFT_ENRAGE:
+            {
                 m_doomTimer = 15s;
                 DisableCombatAction(action);
                 return;
+            }
         }
         ResetCombatAction(action, GetSubsequentActionTimer(action));
     }
