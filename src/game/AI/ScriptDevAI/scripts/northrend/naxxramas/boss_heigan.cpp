@@ -49,7 +49,11 @@ enum
     SPELL_DECREPIT_FEVER_H  = 55011,
     SPELL_DISRUPTION        = 29310,
     SPELL_TELEPORT          = 30211,
-    SPELL_PLAGUE_CLOUD      = 29350
+    SPELL_PLAGUE_CLOUD      = 29350,
+    SPELL_PLAGUE_WAVE_SLOW  = 29351,
+    SPELL_PLAGUE_WAVE_FAST  = 30114,
+
+    NPC_PLAGUE_WAVE         = 17293,
 };
 
 static const float resetX = 2825.0f;                // Beyond this X-line, Heigan is outside his room and should reset (leashing)
@@ -96,12 +100,6 @@ struct boss_heiganAI : public BossAI
     bool m_isRegularMode;
 
     uint8 m_phase;
-    uint8 m_uiPhaseEruption;
-
-    void ResetPhase()
-    {
-        m_uiPhaseEruption = 0;
-    }
 
     void Reset() override
     {
@@ -109,28 +107,31 @@ struct boss_heiganAI : public BossAI
         SetReactState(REACT_AGGRESSIVE);
         SetRootSelf(false);
         SetMeleeEnabled(true);
-        ResetPhase();
+        StopEruptions();
     }
 
     void EnterEvadeMode() override
     {
-        Map::PlayerList const& lPlayers = m_instance->instance->GetPlayers();
-
-        if (!lPlayers.isEmpty())
-        {
-            for (const auto& lPlayer : lPlayers)
-            {
-                if (Player* pPlayer = lPlayer.getSource())
-                {
-                    if (pPlayer->IsAlive() && !pPlayer->IsGameMaster() && pPlayer->IsInWorld())
-                        return;
-                }
-            }
-        }
+        if (m_instance->GetPlayerInMap(true, false))
+            return;
         BossAI::EnterEvadeMode();
-        m_creature->ForcedDespawn();
-        m_creature->SetRespawnDelay(10 * IN_MILLISECONDS, true);
-        m_creature->Respawn();
+    }
+
+    void StartEruptions(uint32 spellId)
+    {
+        // Clear current plague waves controller spell before applying the new one
+        if (Creature* trigger = GetClosestCreatureWithEntry(m_creature, NPC_PLAGUE_WAVE, 100.0f))
+        {
+            trigger->RemoveAllAuras();
+            trigger->CastSpell(trigger, spellId, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+
+    void StopEruptions()
+    {
+        // Reset Plague Waves
+        if (Creature* trigger = GetClosestCreatureWithEntry(m_creature, NPC_PLAGUE_WAVE, 100.0f))
+            trigger->RemoveAllAuras();
     }
 
     std::chrono::milliseconds GetSubsequentActionTimer(uint32 action)
@@ -176,6 +177,7 @@ struct boss_heiganAI : public BossAI
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_TELEPORT) == CAST_OK)
                 {
+                    StopEruptions();
                     SetRootSelf(true);
                     DoBroadcastText(EMOTE_TELEPORT, m_creature);
                     m_creature->GetMotionMaster()->MoveIdle();
@@ -183,43 +185,34 @@ struct boss_heiganAI : public BossAI
                     m_creature->AttackStop();
                     m_creature->SetTarget(nullptr);
                     m_phase = PHASE_PLATFORM;
-                    ResetPhase();
                     DisableCombatAction(action);
                     DisableCombatAction(HEIGAN_DISRUPTION);
                     DisableCombatAction(HEIGAN_FEVER);
                     ResetCombatAction(HEIGAN_PHASE_GROUND, GetSubsequentActionTimer(HEIGAN_PHASE_GROUND));
                     ResetCombatAction(HEIGAN_START_CHANNELING, 1s);
-                    ResetCombatAction(HEIGAN_ERUPTION, 7500ms);
+                    ResetCombatAction(HEIGAN_ERUPTION, 7s + 500ms);
                     return;
                 }
             }
             case HEIGAN_PHASE_GROUND:
             {
+                ResetAllTimers();
+                StopEruptions();
                 SetRootSelf(false);
                 SetReactState(REACT_AGGRESSIVE);
                 m_creature->InterruptNonMeleeSpells(true);
                 DoBroadcastText(EMOTE_RETURN, m_creature);
                 m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
                 m_phase = PHASE_GROUND;
-                ResetPhase();
                 DisableCombatAction(action);
-                ResetCombatAction(HEIGAN_FEVER, GetSubsequentActionTimer(HEIGAN_FEVER));
-                ResetCombatAction(HEIGAN_DISRUPTION, GetSubsequentActionTimer(HEIGAN_DISRUPTION));
-                ResetCombatAction(HEIGAN_PHASE_PLATFORM, GetSubsequentActionTimer(HEIGAN_PHASE_PLATFORM));
-                ResetCombatAction(HEIGAN_ERUPTION, 15s);
+                ResetCombatAction(HEIGAN_ERUPTION, 5s);
                 return;
             }
             case HEIGAN_ERUPTION:
             {
-                for (uint8 uiArea = 0; uiArea < MAX_HEIGAN_TRAP_AREAS; ++uiArea)
-                {
-                    if (uiArea == (m_uiPhaseEruption % 6) || uiArea == 6 - (m_uiPhaseEruption % 6))
-                        continue;
-
-                    m_instance->DoTriggerHeiganTraps(m_creature, uiArea);
-                }
-                ++m_uiPhaseEruption;
-                break;
+                StartEruptions(m_phase == PHASE_GROUND ? SPELL_PLAGUE_WAVE_SLOW : SPELL_PLAGUE_WAVE_FAST);
+                DisableCombatAction(action);
+                return;
             }
             case HEIGAN_START_CHANNELING:
             {
@@ -232,10 +225,24 @@ struct boss_heiganAI : public BossAI
     }
 };
 
+struct PlagueWaveController : public AuraScript
+{
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& /* data */) const override
+    {
+        Unit* triggerTarget = aura->GetTriggerTarget();
+        uint32 spellForTick[6] = { 30116, 30117, 30118, 30119, 30118, 30117 };  // Circling back and forth through the 4 plague areas
+        uint32 tick = (aura->GetAuraTicks() - 1) % 6;
+
+        triggerTarget->CastSpell(triggerTarget, spellForTick[tick], TRIGGERED_OLD_TRIGGERED, nullptr, aura, aura->GetCasterGuid(), nullptr);
+    }
+};
+
 void AddSC_boss_heigan()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_heigan";
     pNewScript->GetAI = &GetNewAIInstance<boss_heiganAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<PlagueWaveController>("spell_plague_wave_controller");
 }
