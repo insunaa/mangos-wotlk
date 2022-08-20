@@ -196,15 +196,16 @@ struct boss_heiganAI : public BossAI
             }
             case HEIGAN_PHASE_GROUND:
             {
-                ResetAllTimers();
+                m_phase = PHASE_GROUND;
                 StopEruptions();
                 SetRootSelf(false);
                 SetReactState(REACT_AGGRESSIVE);
                 m_creature->InterruptNonMeleeSpells(true);
                 DoBroadcastText(EMOTE_RETURN, m_creature);
                 m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
-                m_phase = PHASE_GROUND;
                 DisableCombatAction(action);
+                ResetCombatAction(HEIGAN_DISRUPTION, GetSubsequentActionTimer(HEIGAN_DISRUPTION));
+                ResetCombatAction(HEIGAN_FEVER, GetSubsequentActionTimer(HEIGAN_FEVER));
                 ResetCombatAction(HEIGAN_ERUPTION, 0s);
                 return;
             }
