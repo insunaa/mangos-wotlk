@@ -88,7 +88,7 @@ struct boss_heiganAI : public BossAI
         AddOnAggroText(SAY_AGGRO1, SAY_AGGRO2, SAY_AGGRO3);
         AddCombatAction(HEIGAN_FEVER, 4s);
         AddCombatAction(HEIGAN_DISRUPTION, 5s);
-        AddCombatAction(HEIGAN_ERUPTION, 15s);
+        AddCombatAction(HEIGAN_ERUPTION, 5s);
         AddCombatAction(HEIGAN_TAUNT, 20s, 60s);
         AddCombatAction(HEIGAN_PHASE_PLATFORM, 90s);
         AddCombatAction(HEIGAN_PHASE_GROUND, true);
@@ -191,8 +191,8 @@ struct boss_heiganAI : public BossAI
                     ResetCombatAction(HEIGAN_PHASE_GROUND, GetSubsequentActionTimer(HEIGAN_PHASE_GROUND));
                     ResetCombatAction(HEIGAN_START_CHANNELING, 1s);
                     ResetCombatAction(HEIGAN_ERUPTION, 3s);
-                    return;
                 }
+                return;
             }
             case HEIGAN_PHASE_GROUND:
             {
@@ -210,7 +210,6 @@ struct boss_heiganAI : public BossAI
             }
             case HEIGAN_ERUPTION:
             {
-                sLog.outError("Heigan Wave Debug. Phase: %d", m_phase);
                 StartEruptions(m_phase == PHASE_GROUND ? SPELL_PLAGUE_WAVE_SLOW : SPELL_PLAGUE_WAVE_FAST);
                 DisableCombatAction(action);
                 return;
