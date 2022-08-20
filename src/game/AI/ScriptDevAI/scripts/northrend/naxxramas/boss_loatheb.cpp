@@ -117,9 +117,10 @@ struct boss_loathebAI : public BossAI
         {
             case LOATHEB_NECROTIC_AURA:
             {
+                DoBroadcastText(EMOTE_AURA_BLOCKING, m_creature);
                 DoCastSpellIfCan(nullptr, SPELL_NECROTIC_AURA);
-                DoCastSpellIfCan(nullptr, SPELL_NECROTIC_PRE_WARN);
-                DoCastSpellIfCan(nullptr, SPELL_NECROTIC_WARN);
+                DoCastSpellIfCan(m_creature, SPELL_NECROTIC_PRE_WARN);
+                DoCastSpellIfCan(m_creature, SPELL_NECROTIC_WARN);
                 break;
             }
             case LOATHEB_INEVITABLE_DOOM:
