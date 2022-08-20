@@ -555,6 +555,10 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
                 SetSpecialAchievementCriteria(TYPE_ACHIEV_GET_ENOUGH, false);
                 DoUseDoorOrButton(GO_KELTHUZAD_TRIGGER);
                 m_despawnKTTriggerTimer = 5 * IN_MILLISECONDS;
+            } else if (uiData == FAIL)
+            {
+                if (GameObject* trigger = GetSingleGameObjectFromStorage(GO_KELTHUZAD_TRIGGER))
+                    trigger->Respawn();
             }
             break;
         case TYPE_UNDYING_FAILED:
