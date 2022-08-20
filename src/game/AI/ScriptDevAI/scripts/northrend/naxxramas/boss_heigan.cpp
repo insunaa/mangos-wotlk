@@ -202,8 +202,19 @@ struct boss_heiganAI : public BossAI
                     DisableCombatAction(action);
                     DisableCombatAction(HEIGAN_DISRUPTION);
                     DisableCombatAction(HEIGAN_FEVER);
+                    ResetCombatAction(HEIGAN_ERUPTION, 3s);
+                    ResetCombatAction(HEIGAN_ERUPTION, 3s);
+                    ResetCombatAction(HEIGAN_ERUPTION, 3s);
+                    ResetCombatAction(HEIGAN_ERUPTION, 3s);
                     ResetCombatAction(HEIGAN_PHASE_GROUND, GetSubsequentActionTimer(HEIGAN_PHASE_GROUND));
                     ResetCombatAction(HEIGAN_START_CHANNELING, 1s);
+                    ResetCombatAction(HEIGAN_ERUPTION, 3s);
+                    ResetCombatAction(HEIGAN_ERUPTION, 3s);
+                    ResetCombatAction(HEIGAN_ERUPTION, 3s);
+                    ResetCombatAction(HEIGAN_ERUPTION, 3s);
+                    ResetCombatAction(HEIGAN_ERUPTION, 3s);
+                    ResetCombatAction(HEIGAN_ERUPTION, 3s);
+                    ResetCombatAction(HEIGAN_ERUPTION, 3s);
                     ResetCombatAction(HEIGAN_ERUPTION, 3s);
                 }
                 return;
@@ -220,6 +231,7 @@ struct boss_heiganAI : public BossAI
                 DisableCombatAction(action);
                 ResetCombatAction(HEIGAN_DISRUPTION, GetSubsequentActionTimer(HEIGAN_DISRUPTION));
                 ResetCombatAction(HEIGAN_FEVER, GetSubsequentActionTimer(HEIGAN_FEVER));
+                ResetCombatAction(HEIGAN_PHASE_PLATFORM, GetSubsequentActionTimer(HEIGAN_PHASE_PLATFORM));
                 ResetCombatAction(HEIGAN_ERUPTION, 0s);
                 return;
             }
