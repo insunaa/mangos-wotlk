@@ -91,7 +91,7 @@ struct boss_anubrekhanAI : public BossAI
 
     void Aggro(Unit *who) override
     {
-        if (!m_isRegularMode)
+        if (m_isRegularMode)
             ResetTimer(ANUBREKHAN_SUMMON, 20s);
         BossAI::Aggro(who);
     }
@@ -142,7 +142,7 @@ struct boss_anubrekhanAI : public BossAI
 
         if (pSummoned && pSummoned->GetEntry() == NPC_CRYPT_GUARD)
         {
-            pSummoned->CastSpell(pSummoned, SPELL_SELF_SPAWN_10, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
+            pSummoned->CastSpell(pSummoned, SPELL_SELF_SPAWN_10, TRIGGERED_OLD_TRIGGERED);//, nullptr, nullptr, m_creature->GetObjectGuid());
             DoBroadcastText(EMOTE_CORPSE_SCARABS, pSummoned);
         }
     }
