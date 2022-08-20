@@ -105,7 +105,7 @@ struct boss_heiganAI : public BossAI
     {
         m_phase = PHASE_GROUND;
         SetReactState(REACT_AGGRESSIVE);
-        SetCombatMovement(true);
+        SetRootSelf(false);
         SetMeleeEnabled(true);
         StopEruptions();
         BossAI::Reset();
@@ -178,7 +178,7 @@ struct boss_heiganAI : public BossAI
                 if (DoCastSpellIfCan(m_creature, SPELL_TELEPORT) == CAST_OK)
                 {
                     StopEruptions();
-                    SetCombatMovement(false);
+                    SetRootSelf(true);
                     DoBroadcastText(EMOTE_TELEPORT, m_creature);
                     m_creature->GetMotionMaster()->MoveIdle();
                     SetReactState(REACT_PASSIVE);
@@ -198,7 +198,7 @@ struct boss_heiganAI : public BossAI
             {
                 ResetAllTimers();
                 StopEruptions();
-                SetCombatMovement(true);
+                SetRootSelf(false);
                 SetReactState(REACT_AGGRESSIVE);
                 m_creature->InterruptNonMeleeSpells(true);
                 DoBroadcastText(EMOTE_RETURN, m_creature);
@@ -210,6 +210,7 @@ struct boss_heiganAI : public BossAI
             }
             case HEIGAN_ERUPTION:
             {
+                sLog.outError("Eruption called. Phase: %d", m_phase);
                 StartEruptions(m_phase == PHASE_GROUND ? SPELL_PLAGUE_WAVE_SLOW : SPELL_PLAGUE_WAVE_FAST);
                 DisableCombatAction(action);
                 return;
