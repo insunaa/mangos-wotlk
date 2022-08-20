@@ -45,12 +45,13 @@ enum
     NPC_SPORE               = 16286,
 
     SPELLSET_10N            = 1601101,
+    SPELLSET_10N_P2         = 1601102,
     SPELLSET_25N            = 2971801,
+    SPELLSET_25N_P2         = 2971802,
 };
 
 enum LoathebActions
 {
-    LOATHEB_INEVITABLE_DOOM,
     LOATHEB_BERSERK,
     LOATHEB_SOFT_ENRAGE,
     LOATHEB_ACTIONS_MAX,
@@ -63,20 +64,18 @@ struct boss_loathebAI : public BossAI
     m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
         SetDataType(TYPE_LOATHEB);
-        AddCombatAction(LOATHEB_INEVITABLE_DOOM, 2min);
         AddCombatAction(LOATHEB_SOFT_ENRAGE, 5min);
         if (!m_isRegularMode)
             AddCombatAction(LOATHEB_BERSERK, 12min);
+        Reset();
     }
 
     instance_naxxramas* m_instance;
     bool m_isRegularMode;
-    std::chrono::seconds m_doomTimer = 30s;
 
     void Reset() override
     {
         m_creature->SetSpellList(m_isRegularMode ? SPELLSET_10N : SPELLSET_25N);
-        m_doomTimer = 30s;
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -94,25 +93,10 @@ struct boss_loathebAI : public BossAI
             m_instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_SPORE_LOSER, false);
     }
 
-    std::chrono::milliseconds GetSubsequentActionTimer(uint32 action)
-    {
-        switch (action)
-        {
-            case LOATHEB_INEVITABLE_DOOM: return m_doomTimer;
-            case LOATHEB_BERSERK: return 5min;
-        }
-        return 0s;
-    }
-
     void ExecuteAction(uint32 action) override
     {
         switch (action)
         {
-            case LOATHEB_INEVITABLE_DOOM:
-            {
-                DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_INEVITABLE_DOOM : SPELL_INEVITABLE_DOOM_H);
-                break;
-            }
             case LOATHEB_BERSERK:
             {
                 DoCastSpellIfCan(m_creature, SPELL_BERSERK);
@@ -120,12 +104,12 @@ struct boss_loathebAI : public BossAI
             }
             case LOATHEB_SOFT_ENRAGE:
             {
-                m_doomTimer = 15s;
+                m_creature->SetSpellList(m_isRegularMode ? SPELLSET_10N_P2 : SPELLSET_25N_P2);
                 DisableCombatAction(action);
                 return;
             }
         }
-        ResetCombatAction(action, GetSubsequentActionTimer(action));
+        ResetCombatAction(action, 5min);
     }
 };
 
