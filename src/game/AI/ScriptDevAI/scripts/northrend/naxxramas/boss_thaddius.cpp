@@ -279,6 +279,7 @@ struct npc_tesla_coilAI : public Scripted_NoMovementAI
     npc_tesla_coilAI(Creature* creature) : Scripted_NoMovementAI(creature),
     m_instance(dynamic_cast<instance_naxxramas*>(creature->GetInstanceData()))
     {
+        SetRootSelf(true);
         Reset();
     }
 
@@ -726,6 +727,77 @@ struct ThaddiusCharge : public AuraScript
     }
 };
 
+struct TriggerTeslas : SpellScript
+{
+    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex effIdx) const override
+    {
+        if (target->GetTypeId() == TYPEID_UNIT && target->GetEntry() == NPC_TESLA_COIL)
+            return true;
+        return false;
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx ) const override
+    {
+        if (Unit* target = spell->GetUnitTarget())
+        {
+            DoBroadcastText(EMOTE_TESLA_OVERLOAD, target);
+            target->RemoveAllAuras();
+            target->CastSpell(target, SPELL_SHOCK_OVERLOAD, TRIGGERED_NONE);
+        }
+        return;
+    }
+};
+
+struct ThaddiusTeslaEffect : SpellScript
+{
+    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex effIdx) const override
+    {
+        if (!target)
+            return false;
+        if (target->GetTypeId() == TYPEID_UNIT)
+        {
+            if (spell->m_spellInfo->Id == SPELL_FEUGEN_TESLA_EFFECT && target->GetEntry() == NPC_FEUGEN)
+                return true;
+            if (spell->m_spellInfo->Id == SPELL_STALAGG_TESLA_EFFECT && target->GetEntry() == NPC_STALAGG)
+                return true;
+        }
+        return false;
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx ) const override
+    {
+        if (Unit* target = spell->GetUnitTarget())
+        {
+            if (Unit* caster = spell->GetCaster())
+            {
+                if (target->GetTypeId() == TYPEID_UNIT && target->IsAlive())
+                {
+                    uint32 chainSpellId = spell->m_spellInfo->Id == SPELL_STALAGG_TESLA_EFFECT ? SPELL_STALAGG_CHAIN : SPELL_FEUGEN_CHAIN;
+
+                    if (!target->HasAura(chainSpellId) && caster->IsWithinDistInMap(target, 60.0f))
+                    {
+                        if (!caster->IsImmuneToPlayer())
+                            caster->SetImmuneToPlayer(true);
+                        caster->CastSpell(target, chainSpellId, TRIGGERED_OLD_TRIGGERED);
+                        caster->CombatStop(true);
+                    }
+                    else if (!caster->IsWithinDistInMap(target, 60.0f))
+                    {
+                        target->RemoveAurasDueToSpell(chainSpellId);
+                        caster->SetImmuneToPlayer(false);
+                        static_cast<Creature*>(caster)->SetInCombatWithZone(false);
+                        
+                        if (Unit* teslaTarget = ((Creature*)caster)->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                            caster->CastSpell(teslaTarget, SPELL_SHOCK, TRIGGERED_NONE);
+                    }
+                    else
+                        caster->CombatStop(true);
+                }
+            }
+        }
+    }
+};
+
 void AddSC_boss_thaddius()
 {
     Script* pNewScript = new Script;
@@ -754,4 +826,6 @@ void AddSC_boss_thaddius()
     RegisterSpellScript<PolarityShift>("spell_thaddius_polarity_shift");
     RegisterSpellScript<ThaddiusChargeDamage>("spell_thaddius_charge_damage");
     RegisterSpellScript<ThaddiusCharge>("spell_thaddius_charge_buff");
+    RegisterSpellScript<TriggerTeslas>("spell_trigger_teslas");
+    RegisterSpellScript<ThaddiusTeslaEffect>("spell_thaddius_tesla_effect");
 }
