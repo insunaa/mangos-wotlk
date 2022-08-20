@@ -47,10 +47,7 @@ enum
 
 enum LoathebActions
 {
-    LOATHEB_DEATHBLOOM,
     LOATHEB_INEVITABLE_DOOM,
-    LOATHEB_NECROTIC_AURA,
-    LOATHEB_SUMMON_SPORE,
     LOATHEB_BERSERK,
     LOATHEB_SOFT_ENRAGE,
     LOATHEB_ACTIONS_MAX,
@@ -63,10 +60,7 @@ struct boss_loathebAI : public BossAI
     m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
         SetDataType(TYPE_LOATHEB);
-        AddCombatAction(LOATHEB_DEATHBLOOM, 5s);
-        AddCombatAction(LOATHEB_NECROTIC_AURA, 12s);
         AddCombatAction(LOATHEB_INEVITABLE_DOOM, 2min);
-        AddCombatAction(LOATHEB_SUMMON_SPORE, RandomTimer(10s, 15s));
         AddCombatAction(LOATHEB_SOFT_ENRAGE, 5min);
         if (!m_isRegularMode)
             AddCombatAction(LOATHEB_BERSERK, 12min);
@@ -75,8 +69,6 @@ struct boss_loathebAI : public BossAI
     instance_naxxramas* m_instance;
     bool m_isRegularMode;
     std::chrono::seconds m_doomTimer = 30s;
-
-//    uint8  m_uiNecroticAuraCount;                           // Used for emotes, 5min check
 
     void Reset() override
     {
@@ -102,10 +94,7 @@ struct boss_loathebAI : public BossAI
     {
         switch (action)
         {
-            case LOATHEB_NECROTIC_AURA: return 20s;
             case LOATHEB_INEVITABLE_DOOM: return m_doomTimer;
-            case LOATHEB_SUMMON_SPORE: return m_isRegularMode ? 36s : 18s;
-            case LOATHEB_DEATHBLOOM: return 30s;
             case LOATHEB_BERSERK: return 5min;
         }
         return 0s;
@@ -115,27 +104,9 @@ struct boss_loathebAI : public BossAI
     {
         switch (action)
         {
-            case LOATHEB_NECROTIC_AURA:
-            {
-                DoBroadcastText(EMOTE_AURA_BLOCKING, m_creature);
-                DoCastSpellIfCan(nullptr, SPELL_NECROTIC_AURA);
-                DoCastSpellIfCan(m_creature, SPELL_NECROTIC_PRE_WARN);
-                DoCastSpellIfCan(m_creature, SPELL_NECROTIC_WARN);
-                break;
-            }
             case LOATHEB_INEVITABLE_DOOM:
             {
                 DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_INEVITABLE_DOOM : SPELL_INEVITABLE_DOOM_H);
-                break;
-            }
-            case LOATHEB_SUMMON_SPORE:
-            {
-                DoCastSpellIfCan(m_creature, SPELL_SUMMON_SPORE);
-                break;
-            }
-            case LOATHEB_DEATHBLOOM:
-            {
-                DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_DEATHBLOOM : SPELL_DEATHBLOOM_H);
                 break;
             }
             case LOATHEB_BERSERK:
