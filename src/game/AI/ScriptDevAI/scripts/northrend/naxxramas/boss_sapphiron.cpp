@@ -208,7 +208,7 @@ struct boss_sapphironAI : public BossAI
             case SAPPHIRON_LIFE_DRAIN:
             {
                 if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_LIFE_DRAIN : SPELL_LIFE_DRAIN_H) == CAST_OK)
-                   break;
+                    break;
                 return;
             }
             case SAPPHIRON_BLIZZARD:
@@ -319,9 +319,8 @@ struct boss_sapphironAI : public BossAI
                 DoCastSpellIfCan(nullptr, SPELL_ACHIEVEMENT_CHECK);
                 break;
             }
-
-            ResetCombatAction(action, GetSubsequentActionTimer(action));
         }
+        ResetCombatAction(action, GetSubsequentActionTimer(action));
     }
 };
 
