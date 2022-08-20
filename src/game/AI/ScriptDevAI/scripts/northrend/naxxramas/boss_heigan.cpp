@@ -108,6 +108,7 @@ struct boss_heiganAI : public BossAI
         SetRootSelf(false);
         SetMeleeEnabled(true);
         StopEruptions();
+        BossAI::Reset();
     }
 
     void EnterEvadeMode() override
@@ -141,7 +142,6 @@ struct boss_heiganAI : public BossAI
             case HEIGAN_FEVER: return 21s;
             case HEIGAN_DISRUPTION: return 10s;
             case HEIGAN_TAUNT: return RandomTimer(20s, 70s);
-            case HEIGAN_ERUPTION: return m_phase == PHASE_GROUND ? 10s : 3s;
             case HEIGAN_PHASE_PLATFORM: return 90s;
             case HEIGAN_PHASE_GROUND: return 45s;
             default: return 0s;
@@ -190,7 +190,7 @@ struct boss_heiganAI : public BossAI
                     DisableCombatAction(HEIGAN_FEVER);
                     ResetCombatAction(HEIGAN_PHASE_GROUND, GetSubsequentActionTimer(HEIGAN_PHASE_GROUND));
                     ResetCombatAction(HEIGAN_START_CHANNELING, 1s);
-                    ResetCombatAction(HEIGAN_ERUPTION, 7s + 500ms);
+                    ResetCombatAction(HEIGAN_ERUPTION, 3s);
                     return;
                 }
             }
@@ -205,11 +205,12 @@ struct boss_heiganAI : public BossAI
                 m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
                 m_phase = PHASE_GROUND;
                 DisableCombatAction(action);
-                ResetCombatAction(HEIGAN_ERUPTION, 5s);
+                ResetCombatAction(HEIGAN_ERUPTION, 0s);
                 return;
             }
             case HEIGAN_ERUPTION:
             {
+                sLog.outError("Heigan Wave Debug. Phase: %d", m_phase);
                 StartEruptions(m_phase == PHASE_GROUND ? SPELL_PLAGUE_WAVE_SLOW : SPELL_PLAGUE_WAVE_FAST);
                 DisableCombatAction(action);
                 return;
