@@ -87,6 +87,7 @@ enum SapphironActions
     SAPPHIRON_LANDING_PHASE,
     SAPPHIRON_GROUND_PHASE,
     SAPPHIRON_BERSERK,
+    SAPPHIRON_ACHIEVEMENT_CHECK,
     SAPPHIRON_ACTION_MAX,
 };
 
@@ -111,6 +112,7 @@ struct boss_sapphironAI : public BossAI
         AddCombatAction(SAPPHIRON_AIR_PHASE, true);
         AddCombatAction(SAPPHIRON_LANDING_PHASE, true);
         AddCombatAction(SAPPHIRON_GROUND_PHASE, true);
+        AddCombatAction(SAPPHIRON_ACHIEVEMENT_CHECK, 5s);
     }
 
     ScriptedInstance* m_instance;
@@ -146,6 +148,7 @@ struct boss_sapphironAI : public BossAI
             case SAPPHIRON_ICEBOLT: return 3s;
             case SAPPHIRON_BERSERK: return 5min;
             case SAPPHIRON_AIR_PHASE: return 46s;
+            case SAPPHIRON_ACHIEVEMENT_CHECK: return 5s;
             default: return 0s;
         }
     }
@@ -193,30 +196,29 @@ struct boss_sapphironAI : public BossAI
             case SAPPHIRON_CLEAVE:
             {
                 if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_CLEAVE : SPELL_CLEAVE) == CAST_OK)
-                    ResetCombatAction(action, GetSubsequentActionTimer(action));
+                    break;
                 return;
             }
             case SAPPHIRON_TAIL_SWEEP:
             {
                 if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_TAIL_SWEEP : SPELL_TAIL_SWEEP_H) == CAST_OK)
-                    ResetCombatAction(action, GetSubsequentActionTimer(action));
+                    break;
                 return;
             }
             case SAPPHIRON_LIFE_DRAIN:
             {
                 if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_LIFE_DRAIN : SPELL_LIFE_DRAIN_H) == CAST_OK)
-                    ResetCombatAction(action, GetSubsequentActionTimer(action));
+                   break;
                 return;
             }
             case SAPPHIRON_BLIZZARD:
             {
                 if (m_blizzardCount <= (m_bIsRegularMode ? 2 : 6))
                 {
-                    //if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_BLIZZARD_INIT) == CAST_OK)
                     if (DoCastSpellIfCan(m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0), SPELL_SUMMON_BLIZZARD, TRIGGERED_OLD_TRIGGERED) == CAST_OK)
                     {
-                        ResetCombatAction(action, GetSubsequentActionTimer(action));
                         m_blizzardCount++;
+                        break;
                     }
                 }
                 else
@@ -235,7 +237,7 @@ struct boss_sapphironAI : public BossAI
                     if (DoCastSpellIfCan(m_creature, SPELL_ICEBOLT_INIT) == CAST_OK)
                     {
                         ++m_iceboltCount;
-                        ResetCombatAction(action, GetSubsequentActionTimer(action));
+                        break;
                     }
                 }
                 else
@@ -312,6 +314,13 @@ struct boss_sapphironAI : public BossAI
                 DisableCombatAction(SAPPHIRON_GROUND_PHASE);
                 return;
             }
+            case SAPPHIRON_ACHIEVEMENT_CHECK:
+            {
+                DoCastSpellIfCan(nullptr, SPELL_ACHIEVEMENT_CHECK);
+                break;
+            }
+
+            ResetCombatAction(action, GetSubsequentActionTimer(action));
         }
     }
 };
@@ -387,6 +396,35 @@ struct DespawnBuffet : public AuraScript
     }
 };
 
+struct SapphironAchievementCheck : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex) const override
+    {
+        if (Creature* caster = dynamic_cast<Creature*>(spell->GetCaster()))
+        {
+            if (instance_naxxramas* instance = dynamic_cast<instance_naxxramas*>(caster->GetInstanceData()))
+            {
+                const auto targets = spell->GetTargetList();
+                Map* map = caster->GetMap();
+                bool failed = false;
+                if (!map)
+                    return;
+                for (auto target : targets)
+                {
+                    if (Player* player = map->GetPlayer(target.targetGUID))
+                        if (player->GetResistance(SPELL_SCHOOL_FROST) > 100)
+                        {
+                            failed = true;
+                            break;
+                        }
+                }
+                if (failed)
+                    instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_HUNDRED_CLUB, false);
+            }
+        }
+    }
+};
+
 void AddSC_boss_sapphiron()
 {
     Script* newScript = new Script;
@@ -403,4 +441,5 @@ void AddSC_boss_sapphiron()
     RegisterSpellScript<IceBolt>("spell_sapphiron_icebolt");
     RegisterSpellScript<DespawnIceBlock>("spell_sapphiron_iceblock");
     RegisterSpellScript<DespawnBuffet>("spell_sapphiron_despawn_buffet");
+    RegisterSpellScript<SapphironAchievementCheck>("spell_sapphiron_achievement_check");
 }

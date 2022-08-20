@@ -535,9 +535,8 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_SAPPHIRON:
             m_auiEncounter[uiType] = uiData;
-            // Uncomment when achiev check implemented
-            // if (uiData == IN_PROGRESS)
-            //    SetSpecialAchievementCriteria(TYPE_ACHIEV_HUNDRED_CLUB, true);
+            if (uiData == IN_PROGRESS)
+                SetSpecialAchievementCriteria(TYPE_ACHIEV_HUNDRED_CLUB, true);
             if (uiData == DONE)
             {
                 DoUseDoorOrButton(GO_KELTHUZAD_WATERFALL_DOOR);
