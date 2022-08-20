@@ -37,6 +37,8 @@ enum
     SPELL_INEVITABLE_DOOM   = 29204,
     SPELL_INEVITABLE_DOOM_H = 55052,
     SPELL_NECROTIC_AURA     = 55593,
+    SPELL_NECROTIC_PRE_WARN = 60929,
+    SPELL_NECROTIC_WARN     = 59481,
     SPELL_SUMMON_SPORE      = 29234,
     SPELL_BERSERK           = 26662,
 
@@ -50,6 +52,7 @@ enum LoathebActions
     LOATHEB_NECROTIC_AURA,
     LOATHEB_SUMMON_SPORE,
     LOATHEB_BERSERK,
+    LOATHEB_SOFT_ENRAGE,
     LOATHEB_ACTIONS_MAX,
 };
 
@@ -64,18 +67,20 @@ struct boss_loathebAI : public BossAI
         AddCombatAction(LOATHEB_NECROTIC_AURA, 12s);
         AddCombatAction(LOATHEB_INEVITABLE_DOOM, 2min);
         AddCombatAction(LOATHEB_SUMMON_SPORE, RandomTimer(10s, 15s));
+        AddCombatAction(LOATHEB_SOFT_ENRAGE, 5min);
         if (!m_isRegularMode)
             AddCombatAction(LOATHEB_BERSERK, 12min);
     }
 
     instance_naxxramas* m_instance;
     bool m_isRegularMode;
+    std::chrono::seconds m_doomTimer = 30s;
 
-    uint8  m_uiNecroticAuraCount;                           // Used for emotes, 5min check
+//    uint8  m_uiNecroticAuraCount;                           // Used for emotes, 5min check
 
     void Reset() override
     {
-        m_uiNecroticAuraCount = 0;
+        m_doomTimer = 30s;
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -97,18 +102,8 @@ struct boss_loathebAI : public BossAI
     {
         switch (action)
         {
-            case LOATHEB_NECROTIC_AURA:
-            {
-                switch (m_uiNecroticAuraCount % 3)
-                {
-                    case 0:
-                        return 14s;
-                    case 1:
-                    case 2:
-                        return 3s;
-                }
-            }
-            case LOATHEB_INEVITABLE_DOOM: return (m_uiNecroticAuraCount <= 40) ? 30s : 15s;
+            case LOATHEB_NECROTIC_AURA: return 20s;
+            case LOATHEB_INEVITABLE_DOOM: return m_doomTimer;
             case LOATHEB_SUMMON_SPORE: return m_isRegularMode ? 36s : 18s;
             case LOATHEB_DEATHBLOOM: 30s;
             case LOATHEB_BERSERK: 5min;
@@ -121,20 +116,9 @@ struct boss_loathebAI : public BossAI
         switch (action)
         {
             case LOATHEB_NECROTIC_AURA:
-                switch (m_uiNecroticAuraCount % 3)
-                {
-                    case 0:
-                        DoCastSpellIfCan(m_creature, SPELL_NECROTIC_AURA);
-                        DoBroadcastText(EMOTE_AURA_BLOCKING, m_creature);
-                        break;
-                    case 1:
-                        DoBroadcastText(EMOTE_AURA_WANE, m_creature);
-                        break;
-                    case 2:
-                        DoBroadcastText(EMOTE_AURA_FADING, m_creature);
-                        break;
-                }
-                ++m_uiNecroticAuraCount;
+                DoCastSpellIfCan(nullptr, SPELL_NECROTIC_AURA);
+                DoCastSpellIfCan(nullptr, SPELL_NECROTIC_PRE_WARN);
+                DoCastSpellIfCan(nullptr, SPELL_NECROTIC_WARN);
                 break;
             case LOATHEB_INEVITABLE_DOOM:
                 DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_INEVITABLE_DOOM : SPELL_INEVITABLE_DOOM_H);
@@ -148,8 +132,32 @@ struct boss_loathebAI : public BossAI
             case LOATHEB_BERSERK:
                 DoCastSpellIfCan(m_creature, SPELL_BERSERK);
                 break;
+            case LOATHEB_SOFT_ENRAGE:
+                m_doomTimer = 15s;
+                DisableCombatAction(action);
+                return;
         }
         ResetCombatAction(action, GetSubsequentActionTimer(action));
+    }
+};
+
+struct AuraPreWarning : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if(!apply)
+            if (Unit* target = aura->GetTarget())
+                DoBroadcastText(EMOTE_AURA_WANE, target);
+    }
+};
+
+struct AuraWarning : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply)
+            if (Unit* target = aura->GetTarget())
+                DoBroadcastText(EMOTE_AURA_FADING, target);
     }
 };
 
