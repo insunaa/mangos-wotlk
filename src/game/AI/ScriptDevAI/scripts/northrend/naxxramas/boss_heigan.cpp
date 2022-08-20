@@ -218,7 +218,8 @@ struct boss_heiganAI : public BossAI
             {
                 DoBroadcastText(SAY_CHANNELING, m_creature);
                 DoCastSpellIfCan(m_creature, SPELL_PLAGUE_CLOUD);
-                break;
+                DisableCombatAction(action);
+                return;
             }
         }
         ResetCombatAction(action, GetSubsequentActionTimer(action));
