@@ -71,7 +71,7 @@ struct boss_faerlinaAI : public BossAI
     bool m_hasTaunted;
     bool m_inGracePeriod;
 
-    void Aggro(Player* who) override
+    void Aggro(Unit* who) override
     {
         BossAI::Aggro(who);
         m_inGracePeriod = true;
