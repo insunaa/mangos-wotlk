@@ -152,6 +152,20 @@ struct boss_heiganAI : public BossAI
     {
         switch (action)
         {
+            case HEIGAN_ERUPTION:
+            {
+                sLog.outError("Eruption called. Phase: %d", m_phase);
+                StartEruptions(m_phase == PHASE_GROUND ? SPELL_PLAGUE_WAVE_SLOW : SPELL_PLAGUE_WAVE_FAST);
+                DisableCombatAction(action);
+                return;
+            }
+            case HEIGAN_START_CHANNELING:
+            {
+                DoBroadcastText(SAY_CHANNELING, m_creature);
+                DoCastSpellIfCan(m_creature, SPELL_PLAGUE_CLOUD);
+                DisableCombatAction(action);
+                return;
+            }
             case HEIGAN_FEVER:
             {
                 DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_DECREPIT_FEVER : SPELL_DECREPIT_FEVER_H);
@@ -207,20 +221,6 @@ struct boss_heiganAI : public BossAI
                 ResetCombatAction(HEIGAN_DISRUPTION, GetSubsequentActionTimer(HEIGAN_DISRUPTION));
                 ResetCombatAction(HEIGAN_FEVER, GetSubsequentActionTimer(HEIGAN_FEVER));
                 ResetCombatAction(HEIGAN_ERUPTION, 0s);
-                return;
-            }
-            case HEIGAN_ERUPTION:
-            {
-                sLog.outError("Eruption called. Phase: %d", m_phase);
-                StartEruptions(m_phase == PHASE_GROUND ? SPELL_PLAGUE_WAVE_SLOW : SPELL_PLAGUE_WAVE_FAST);
-                DisableCombatAction(action);
-                return;
-            }
-            case HEIGAN_START_CHANNELING:
-            {
-                DoBroadcastText(SAY_CHANNELING, m_creature);
-                DoCastSpellIfCan(m_creature, SPELL_PLAGUE_CLOUD);
-                DisableCombatAction(action);
                 return;
             }
         }
