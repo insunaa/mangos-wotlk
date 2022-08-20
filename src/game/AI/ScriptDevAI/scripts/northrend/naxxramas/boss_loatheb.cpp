@@ -42,7 +42,10 @@ enum
     SPELL_SUMMON_SPORE      = 29234,
     SPELL_BERSERK           = 26662,
 
-    NPC_SPORE               = 16286
+    NPC_SPORE               = 16286,
+
+    SPELLSET_10N            = 1601101,
+    SPELLSET_25N            = 2971801,
 };
 
 enum LoathebActions
@@ -72,6 +75,7 @@ struct boss_loathebAI : public BossAI
 
     void Reset() override
     {
+        m_creature->SetSpellList(m_isRegularMode ? SPELLSET_10N : SPELLSET_25N);
         m_doomTimer = 30s;
     }
 
