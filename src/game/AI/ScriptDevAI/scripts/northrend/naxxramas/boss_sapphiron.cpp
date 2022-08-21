@@ -261,7 +261,6 @@ struct IceBolt : public SpellScript
         if (!boss_ai)
             return;
 
-        boss_ai->m_iceboltCount += 1;
         if (Unit* target = caster->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_ICEBOLT, SELECT_FLAG_PLAYER | SELECT_FLAG_NOT_AURA))
             caster->CastSpell(target, SPELL_ICEBOLT, TRIGGERED_NONE);
 
@@ -273,6 +272,8 @@ struct IceBolt : public SpellScript
             caster->SetSpellList(boss_ai->m_isRegularMode ? SPELLSET_NULL_10N : SPELLSET_NULL_25N);
             boss_ai->ResetCombatAction(SAPPHIRON_LANDING_PHASE, 10s);
         }
+
+        boss_ai->m_iceboltCount += 1;
     }
 };
 
