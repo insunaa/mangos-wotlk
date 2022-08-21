@@ -65,6 +65,13 @@ enum
 
     NPC_BLIZZARD                = 16474,
     NPC_WING_BUFFET             = 17025,
+
+    SPELLSET_10N                = 1598901,
+    SPELLSET_AIR_10N            = 1598902,
+    SPELLSET_NULL_10N           = 1598903,
+    SPELLSET_25N                = 2999101,
+    SPELLSET_AIR_25N            = 2999102,
+    SPELLSET_NULL_25N           = 2999103,
 };
 
 static const float aLiftOffPosition[3] = {3522.386f, -5236.784f, 137.709f};
@@ -77,49 +84,39 @@ enum SapphironPhases
 
 enum SapphironActions
 {
-    SAPPHIRON_CLEAVE,
-    SAPPHIRON_TAIL_SWEEP,
-    SAPPHIRON_ICEBOLT,
-    SAPPHIRON_FROST_BREATH,
-    SAPPHIRON_LIFE_DRAIN,
-    SAPPHIRON_BLIZZARD,
+//    SAPPHIRON_ICEBOLT,
+//    SAPPHIRON_FROST_BREATH,
     SAPPHIRON_AIR_PHASE,
     SAPPHIRON_LANDING_PHASE,
     SAPPHIRON_GROUND_PHASE,
     SAPPHIRON_BERSERK,
-    SAPPHIRON_ACHIEVEMENT_CHECK,
+//    SAPPHIRON_ACHIEVEMENT_CHECK,
     SAPPHIRON_ACTION_MAX,
 };
 
 std::unordered_set<ObjectGuid> localIceBlocks;
 
-static const uint32 groundPhaseActions[] = {SAPPHIRON_CLEAVE, SAPPHIRON_TAIL_SWEEP, SAPPHIRON_BLIZZARD, SAPPHIRON_LIFE_DRAIN};
-
 struct boss_sapphironAI : public BossAI
 {
     boss_sapphironAI(Creature* creature) : BossAI(creature, SAPPHIRON_ACTION_MAX),
     m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())),
-    m_bIsRegularMode(creature->GetMap()->IsRegularDifficulty())
+    m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
         SetDataType(TYPE_SAPPHIRON);
-        AddCombatAction(SAPPHIRON_CLEAVE, 5s);
-        AddCombatAction(SAPPHIRON_TAIL_SWEEP, 12s);
-        AddCombatAction(SAPPHIRON_LIFE_DRAIN, 11s);
-        AddCombatAction(SAPPHIRON_BLIZZARD, 15s);
-        AddCombatAction(SAPPHIRON_FROST_BREATH, true);
-        AddCombatAction(SAPPHIRON_ICEBOLT, true);
+//        AddCombatAction(SAPPHIRON_FROST_BREATH, true);
+//        AddCombatAction(SAPPHIRON_ICEBOLT, true);
         AddCombatAction(SAPPHIRON_BERSERK, 15min);
         AddCombatAction(SAPPHIRON_AIR_PHASE, true);
         AddCombatAction(SAPPHIRON_LANDING_PHASE, true);
         AddCombatAction(SAPPHIRON_GROUND_PHASE, true);
-        AddCombatAction(SAPPHIRON_ACHIEVEMENT_CHECK, 5s);
+//        AddCombatAction(SAPPHIRON_ACHIEVEMENT_CHECK, 20s);
     }
 
     ScriptedInstance* m_instance;
 
     uint32 m_iceboltCount;
     SapphironPhases m_phase;
-    bool m_bIsRegularMode;
+    bool m_isRegularMode;
     uint32 m_blizzardCount;
 
     void Reset() override
@@ -135,27 +132,24 @@ struct boss_sapphironAI : public BossAI
         SetMeleeEnabled(true);
         SetCombatScriptStatus(false);
         m_creature->SetHover(false);
+        m_creature->SetSpellList(m_isRegularMode ? SPELLSET_10N : SPELLSET_25N);
     }
 
     std::chrono::milliseconds GetSubsequentActionTimer(uint32 action)
     {
         switch (action)
         {
-            case SAPPHIRON_CLEAVE: return RandomTimer(5s, 10s);
-            case SAPPHIRON_TAIL_SWEEP: return RandomTimer(7s, 10s);
-            case SAPPHIRON_LIFE_DRAIN: return 24s;
-            case SAPPHIRON_BLIZZARD: return RandomTimer(10s, 30s);
-            case SAPPHIRON_ICEBOLT: return 3s;
+//            case SAPPHIRON_ICEBOLT: return 3s;
             case SAPPHIRON_BERSERK: return 5min;
             case SAPPHIRON_AIR_PHASE: return 46s;
-            case SAPPHIRON_ACHIEVEMENT_CHECK: return 5s;
+//            case SAPPHIRON_ACHIEVEMENT_CHECK: return 20s;
             default: return 0s;
         }
     }
 
     void Aggro(Unit* /*who*/) override
     {
-        DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_FROST_AURA : SPELL_FROST_AURA_H, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_FROST_AURA : SPELL_FROST_AURA_H, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
         ResetCombatAction(SAPPHIRON_AIR_PHASE, GetSubsequentActionTimer(SAPPHIRON_AIR_PHASE));
         BossAI::Aggro();
     }
@@ -181,9 +175,8 @@ struct boss_sapphironAI : public BossAI
             m_creature->SetHover(true);
             m_creature->CastSpell(nullptr, SPELL_DRAGON_HOVER, TRIGGERED_OLD_TRIGGERED);
             SetCombatScriptStatus(false);
-            for (uint32 action : groundPhaseActions)
-                DisableCombatAction(action);
-            ResetCombatAction(SAPPHIRON_ICEBOLT, 8s);
+            m_creature->SetSpellList(m_isRegularMode ? SPELLSET_AIR_10N : SPELLSET_AIR_25N);
+//            ResetCombatAction(SAPPHIRON_ICEBOLT, 8s);
         }
     }
 
@@ -191,72 +184,35 @@ struct boss_sapphironAI : public BossAI
     {
         switch(action)
         {
-            case SAPPHIRON_CLEAVE:
-            {
-                if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_CLEAVE : SPELL_CLEAVE) == CAST_OK)
-                    break;
-                return;
-            }
-            case SAPPHIRON_TAIL_SWEEP:
-            {
-                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_TAIL_SWEEP : SPELL_TAIL_SWEEP_H) == CAST_OK)
-                    break;
-                return;
-            }
-            case SAPPHIRON_LIFE_DRAIN:
-            {
-                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_LIFE_DRAIN : SPELL_LIFE_DRAIN_H) == CAST_OK)
-                    break;
-                return;
-            }
-            case SAPPHIRON_BLIZZARD:
-            {
-                if (m_blizzardCount <= (m_bIsRegularMode ? 2 : 6))
-                {
-                    if (DoCastSpellIfCan(m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0), SPELL_SUMMON_BLIZZARD, TRIGGERED_OLD_TRIGGERED) == CAST_OK)
-                    {
-                        m_blizzardCount++;
-                        break;
-                    }
-                }
-                else
-                {
-                    m_blizzardCount = 0;
-                    DisableCombatAction(action);
-                }
-
-                return;
-
-            }
-            case SAPPHIRON_ICEBOLT:
-            {
-                if (m_iceboltCount < (m_bIsRegularMode ? 2 : 3))
-                {
-                    if (DoCastSpellIfCan(m_creature, SPELL_ICEBOLT_INIT) == CAST_OK)
-                    {
-                        ++m_iceboltCount;
-                        break;
-                    }
-                }
-                else
-                {
-                    m_iceboltCount = 0;
-                    DisableCombatAction(action);
-                    ResetCombatAction(SAPPHIRON_FROST_BREATH, 100ms);    // Enough Icebolts were cast, switch to Frost Breath (Ice Bomb) after that
-                }
-                return;
-            }
-            case SAPPHIRON_FROST_BREATH:
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_FROST_BREATH) == CAST_OK)
-                {
-                    DoCastSpellIfCan(m_creature, SPELL_FROST_BREATH_DUMMY, CAST_TRIGGERED);
-                    DoBroadcastText(EMOTE_BREATH, m_creature);
-                    DisableCombatAction(action);
-                    ResetCombatAction(SAPPHIRON_LANDING_PHASE, 10s);
-                }
-                return;
-            }
+            // case SAPPHIRON_ICEBOLT:
+            // {
+            //     if (m_iceboltCount < (m_isRegularMode ? 2 : 3))
+            //     {
+            //         if (DoCastSpellIfCan(m_creature, SPELL_ICEBOLT_INIT) == CAST_OK)
+            //         {
+            //             ++m_iceboltCount;
+            //             break;
+            //         }
+            //     }
+            //     else
+            //     {
+            //         m_iceboltCount = 0;
+            //         DisableCombatAction(action);
+            //         ResetCombatAction(SAPPHIRON_FROST_BREATH, 100ms);    // Enough Icebolts were cast, switch to Frost Breath (Ice Bomb) after that
+            //     }
+            //     return;
+            // }
+            // case SAPPHIRON_FROST_BREATH:
+            // {
+            //     if (DoCastSpellIfCan(m_creature, SPELL_FROST_BREATH) == CAST_OK)
+            //     {
+            //         DoCastSpellIfCan(m_creature, SPELL_FROST_BREATH_DUMMY, CAST_TRIGGERED);
+            //         DoBroadcastText(EMOTE_BREATH, m_creature);
+            //         DisableCombatAction(action);
+            //         ResetCombatAction(SAPPHIRON_LANDING_PHASE, 10s);
+            //     }
+            //     return;
+            // }
             case SAPPHIRON_BERSERK:
             {
                 if (DoCastSpellIfCan(nullptr, SPELL_BERSERK) == CAST_OK)
@@ -296,8 +252,7 @@ struct boss_sapphironAI : public BossAI
             case SAPPHIRON_GROUND_PHASE:
             {
                 m_phase = PHASE_GROUND;
-                for (uint32 action : groundPhaseActions)
-                    ResetCombatAction(action, GetSubsequentActionTimer(action));
+                m_creature->SetSpellList(m_isRegularMode ? SPELLSET_10N : SPELLSET_25N);
                 SetDeathPrevention(false);
                 SetCombatMovement(true);
                 SetMeleeEnabled(true);
@@ -310,11 +265,11 @@ struct boss_sapphironAI : public BossAI
                 DisableCombatAction(SAPPHIRON_GROUND_PHASE);
                 return;
             }
-            case SAPPHIRON_ACHIEVEMENT_CHECK:
-            {
-                DoCastSpellIfCan(nullptr, SPELL_ACHIEVEMENT_CHECK);
-                break;
-            }
+            // case SAPPHIRON_ACHIEVEMENT_CHECK:
+            // {
+            //     DoCastSpellIfCan(nullptr, SPELL_ACHIEVEMENT_CHECK);
+            //     break;
+            // }
         }
         ResetCombatAction(action, GetSubsequentActionTimer(action));
     }
@@ -345,8 +300,39 @@ struct IceBolt : public SpellScript
     {
         if (Unit* caster = spell->GetCaster())
         {
-            if (Unit* target = (static_cast<Creature*>(caster))->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_ICEBOLT, SELECT_FLAG_PLAYER | SELECT_FLAG_NOT_AURA))
-                caster->CastSpell(target, SPELL_ICEBOLT, TRIGGERED_NONE); // Icebolt
+            if (boss_sapphironAI* ai = dynamic_cast<boss_sapphironAI*>(caster->AI()))
+            {
+                if (ai->m_iceboltCount >= (ai->m_isRegularMode ? 2 : 3))
+                {
+                    if (ai->DoCastSpellIfCan(caster, SPELL_FROST_BREATH) == CAST_OK)
+                    {
+                        ai->DoCastSpellIfCan(caster, SPELL_FROST_BREATH_DUMMY, CAST_TRIGGERED);
+                        DoBroadcastText(EMOTE_BREATH, caster);
+                        static_cast<Creature*>(caster)->SetSpellList(ai->m_isRegularMode ? SPELLSET_NULL_10N : SPELLSET_NULL_25N);
+                        ai->ResetCombatAction(SAPPHIRON_LANDING_PHASE, 10s);
+                    }
+                }
+                else
+                {
+                    ai->m_iceboltCount += 1;
+                    if (Unit* target = caster->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_ICEBOLT, SELECT_FLAG_PLAYER | SELECT_FLAG_NOT_AURA))
+                        caster->CastSpell(target, SPELL_ICEBOLT, TRIGGERED_NONE);
+                }
+            }
+        }
+    }
+};
+
+struct FrostBreath : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (Unit* caster = spell->GetCaster())
+        {
+            if (boss_sapphironAI* ai = dynamic_cast<boss_sapphironAI*>(caster->AI()))
+            {
+                ai->m_iceboltCount = 0;
+            }
         }
     }
 };
@@ -378,6 +364,22 @@ struct DespawnIceBlock : public SpellScript
                 unitTarget->RemoveAurasDueToSpell(SPELL_ICEBOLT);                                   // Icebolt stun/damage spell
                 unitTarget->CastSpell(nullptr, SPELL_DESPAWN_ICEBLOCK_GO, TRIGGERED_OLD_TRIGGERED); // Despawn Ice Block (targets Ice Block GOs)
             }
+        }
+    }
+};
+
+struct SapphironBlizzardInit : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (Unit* caster = spell->GetCaster())
+        {
+            CreatureList blizzards;
+            GetCreatureListWithEntryInGrid(blizzards, caster, NPC_BLIZZARD, 100.f);
+            uint8 maximumBlizzards = caster->GetMap()->IsRegularDifficulty() ? 2 : 6;
+            if (blizzards.size() >= maximumBlizzards || !caster->AI())
+                return;
+            caster->AI()->DoCastSpellIfCan(caster->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0), SPELL_SUMMON_BLIZZARD, TRIGGERED_OLD_TRIGGERED);
         }
     }
 };
@@ -425,6 +427,8 @@ void AddSC_boss_sapphiron()
 
     RegisterSpellScript<PeriodicIceBolt>("spell_sapphiron_icebolt_aura");
     RegisterSpellScript<IceBolt>("spell_sapphiron_icebolt");
+    RegisterSpellScript<FrostBreath>("spell_sapphiron_frost_breath");
     RegisterSpellScript<DespawnIceBlock>("spell_sapphiron_iceblock");
+    RegisterSpellScript<SapphironBlizzardInit>("spell_sapphiron_blizzard_init");
     RegisterSpellScript<SapphironAchievementCheck>("spell_sapphiron_achievement_check");
 }
