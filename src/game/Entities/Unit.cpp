@@ -6549,6 +6549,7 @@ void Unit::RemoveAllAurasOnEvade()
     for (SpellAuraHolderMap::iterator iter = m_spellAuraHolders.begin(); iter != m_spellAuraHolders.end();)
     {
         SpellEntry const* proto = iter->second->GetSpellProto();
+        sLog.outError("Remove Aura: %s - %d", proto->SpellName, IsSpellRemovedOnEvade(proto));
         if (IsSpellRemovedOnEvade(proto))
         {
             RemoveSpellAuraHolder(iter->second, AURA_REMOVE_BY_DEFAULT);
