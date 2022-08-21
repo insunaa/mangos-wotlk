@@ -62,12 +62,12 @@ enum HeiganActions
 {
     HEIGAN_FEVER,
     HEIGAN_DISRUPTION,
-    HEIGAN_ERUPTION,
-    HEIGAN_TAUNT,
     HEIGAN_PHASE_PLATFORM,
-    HEIGAN_PHASE_GROUND,
     HEIGAN_START_CHANNELING,
     HEIGAN_ACTIONS_MAX,
+    HEIGAN_PHASE_GROUND,
+    HEIGAN_TAUNT,
+    HEIGAN_ERUPTIONS,
 };
 
 struct boss_heiganAI : public BossAI
@@ -88,11 +88,11 @@ struct boss_heiganAI : public BossAI
         AddOnAggroText(SAY_AGGRO1, SAY_AGGRO2, SAY_AGGRO3);
         AddCombatAction(HEIGAN_FEVER, 4s);
         AddCombatAction(HEIGAN_DISRUPTION, 5s);
-        AddCombatAction(HEIGAN_ERUPTION, 5s);
-        AddCombatAction(HEIGAN_TAUNT, 20s, 60s);
         AddCombatAction(HEIGAN_PHASE_PLATFORM, 90s);
-        AddCombatAction(HEIGAN_PHASE_GROUND, true);
         AddCombatAction(HEIGAN_START_CHANNELING, true);
+        AddCustomAction(HEIGAN_PHASE_GROUND, true, [&]() { HandleGroundPhase(); });
+        AddCustomAction(HEIGAN_TAUNT, true, [&](){ HandleTaunt(); });
+        AddCustomAction(HEIGAN_ERUPTIONS, true, [&](){ StartEruptions(); });
         Reset();
     }
 
@@ -111,6 +111,13 @@ struct boss_heiganAI : public BossAI
         BossAI::Reset();
     }
 
+    void Aggro(Unit *who = nullptr) override
+    {
+        ResetTimer(HEIGAN_ERUPTIONS, 5s);
+        ResetTimer(HEIGAN_TAUNT, RandomTimer(20s, 60s));
+        BossAI::Aggro(who);
+    }
+
     void EnterEvadeMode() override
     {
         if (m_instance->GetPlayerInMap(true, false))
@@ -118,9 +125,9 @@ struct boss_heiganAI : public BossAI
         BossAI::EnterEvadeMode();
     }
 
-    void StartEruptions(uint32 spellId)
+    void StartEruptions()
     {
-        // Clear current plague waves controller spell before applying the new one
+        uint32 spellId = m_phase == PHASE_GROUND ? SPELL_PLAGUE_WAVE_SLOW : SPELL_PLAGUE_WAVE_FAST;
         if (Creature* trigger = GetClosestCreatureWithEntry(m_creature, NPC_PLAGUE_WAVE, 100.0f))
         {
             trigger->RemoveAllAuras();
@@ -133,6 +140,35 @@ struct boss_heiganAI : public BossAI
         // Reset Plague Waves
         if (Creature* trigger = GetClosestCreatureWithEntry(m_creature, NPC_PLAGUE_WAVE, 100.0f))
             trigger->RemoveAllAuras();
+    }
+
+    void HandleGroundPhase()
+    {
+        m_phase = PHASE_GROUND;
+        StopEruptions();
+        SetRootSelf(false);
+        SetReactState(REACT_AGGRESSIVE);
+        m_creature->InterruptNonMeleeSpells(true);
+        DoBroadcastText(EMOTE_RETURN, m_creature);
+        m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
+        ResetCombatAction(HEIGAN_DISRUPTION, GetSubsequentActionTimer(HEIGAN_DISRUPTION));
+        ResetCombatAction(HEIGAN_FEVER, GetSubsequentActionTimer(HEIGAN_FEVER));
+        ResetCombatAction(HEIGAN_PHASE_PLATFORM, GetSubsequentActionTimer(HEIGAN_PHASE_PLATFORM));
+        ResetTimer(HEIGAN_ERUPTIONS, 5s);
+    }
+
+    void HandleTaunt()
+    {
+        if (!m_creature->IsAlive() || !m_creature->IsInCombat())
+            return;
+        switch (urand(0, 3))
+        {
+            case 0: DoBroadcastText(SAY_TAUNT1, m_creature); break;
+            case 1: DoBroadcastText(SAY_TAUNT2, m_creature); break;
+            case 2: DoBroadcastText(SAY_TAUNT3, m_creature); break;
+            case 3: DoBroadcastText(SAY_TAUNT4, m_creature); break;
+        }
+        ResetTimer(HEIGAN_TAUNT, GetSubsequentActionTimer(HEIGAN_TAUNT));
     }
 
     std::chrono::milliseconds GetSubsequentActionTimer(uint32 action)
@@ -152,13 +188,6 @@ struct boss_heiganAI : public BossAI
     {
         switch (action)
         {
-            case HEIGAN_ERUPTION:
-            {
-                sLog.outError("Eruption called. Phase: %d", m_phase);
-                StartEruptions(m_phase == PHASE_GROUND ? SPELL_PLAGUE_WAVE_SLOW : SPELL_PLAGUE_WAVE_FAST);
-                DisableCombatAction(action);
-                return;
-            }
             case HEIGAN_START_CHANNELING:
             {
                 DoBroadcastText(SAY_CHANNELING, m_creature);
@@ -176,17 +205,6 @@ struct boss_heiganAI : public BossAI
                 DoCastSpellIfCan(m_creature, SPELL_DISRUPTION);
                 break;
             }
-            case HEIGAN_TAUNT:
-            {
-                switch (urand(0, 3))
-                {
-                    case 0: DoBroadcastText(SAY_TAUNT1, m_creature); break;
-                    case 1: DoBroadcastText(SAY_TAUNT2, m_creature); break;
-                    case 2: DoBroadcastText(SAY_TAUNT3, m_creature); break;
-                    case 3: DoBroadcastText(SAY_TAUNT4, m_creature); break;
-                }
-                break;
-            }
             case HEIGAN_PHASE_PLATFORM:
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_TELEPORT) == CAST_OK)
@@ -202,37 +220,10 @@ struct boss_heiganAI : public BossAI
                     DisableCombatAction(action);
                     DisableCombatAction(HEIGAN_DISRUPTION);
                     DisableCombatAction(HEIGAN_FEVER);
-                    ResetCombatAction(HEIGAN_ERUPTION, 3s);
-                    ResetCombatAction(HEIGAN_ERUPTION, 3s);
-                    ResetCombatAction(HEIGAN_ERUPTION, 3s);
-                    ResetCombatAction(HEIGAN_ERUPTION, 3s);
-                    ResetCombatAction(HEIGAN_PHASE_GROUND, GetSubsequentActionTimer(HEIGAN_PHASE_GROUND));
                     ResetCombatAction(HEIGAN_START_CHANNELING, 1s);
-                    ResetCombatAction(HEIGAN_ERUPTION, 3s);
-                    ResetCombatAction(HEIGAN_ERUPTION, 3s);
-                    ResetCombatAction(HEIGAN_ERUPTION, 3s);
-                    ResetCombatAction(HEIGAN_ERUPTION, 3s);
-                    ResetCombatAction(HEIGAN_ERUPTION, 3s);
-                    ResetCombatAction(HEIGAN_ERUPTION, 3s);
-                    ResetCombatAction(HEIGAN_ERUPTION, 3s);
-                    ResetCombatAction(HEIGAN_ERUPTION, 3s);
+                    ResetTimer(HEIGAN_PHASE_GROUND, GetSubsequentActionTimer(HEIGAN_PHASE_GROUND));
+                    ResetTimer(HEIGAN_ERUPTIONS, 5s);
                 }
-                return;
-            }
-            case HEIGAN_PHASE_GROUND:
-            {
-                m_phase = PHASE_GROUND;
-                StopEruptions();
-                SetRootSelf(false);
-                SetReactState(REACT_AGGRESSIVE);
-                m_creature->InterruptNonMeleeSpells(true);
-                DoBroadcastText(EMOTE_RETURN, m_creature);
-                m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
-                DisableCombatAction(action);
-                ResetCombatAction(HEIGAN_DISRUPTION, GetSubsequentActionTimer(HEIGAN_DISRUPTION));
-                ResetCombatAction(HEIGAN_FEVER, GetSubsequentActionTimer(HEIGAN_FEVER));
-                ResetCombatAction(HEIGAN_PHASE_PLATFORM, GetSubsequentActionTimer(HEIGAN_PHASE_PLATFORM));
-                ResetCombatAction(HEIGAN_ERUPTION, 0s);
                 return;
             }
         }
