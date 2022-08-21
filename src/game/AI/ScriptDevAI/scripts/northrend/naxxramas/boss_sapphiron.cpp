@@ -298,20 +298,18 @@ struct IceBolt : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex /* effIdx */) const override
     {
-        if (Unit* caster = spell->GetCaster())
+        if (Creature* caster = static_cast<Creature*>(spell->GetCaster()))
         {
             if (boss_sapphironAI* ai = dynamic_cast<boss_sapphironAI*>(caster->AI()))
             {
                 sLog.outError("IceboltCount: %d", ai->m_iceboltCount);
                 if (ai->m_iceboltCount >= (ai->m_isRegularMode ? 2 : 3))
                 {
-                    if (ai->DoCastSpellIfCan(caster, SPELL_FROST_BREATH) == CAST_OK)
-                    {
-                        ai->DoCastSpellIfCan(caster, SPELL_FROST_BREATH_DUMMY, CAST_TRIGGERED);
-                        DoBroadcastText(EMOTE_BREATH, caster);
-                        static_cast<Creature*>(caster)->SetSpellList(ai->m_isRegularMode ? SPELLSET_NULL_10N : SPELLSET_NULL_25N);
-                        ai->ResetCombatAction(SAPPHIRON_LANDING_PHASE, 10s);
-                    }
+                    caster->CastSpell(caster, SPELL_FROST_BREATH, TRIGGERED_IGNORE_COOLDOWNS | TRIGGERED_IGNORE_GCD);
+                    caster->CastSpell(caster, SPELL_FROST_BREATH_DUMMY, TRIGGERED_IGNORE_COOLDOWNS | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD);
+                    DoBroadcastText(EMOTE_BREATH, caster);
+                    caster->SetSpellList(ai->m_isRegularMode ? SPELLSET_NULL_10N : SPELLSET_NULL_25N);
+                    ai->ResetCombatAction(SAPPHIRON_LANDING_PHASE, 10s);
                 }
                 else
                 {
