@@ -281,12 +281,13 @@ struct FrostBreath : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
-        if (Unit* caster = spell->GetCaster())
+        Unit* caster = spell->GetCaster();
+        if (!caster)
+            return;
+
+        if (boss_sapphironAI* ai = dynamic_cast<boss_sapphironAI*>(caster->AI()))
         {
-            if (boss_sapphironAI* ai = dynamic_cast<boss_sapphironAI*>(caster->AI()))
-            {
-                ai->m_iceboltCount = 0;
-            }
+            ai->m_iceboltCount = 0;
         }
     }
 };
@@ -295,13 +296,14 @@ struct PeriodicIceBolt : public AuraScript
 {
     void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
     {
-        if (Unit* target =  aura->GetTarget())
+        Unit* target =  aura->GetTarget();
+        if (!target)
+            return;
+
+        if (target->IsAlive() && !target->HasAura(SPELL_ICEBOLT_IMMUNITY))
         {
-            if (target->IsAlive() && !target->HasAura(SPELL_ICEBOLT_IMMUNITY))
-            {
-                target->CastSpell(target, SPELL_ICEBOLT_IMMUNITY, TRIGGERED_OLD_TRIGGERED);     // Icebolt which causes immunity to frost dmg
-                data.spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(SPELL_ICEBLOCK_SUMMON); // Summon Ice Block
-            }
+            target->CastSpell(target, SPELL_ICEBOLT_IMMUNITY, TRIGGERED_OLD_TRIGGERED);     // Icebolt which causes immunity to frost dmg
+            data.spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(SPELL_ICEBLOCK_SUMMON); // Summon Ice Block
         }
     }
 };
@@ -310,14 +312,15 @@ struct DespawnIceBlock : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex /* effIdx */) const override
     {
-        if (Unit* unitTarget = spell->GetUnitTarget())
+        Unit* unitTarget = spell->GetUnitTarget();
+        if (!unitTarget)
+            return;
+
+        if (unitTarget->GetTypeId() == TYPEID_PLAYER)
         {
-            if (unitTarget->GetTypeId() == TYPEID_PLAYER)
-            {
-                unitTarget->RemoveAurasDueToSpell(SPELL_ICEBOLT_IMMUNITY);                          // Icebolt immunity spell
-                unitTarget->RemoveAurasDueToSpell(SPELL_ICEBOLT);                                   // Icebolt stun/damage spell
-                unitTarget->CastSpell(nullptr, SPELL_DESPAWN_ICEBLOCK_GO, TRIGGERED_OLD_TRIGGERED); // Despawn Ice Block (targets Ice Block GOs)
-            }
+            unitTarget->RemoveAurasDueToSpell(SPELL_ICEBOLT_IMMUNITY);                          // Icebolt immunity spell
+            unitTarget->RemoveAurasDueToSpell(SPELL_ICEBOLT);                                   // Icebolt stun/damage spell
+            unitTarget->CastSpell(nullptr, SPELL_DESPAWN_ICEBLOCK_GO, TRIGGERED_OLD_TRIGGERED); // Despawn Ice Block (targets Ice Block GOs)
         }
     }
 };
@@ -326,15 +329,16 @@ struct SapphironBlizzardInit : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
-        if (Unit* caster = spell->GetCaster())
-        {
-            CreatureList blizzards;
-            GetCreatureListWithEntryInGrid(blizzards, caster, NPC_BLIZZARD, 100.f);
-            uint8 maximumBlizzards = caster->GetMap()->IsRegularDifficulty() ? 2 : 6;
-            if (blizzards.size() >= maximumBlizzards || !caster->AI())
-                return;
-            caster->CastSpell(caster->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0), SPELL_SUMMON_BLIZZARD, TRIGGERED_OLD_TRIGGERED);
-        }
+        Unit* caster = spell->GetCaster();
+        if (!caster)
+            return;
+
+        CreatureList blizzards;
+        GetCreatureListWithEntryInGrid(blizzards, caster, NPC_BLIZZARD, 100.f);
+        uint8 maximumBlizzards = caster->GetMap()->IsRegularDifficulty() ? 2 : 6;
+        if (blizzards.size() >= maximumBlizzards || !caster->AI())
+            return;
+        caster->CastSpell(caster->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0), SPELL_SUMMON_BLIZZARD, TRIGGERED_OLD_TRIGGERED);
     }
 };
 
@@ -342,28 +346,32 @@ struct SapphironAchievementCheck : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex) const override
     {
-        if (Creature* caster = dynamic_cast<Creature*>(spell->GetCaster()))
+        Creature* caster = dynamic_cast<Creature*>(spell->GetCaster());
+        if (!caster)
+            return;
+        instance_naxxramas* instance = dynamic_cast<instance_naxxramas*>(caster->GetInstanceData());
+        if (!instance)
+            return;
+
+        const auto targets = spell->GetTargetList();
+        Map* map = caster->GetMap();
+        bool failed = false;
+        if (!map)
+            return;
+
+        for (auto target : targets)
         {
-            if (instance_naxxramas* instance = dynamic_cast<instance_naxxramas*>(caster->GetInstanceData()))
+            Player* player = map->GetPlayer(target.targetGUID);
+            if (!player)
+                continue;
+            if (player->GetResistance(SPELL_SCHOOL_FROST) > 100)
             {
-                const auto targets = spell->GetTargetList();
-                Map* map = caster->GetMap();
-                bool failed = false;
-                if (!map)
-                    return;
-                for (auto target : targets)
-                {
-                    if (Player* player = map->GetPlayer(target.targetGUID))
-                        if (player->GetResistance(SPELL_SCHOOL_FROST) > 100)
-                        {
-                            failed = true;
-                            break;
-                        }
-                }
-                if (failed)
-                    instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_HUNDRED_CLUB, false);
+                failed = true;
+                break;
             }
         }
+        if (failed)
+            instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_HUNDRED_CLUB, false);
     }
 };
 
