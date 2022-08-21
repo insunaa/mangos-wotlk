@@ -84,13 +84,10 @@ enum SapphironPhases
 
 enum SapphironActions
 {
-//    SAPPHIRON_ICEBOLT,
-//    SAPPHIRON_FROST_BREATH,
     SAPPHIRON_AIR_PHASE,
     SAPPHIRON_LANDING_PHASE,
     SAPPHIRON_GROUND_PHASE,
     SAPPHIRON_BERSERK,
-//    SAPPHIRON_ACHIEVEMENT_CHECK,
     SAPPHIRON_ACTION_MAX,
 };
 
@@ -103,13 +100,10 @@ struct boss_sapphironAI : public BossAI
     m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
         SetDataType(TYPE_SAPPHIRON);
-//        AddCombatAction(SAPPHIRON_FROST_BREATH, true);
-//        AddCombatAction(SAPPHIRON_ICEBOLT, true);
         AddCombatAction(SAPPHIRON_BERSERK, 15min);
         AddCombatAction(SAPPHIRON_AIR_PHASE, true);
         AddCombatAction(SAPPHIRON_LANDING_PHASE, true);
         AddCombatAction(SAPPHIRON_GROUND_PHASE, true);
-//        AddCombatAction(SAPPHIRON_ACHIEVEMENT_CHECK, 20s);
     }
 
     ScriptedInstance* m_instance;
@@ -139,10 +133,8 @@ struct boss_sapphironAI : public BossAI
     {
         switch (action)
         {
-//            case SAPPHIRON_ICEBOLT: return 3s;
             case SAPPHIRON_BERSERK: return 5min;
             case SAPPHIRON_AIR_PHASE: return 46s;
-//            case SAPPHIRON_ACHIEVEMENT_CHECK: return 20s;
             default: return 0s;
         }
     }
@@ -169,14 +161,12 @@ struct boss_sapphironAI : public BossAI
         {
             DoCastSpellIfCan(m_creature, SPELL_SUMMON_WING_BUFFET);
 
-            // Actual take off
             m_creature->HandleEmote(EMOTE_ONESHOT_LIFTOFF);
             DoBroadcastText(EMOTE_SAPPHIRON_FLY, m_creature);
             m_creature->SetHover(true);
             m_creature->CastSpell(nullptr, SPELL_DRAGON_HOVER, TRIGGERED_OLD_TRIGGERED);
             SetCombatScriptStatus(false);
             m_creature->SetSpellList(m_isRegularMode ? SPELLSET_AIR_10N : SPELLSET_AIR_25N);
-//            ResetCombatAction(SAPPHIRON_ICEBOLT, 8s);
         }
     }
 
@@ -184,35 +174,6 @@ struct boss_sapphironAI : public BossAI
     {
         switch(action)
         {
-            // case SAPPHIRON_ICEBOLT:
-            // {
-            //     if (m_iceboltCount < (m_isRegularMode ? 2 : 3))
-            //     {
-            //         if (DoCastSpellIfCan(m_creature, SPELL_ICEBOLT_INIT) == CAST_OK)
-            //         {
-            //             ++m_iceboltCount;
-            //             break;
-            //         }
-            //     }
-            //     else
-            //     {
-            //         m_iceboltCount = 0;
-            //         DisableCombatAction(action);
-            //         ResetCombatAction(SAPPHIRON_FROST_BREATH, 100ms);    // Enough Icebolts were cast, switch to Frost Breath (Ice Bomb) after that
-            //     }
-            //     return;
-            // }
-            // case SAPPHIRON_FROST_BREATH:
-            // {
-            //     if (DoCastSpellIfCan(m_creature, SPELL_FROST_BREATH) == CAST_OK)
-            //     {
-            //         DoCastSpellIfCan(m_creature, SPELL_FROST_BREATH_DUMMY, CAST_TRIGGERED);
-            //         DoBroadcastText(EMOTE_BREATH, m_creature);
-            //         DisableCombatAction(action);
-            //         ResetCombatAction(SAPPHIRON_LANDING_PHASE, 10s);
-            //     }
-            //     return;
-            // }
             case SAPPHIRON_BERSERK:
             {
                 if (DoCastSpellIfCan(nullptr, SPELL_BERSERK) == CAST_OK)
@@ -265,11 +226,6 @@ struct boss_sapphironAI : public BossAI
                 DisableCombatAction(SAPPHIRON_GROUND_PHASE);
                 return;
             }
-            // case SAPPHIRON_ACHIEVEMENT_CHECK:
-            // {
-            //     DoCastSpellIfCan(nullptr, SPELL_ACHIEVEMENT_CHECK);
-            //     break;
-            // }
         }
         ResetCombatAction(action, GetSubsequentActionTimer(action));
     }
@@ -298,26 +254,26 @@ struct IceBolt : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex /* effIdx */) const override
     {
-        if (Creature* caster = static_cast<Creature*>(spell->GetCaster()))
+        Creature* caster = static_cast<Creature*>(spell->GetCaster());
+        if (!caster)
+            return;
+        boss_sapphironAI* boss_ai = dynamic_cast<boss_sapphironAI*>(caster->AI());
+        if (!boss_ai)
+            return;
+
+        if (boss_ai->m_iceboltCount >= (boss_ai->m_isRegularMode ? 2 : 3))
         {
-            if (boss_sapphironAI* ai = dynamic_cast<boss_sapphironAI*>(caster->AI()))
-            {
-                sLog.outError("IceboltCount: %d", ai->m_iceboltCount);
-                if (ai->m_iceboltCount >= (ai->m_isRegularMode ? 2 : 3))
-                {
-                    caster->CastSpell(caster, SPELL_FROST_BREATH, TRIGGERED_IGNORE_COOLDOWNS | TRIGGERED_IGNORE_GCD);
-                    caster->CastSpell(caster, SPELL_FROST_BREATH_DUMMY, TRIGGERED_IGNORE_COOLDOWNS | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD);
-                    DoBroadcastText(EMOTE_BREATH, caster);
-                    caster->SetSpellList(ai->m_isRegularMode ? SPELLSET_NULL_10N : SPELLSET_NULL_25N);
-                    ai->ResetCombatAction(SAPPHIRON_LANDING_PHASE, 10s);
-                }
-                else
-                {
-                    ai->m_iceboltCount += 1;
-                    if (Unit* target = caster->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_ICEBOLT, SELECT_FLAG_PLAYER | SELECT_FLAG_NOT_AURA))
-                        caster->CastSpell(target, SPELL_ICEBOLT, TRIGGERED_NONE);
-                }
-            }
+            caster->CastSpell(caster, SPELL_FROST_BREATH, TRIGGERED_IGNORE_COOLDOWNS | TRIGGERED_IGNORE_GCD);
+            caster->CastSpell(caster, SPELL_FROST_BREATH_DUMMY, TRIGGERED_IGNORE_COOLDOWNS | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD);
+            DoBroadcastText(EMOTE_BREATH, caster);
+            caster->SetSpellList(boss_ai->m_isRegularMode ? SPELLSET_NULL_10N : SPELLSET_NULL_25N);
+            boss_ai->ResetCombatAction(SAPPHIRON_LANDING_PHASE, 10s);
+        }
+        else
+        {
+            boss_ai->m_iceboltCount += 1;
+            if (Unit* target = caster->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_ICEBOLT, SELECT_FLAG_PLAYER | SELECT_FLAG_NOT_AURA))
+                caster->CastSpell(target, SPELL_ICEBOLT, TRIGGERED_NONE);
         }
     }
 };
