@@ -39,7 +39,7 @@ enum
     SAY_TAUNT3              = 13048,
     SAY_TAUNT4              = 13050,
     SAY_CHANNELING          = 13049,
-    SAY_DEATH               = 13043,
+    SAY_DEATH               = 13044,
     EMOTE_TELEPORT          = 32332,
     EMOTE_RETURN            = 32333,
 
