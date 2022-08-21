@@ -23,7 +23,6 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/base/CombatAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
-#include "Entities/Player.h"
 #include "naxxramas.h"
 
 enum
@@ -31,20 +30,19 @@ enum
     PHASE_GROUND            = 1,
     PHASE_PLATFORM          = 2,
 
-    SAY_AGGRO1              = -1533109,
-    SAY_AGGRO2              = -1533110,
-    SAY_AGGRO3              = -1533111,
-    SAY_SLAY                = -1533112,
-    SAY_TAUNT1              = -1533113,
-    SAY_TAUNT2              = -1533114,
-    SAY_TAUNT3              = -1533115,
-    SAY_TAUNT4              = -1533117,
-    SAY_CHANNELING          = -1533116,
-    SAY_DEATH               = -1533118,
-    EMOTE_TELEPORT          = -1533136,
-    EMOTE_RETURN            = -1533137,
+    SAY_AGGRO1              = 13041,
+    SAY_AGGRO2              = 13042,
+    SAY_AGGRO3              = 13043,
+    SAY_SLAY                = 13045,
+    SAY_TAUNT1              = 13046,
+    SAY_TAUNT2              = 13047,
+    SAY_TAUNT3              = 13048,
+    SAY_TAUNT4              = 13050,
+    SAY_CHANNELING          = 13049,
+    SAY_DEATH               = 13043,
+    EMOTE_TELEPORT          = 32332,
+    EMOTE_RETURN            = 32333,
 
-    // Spells by boss
     SPELL_DECREPIT_FEVER    = 29998,
     SPELL_DECREPIT_FEVER_H  = 55011,
     SPELL_DISRUPTION        = 29310,
@@ -137,7 +135,6 @@ struct boss_heiganAI : public BossAI
 
     void StopEruptions()
     {
-        // Reset Plague Waves
         if (Creature* trigger = GetClosestCreatureWithEntry(m_creature, NPC_PLAGUE_WAVE, 100.0f))
             trigger->RemoveAllAuras();
     }
@@ -236,7 +233,7 @@ struct PlagueWaveController : public AuraScript
     void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& /* data */) const override
     {
         Unit* triggerTarget = aura->GetTriggerTarget();
-        uint32 spellForTick[6] = { 30116, 30117, 30118, 30119, 30118, 30117 };  // Circling back and forth through the 4 plague areas
+        uint32 spellForTick[6] = { 30116, 30117, 30118, 30119, 30118, 30117 };
         uint32 tick = (aura->GetAuraTicks() - 1) % 6;
 
         triggerTarget->CastSpell(triggerTarget, spellForTick[tick], TRIGGERED_OLD_TRIGGERED, nullptr, aura, aura->GetCasterGuid(), nullptr);
