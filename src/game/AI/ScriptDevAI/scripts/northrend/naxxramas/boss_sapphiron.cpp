@@ -302,7 +302,8 @@ struct IceBolt : public SpellScript
         {
             if (boss_sapphironAI* ai = dynamic_cast<boss_sapphironAI*>(caster->AI()))
             {
-                if (ai->m_iceboltCount >= (ai->m_isRegularMode ? 2 : 3) || ai->m_iceboltCount >= caster->getAttackers().size())
+                sLog.outError("IceboltCount: %d", ai->m_iceboltCount);
+                if (ai->m_iceboltCount >= (ai->m_isRegularMode ? 2 : 3))
                 {
                     if (ai->DoCastSpellIfCan(caster, SPELL_FROST_BREATH) == CAST_OK)
                     {
