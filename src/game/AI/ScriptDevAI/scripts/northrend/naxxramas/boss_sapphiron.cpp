@@ -333,7 +333,7 @@ struct SapphironBlizzardInit : public SpellScript
             uint8 maximumBlizzards = caster->GetMap()->IsRegularDifficulty() ? 2 : 6;
             if (blizzards.size() >= maximumBlizzards || !caster->AI())
                 return;
-            caster->AI()->DoCastSpellIfCan(caster->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0), SPELL_SUMMON_BLIZZARD, TRIGGERED_OLD_TRIGGERED);
+            caster->CastSpell(caster->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0), SPELL_SUMMON_BLIZZARD, TRIGGERED_OLD_TRIGGERED);
         }
     }
 };
