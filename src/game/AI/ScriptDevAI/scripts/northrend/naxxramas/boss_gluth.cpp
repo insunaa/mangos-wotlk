@@ -84,6 +84,7 @@ struct boss_gluthAI : public BossAI
         m_creature->SetSpellList(m_isRegularMode ? SPELLSET_10N : SPELLSET_25N);
         m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_ZOMBIE_CHOW);
         m_creature->RemoveAurasDueToSpell(SPELL_ZOMBIE_CHOW_SEARCH);
+        m_creature->RemoveAurasDueToSpell(SPELL_CALL_ALL_ZOMBIE_CHOW);
         DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
@@ -92,6 +93,7 @@ struct boss_gluthAI : public BossAI
         BossAI::Aggro(who);
         ResetTimer(GLUTH_SUMMON_DELAY, 5s);
         DoCastSpellIfCan(m_creature, SPELL_ZOMBIE_CHOW_SEARCH, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        DoCastSpellIfCan(m_creature, SPELL_CALL_ALL_ZOMBIE_CHOW, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     std::chrono::milliseconds GetSubsequentActionTimer(uint32 action)
