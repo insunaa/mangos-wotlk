@@ -139,6 +139,8 @@ enum
     NPC_GUARDIAN                = 16441,
     NPC_GUARDIAN_H              = 30057,
 
+    NPC_OLDWORLD_TRIGGER        = 15384,
+
     // Arachnid Quarter
     GO_ARAC_ANUB_DOOR           = 181126,                   // encounter door
     GO_ARAC_ANUB_GATE           = 181195,                   // open after boss is dead
@@ -298,6 +300,9 @@ class instance_naxxramas : public ScriptedInstance
         void GetGothSummonPointCreatures(CreatureList& lList, bool bRightSide);
         bool IsInRightSideGothArea(Unit* pUnit);
 
+        // Gluth
+        const GuidList GetGluthTriggers();
+
         // thaddius
         void GetThadTeslaCreatures(GuidList& lList) const { lList = m_lThadTeslaCoilList; };
 
@@ -314,6 +319,7 @@ class instance_naxxramas : public ScriptedInstance
 
         GuidList m_lThadTeslaCoilList;
         GuidList m_lGothTriggerList;
+        GuidList m_lGluthTriggerList;
 
         std::unordered_map<ObjectGuid, GothTrigger> m_mGothTriggerMap;
         GuidList m_alHeiganTrapGuids[MAX_HEIGAN_TRAP_AREAS];

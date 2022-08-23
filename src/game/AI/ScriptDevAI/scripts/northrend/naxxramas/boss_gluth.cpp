@@ -23,7 +23,6 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/base/CombatAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
-#include "MotionGenerators/MotionMaster.h"
 #include "naxxramas.h"
 
 enum
@@ -36,35 +35,28 @@ enum
     SPELL_MORTALWOUND               = 54378,                // old vanilla spell was 25646,
     SPELL_DECIMATE                  = 28374,
     SPELL_DECIMATE_H                = 54426,
+    SPELL_DECIMATE_DAMAGE           = 28375,
     SPELL_ENRAGE                    = 28371,
     SPELL_ENRAGE_H                  = 54427,
     SPELL_BERSERK                   = 26662,
     // SPELL_TERRIFYING_ROAR         = 29685,               // no longer used in 3.x.x
-    // SPELL_SUMMON_ZOMBIE_CHOW      = 28216,               // removed from dbc: triggers 28217 every 6 secs
-    // SPELL_CALL_ALL_ZOMBIE_CHOW    = 29681,               // removed from dbc: triggers 29682
-    // SPELL_ZOMBIE_CHOW_SEARCH      = 28235,               // removed from dbc: triggers 28236 every 3 secs
+    SPELL_SUMMON_ZOMBIE_CHOW      = 28216,               // removed from dbc: triggers 28217 every 6 secs
+    SPELL_SUMMON_ZOMBIE_CHOW_TR   = 28217,
+    SPELL_CALL_ALL_ZOMBIE_CHOW    = 29681,               // removed from dbc: triggers 29682
+    SPELL_ZOMBIE_CHOW_SEARCH      = 28235,               // removed from dbc: triggers 28236 every 3 secs
     SPELL_ZOMBIE_CHOW_SEARCH_INSTAKILL_TARGETED = 28239,    // Add usage
     SPELL_ZOMBIE_CHOW_SEARCH_INSTAKILL_AOE = 28404,
 
     NPC_ZOMBIE_CHOW                 = 16360,                // old vanilla summoning spell 28217
 
     MAX_ZOMBIE_LOCATIONS            = 3,
-};
 
-static const float aZombieSummonLoc[MAX_ZOMBIE_LOCATIONS][3] =
-{
-    {3267.9f, -3172.1f, 297.42f},
-    {3253.2f, -3132.3f, 297.42f},
-    {3308.3f, -3185.8f, 297.42f},
+    SPELLSET_10N                    = 1593201,
+    SPELLSET_25N                    = 2941701,
 };
 
 enum GluthActions
 {
-    GLUTH_MORTAL_WOUND,
-    GLUTH_DECIMATE,
-    GLUTH_ENRAGE,
-    GLUTH_SUMMON_ZOMBIE_CHOW,
-    GLUTH_ZOMBIE_CHOW_SEARCH,
     GLUTH_BERSERK,
     GLUTH_ACTIONS_MAX,
 };
@@ -76,32 +68,31 @@ struct boss_gluthAI : public BossAI
     m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
         SetDataType(TYPE_GLUTH);
-        AddCombatAction(GLUTH_MORTAL_WOUND, 10s);
-        AddCombatAction(GLUTH_DECIMATE, 110s);
-        AddCombatAction(GLUTH_ENRAGE, 25s);
-        AddCombatAction(GLUTH_SUMMON_ZOMBIE_CHOW, 15s);
-        AddCombatAction(GLUTH_ZOMBIE_CHOW_SEARCH, 3s);
         AddCombatAction(GLUTH_BERSERK, 8min);
     }
 
     instance_naxxramas* m_instance;
     bool m_isRegularMode;
-    GuidList m_lZombieChowGuidList;
 
     void Reset() override
     {
+        m_creature->SetSpellList(m_isRegularMode ? SPELLSET_10N : SPELLSET_25N);
+        m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_ZOMBIE_CHOW);
+        m_creature->RemoveAurasDueToSpell(SPELL_ZOMBIE_CHOW_SEARCH);
         DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+    }
+
+    void Aggro(Unit *who = nullptr) override
+    {
+        BossAI::Aggro(who);
+        DoCastSpellIfCan(m_creature, SPELL_SUMMON_ZOMBIE_CHOW, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        DoCastSpellIfCan(m_creature, SPELL_ZOMBIE_CHOW_SEARCH, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     std::chrono::milliseconds GetSubsequentActionTimer(uint32 action)
     {
         switch (action)
         {
-            case GLUTH_MORTAL_WOUND: return 10s;
-            case GLUTH_DECIMATE: return 100s;
-            case GLUTH_ENRAGE: return RandomTimer(20s, 30s);
-            case GLUTH_SUMMON_ZOMBIE_CHOW: return 10s;
-            case GLUTH_ZOMBIE_CHOW_SEARCH: return 3s;
             case GLUTH_BERSERK: return 5min;
         }
         return 0s;
@@ -117,40 +108,30 @@ struct boss_gluthAI : public BossAI
         }
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void ExecuteAction(uint32 action) override
     {
-        pSummoned->GetMotionMaster()->MoveChase(m_creature, ATTACK_DISTANCE);
-        pSummoned->getThreatManager().addThreat(m_creature, 20.f);
-        m_lZombieChowGuidList.push_back(pSummoned->GetObjectGuid());
-    }
-
-    void SummonedCreatureDespawn(Creature* pSummoned) override
-    {
-        m_lZombieChowGuidList.remove(pSummoned->GetObjectGuid());
-    }
-
-    // Replaces missing spell 29682
-    void DoCallAllZombieChow()
-    {
-        for (GuidList::const_iterator itr = m_lZombieChowGuidList.begin(); itr != m_lZombieChowGuidList.end(); ++itr)
+        switch (action)
         {
-            if (Creature* pZombie = m_creature->GetMap()->GetCreature(*itr))
-            {
-                if (!pZombie->IsAlive())
-                    continue;
-                pZombie->AttackStop(true, true);
-                pZombie->AI()->SetReactState(REACT_PASSIVE);
-                pZombie->GetMotionMaster()->MovePoint(1, m_creature->GetPosition(), FORCED_MOVEMENT_WALK);
-            }
+            case GLUTH_BERSERK:
+                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+                    break;
+                return;
         }
-        ResetCombatAction(GLUTH_SUMMON_ZOMBIE_CHOW, 15s);
+        ResetCombatAction(action, GetSubsequentActionTimer(action));
     }
+};
 
-    // Replaces missing spell 28236
-    void DoSearchZombieChow()
+struct ZombieChowSearch : AuraScript
+{
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
     {
-        CreatureList zombiesInRange(m_lZombieChowGuidList.size());
-        GetCreatureListWithEntryInGrid(zombiesInRange, m_creature, NPC_ZOMBIE_CHOW, 10.f);
+        Creature* caster = static_cast<Creature*>(aura->GetCaster());
+        if (!caster)
+            return;
+        if (!caster->AI())
+            return;
+        CreatureList zombiesInRange;
+        GetCreatureListWithEntryInGrid(zombiesInRange, caster, NPC_ZOMBIE_CHOW, 8.f);
         for (auto zombieItr = zombiesInRange.begin();zombieItr != zombiesInRange.end();)
         {
             if (!(*zombieItr) || !(*zombieItr)->IsAlive())
@@ -166,57 +147,97 @@ struct boss_gluthAI : public BossAI
             Creature* pZombie = zombiesInRange.front();
             if (!pZombie)
                 return;
-            m_creature->GetMotionMaster()->MoveCharge(*pZombie, 30.f, EVENT_CHARGE);
-            DoCastSpellIfCan(pZombie, SPELL_ZOMBIE_CHOW_SEARCH_INSTAKILL_TARGETED);
+            caster->GetMotionMaster()->MoveCharge(*pZombie, 30.f, EVENT_CHARGE);
+            caster->AI()->DoCastSpellIfCan(pZombie, SPELL_ZOMBIE_CHOW_SEARCH_INSTAKILL_TARGETED);
             return;
         }
-        m_creature->CastSpell(nullptr, SPELL_ZOMBIE_CHOW_SEARCH_INSTAKILL_AOE, TRIGGERED_OLD_TRIGGERED);
+        caster->CastSpell(nullptr, SPELL_ZOMBIE_CHOW_SEARCH_INSTAKILL_AOE, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+struct GluthDecimate : SpellScript
+{
+    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex effIdx) const override
+    {
+        if (target->IsPlayer() || target->IsControlledByPlayer())
+            return true;
+        if (target->GetEntry() == NPC_ZOMBIE_CHOW)
+            return true;
+        return false;
     }
 
-    void ExecuteAction(uint32 action) override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
-        switch (action)
-        {
-            case GLUTH_ZOMBIE_CHOW_SEARCH:
-                DoSearchZombieChow();
-                break;
-            case GLUTH_SUMMON_ZOMBIE_CHOW:
-                {
-                    uint8 uiPos1 = urand(0, MAX_ZOMBIE_LOCATIONS - 1);
-                    m_creature->SummonCreature(NPC_ZOMBIE_CHOW, aZombieSummonLoc[uiPos1][0], aZombieSummonLoc[uiPos1][1], aZombieSummonLoc[uiPos1][2], 0.0f, TEMPSPAWN_DEAD_DESPAWN, 0);
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+        Unit* unitTarget = spell->GetUnitTarget();
+        if (!unitTarget)
+            return;
+        if (!unitTarget->IsAlive())
+            return;
+        int32 damage = unitTarget->GetHealth() - unitTarget->GetMaxHealth() * 0.05f;
+        if (damage > 0)
+            spell->GetCaster()->CastCustomSpell(unitTarget, SPELL_DECIMATE_DAMAGE, &damage, nullptr, nullptr, TRIGGERED_INSTANT_CAST);
+        if (unitTarget->IsPlayer() || unitTarget->IsControlledByPlayer())
+            return;
+        if (!unitTarget->AI())
+            return;
+        unitTarget->AttackStop(true, true);
+        unitTarget->AI()->SetReactState(REACT_PASSIVE);
+        unitTarget->GetMotionMaster()->MoveChase(spell->GetCaster(), 0, 0, FORCED_MOVEMENT_WALK);
+    }
+};
 
-                    if (!m_isRegularMode)
-                    {
-                        uint8 uiPos2 = (uiPos1 + urand(1, MAX_ZOMBIE_LOCATIONS - 1)) % MAX_ZOMBIE_LOCATIONS;
-                        m_creature->SummonCreature(NPC_ZOMBIE_CHOW, aZombieSummonLoc[uiPos2][0], aZombieSummonLoc[uiPos2][1], aZombieSummonLoc[uiPos2][2], 0.0f, TEMPSPAWN_DEAD_DESPAWN, 0);
-                    }
-                    break;
-                }
-            case GLUTH_MORTAL_WOUND:
-                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MORTALWOUND) == CAST_OK)
-                    break;
-                return;
-            case GLUTH_ENRAGE:
-                if (DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_ENRAGE : SPELL_ENRAGE_H) == CAST_OK)
-                {
-                    DoScriptText(EMOTE_BOSS_GENERIC_ENRAGED, m_creature);
-                    break;
-                }
-                return;
-            case GLUTH_DECIMATE:
-                if (DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_DECIMATE : SPELL_DECIMATE_H) == CAST_OK)
-                {
-                    DoScriptText(EMOTE_DECIMATE, m_creature);
-                    DoCallAllZombieChow();
-                    break;
-                }
-                return;
-            case GLUTH_BERSERK:
-                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
-                    break;
-                return;
+struct SummonZombieChow : AuraScript
+{
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
+    {
+        data.spellInfo = nullptr;
+        Creature* caster = static_cast<Creature*>(aura->GetCaster());
+        if (!caster)
+            return;
+        instance_naxxramas* instance = dynamic_cast<instance_naxxramas*>(caster->GetInstanceData());
+        if (!instance)
+            return;
+
+        GuidList gluthTriggers = instance->GetGluthTriggers();
+        if (gluthTriggers.size() < 3)
+            return;
+
+        std::shuffle(gluthTriggers.begin(), gluthTriggers.end(), *GetRandomGenerator());
+
+        if (caster->GetMap()->GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL)
+            gluthTriggers.resize(1);
+        else
+            gluthTriggers.resize(2);
+
+        for (auto guid : gluthTriggers)
+        {
+            if (Creature* triggerNpc = caster->GetMap()->GetCreature(guid))
+                triggerNpc->CastSpell(triggerNpc, SPELL_SUMMON_ZOMBIE_CHOW_TR, TRIGGERED_INSTANT_CAST);
         }
-        ResetCombatAction(action, GetSubsequentActionTimer(action));
+    }
+};
+
+struct CallAllZombieChow : SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        Unit* caster = spell->GetCaster();
+        if (!caster)
+            return;
+        Map* map = caster->GetMap();
+        if (!map)
+            return;
+        auto targetList = spell->GetTargetList();
+        for (auto& target : targetList)
+        {
+            auto targetUnit = map->GetUnit(target.targetGUID);
+            if (!targetUnit)
+                continue;
+            targetUnit->GetMotionMaster()->MoveChase(caster, 0.f, 0.f, false, true);
+            targetUnit->getThreatManager().addThreat(caster, 20.f);
+        }
     }
 };
 
@@ -237,5 +258,9 @@ void AddSC_boss_gluth()
     pNewScript->GetAI = &GetNewAIInstance<boss_gluthAI>;
     pNewScript->RegisterSelf();
 
+    RegisterSpellScript<GluthDecimate>("spell_decimate");
+    RegisterSpellScript<SummonZombieChow>("spell_summon_zombie_chow");
+    RegisterSpellScript<CallAllZombieChow>("spell_call_all_zombie_chow");
+    RegisterSpellScript<ZombieChowSearch>("spell_zombie_chow_search");
     RegisterSpellScript<EatZombieChowAOE>("spell_zombie_chow_search_instakill_aoe");
 }
