@@ -120,7 +120,7 @@ void instance_naxxramas::OnCreatureCreate(Creature* pCreature)
         case NPC_OLDWORLD_TRIGGER:
         {
             if (pCreature->GetPositionX() > 3250 && pCreature->GetPositionX() < 3322 && pCreature->GetPositionY() > -3190 && pCreature->GetPositionY() < -3115)
-                m_lGluthTriggerList.push_back(pCreature->GetObjectGuid());
+                m_gluthTriggerList.push_back(pCreature->GetObjectGuid());
             break;
         }
     }
@@ -766,7 +766,7 @@ void instance_naxxramas::Update(uint32 uiDiff)
 
 const GuidList instance_naxxramas::GetGluthTriggers()
 {
-    return m_lGluthTriggerList;
+    return m_gluthTriggerList;
 }
 
 void instance_naxxramas::SetGothTriggers()

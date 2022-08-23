@@ -319,7 +319,7 @@ class instance_naxxramas : public ScriptedInstance
 
         GuidList m_lThadTeslaCoilList;
         GuidList m_lGothTriggerList;
-        GuidList m_lGluthTriggerList;
+        GuidList m_gluthTriggerList;
 
         std::unordered_map<ObjectGuid, GothTrigger> m_mGothTriggerMap;
         GuidList m_alHeiganTrapGuids[MAX_HEIGAN_TRAP_AREAS];
