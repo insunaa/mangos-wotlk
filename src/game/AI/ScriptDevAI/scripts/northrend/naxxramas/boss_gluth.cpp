@@ -205,7 +205,7 @@ struct SummonZombieChow : AuraScript
         if (!instance)
             return;
 
-        GuidList gluthTriggers = instance->GetGluthTriggers();
+        GuidVector gluthTriggers = instance->GetGluthTriggers();
         if (gluthTriggers.size() < 3)
             return;
 
@@ -216,7 +216,7 @@ struct SummonZombieChow : AuraScript
         else
             gluthTriggers.resize(2);
 
-        for (auto guid : gluthTriggers)
+        for (auto& guid : gluthTriggers)
         {
             if (Creature* triggerNpc = caster->GetMap()->GetCreature(guid))
                 triggerNpc->CastSpell(triggerNpc, SPELL_SUMMON_ZOMBIE_CHOW_TR, TRIGGERED_INSTANT_CAST);
