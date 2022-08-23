@@ -189,7 +189,7 @@ struct GluthDecimate : SpellScript
             return;
         unitTarget->AttackStop(true, true);
         unitTarget->AI()->SetReactState(REACT_PASSIVE);
-        unitTarget->GetMotionMaster()->MoveChase(spell->GetCaster(), 0, 0, FORCED_MOVEMENT_WALK);
+        unitTarget->GetMotionMaster()->MoveChase(spell->GetCaster(), 0, 0, 0, true);
     }
 };
 
@@ -234,13 +234,14 @@ struct CallAllZombieChow : SpellScript
         Map* map = caster->GetMap();
         if (!map)
             return;
+        sLog.outError("CallZombieCalled %d", spell->GetTargetList().size());
         auto targetList = spell->GetTargetList();
         for (auto& target : targetList)
         {
             auto targetUnit = map->GetUnit(target.targetGUID);
             if (!targetUnit)
                 continue;
-            targetUnit->GetMotionMaster()->MoveChase(caster, 0.f, 0.f, false, true);
+            targetUnit->GetMotionMaster()->MoveChase(caster);
             targetUnit->getThreatManager().addThreat(caster, 20.f);
         }
     }
