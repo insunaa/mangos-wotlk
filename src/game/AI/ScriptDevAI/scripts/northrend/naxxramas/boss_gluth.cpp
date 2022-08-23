@@ -59,6 +59,7 @@ enum GluthActions
 {
     GLUTH_BERSERK,
     GLUTH_ACTIONS_MAX,
+    GLUTH_SUMMON_DELAY,
 };
 
 struct boss_gluthAI : public BossAI
@@ -69,6 +70,10 @@ struct boss_gluthAI : public BossAI
     {
         SetDataType(TYPE_GLUTH);
         AddCombatAction(GLUTH_BERSERK, 8min);
+        AddCustomAction(GLUTH_SUMMON_DELAY, true, [&]()
+        {
+            DoCastSpellIfCan(m_creature, SPELL_SUMMON_ZOMBIE_CHOW, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        });
     }
 
     instance_naxxramas* m_instance;
@@ -85,7 +90,7 @@ struct boss_gluthAI : public BossAI
     void Aggro(Unit *who = nullptr) override
     {
         BossAI::Aggro(who);
-        DoCastSpellIfCan(m_creature, SPELL_SUMMON_ZOMBIE_CHOW, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        ResetTimer(GLUTH_SUMMON_DELAY, 5s);
         DoCastSpellIfCan(m_creature, SPELL_ZOMBIE_CHOW_SEARCH, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
