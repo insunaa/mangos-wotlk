@@ -93,6 +93,7 @@ enum
     NPC_FALLOUT_SLIME_H         = 29388,
     NPC_ZOMBIE_CHOW_N           = 16360,
     NPC_ZOMBIE_CHOW_H           = 30303,
+    NPC_GLUTH                   = 15932,
     NPC_THADDIUS                = 15928,
     NPC_STALAGG                 = 15929,
     NPC_FEUGEN                  = 15930,

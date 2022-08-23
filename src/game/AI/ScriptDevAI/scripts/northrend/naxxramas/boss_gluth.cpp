@@ -189,6 +189,7 @@ struct GluthDecimate : SpellScript
             return;
         unitTarget->AttackStop(true, true);
         unitTarget->AI()->SetReactState(REACT_PASSIVE);
+        unitTarget->SetBaseRunSpeed(1.f, true);
         unitTarget->GetMotionMaster()->MoveChase(spell->GetCaster(), 0, 0, 0, true);
     }
 };

@@ -123,6 +123,18 @@ void instance_naxxramas::OnCreatureCreate(Creature* pCreature)
                 m_gluthTriggerVector.push_back(pCreature->GetObjectGuid());
             break;
         }
+        case NPC_ZOMBIE_CHOW_N:
+        case NPC_ZOMBIE_CHOW_H:
+        {
+            if (Creature* gluth = GetSingleCreatureFromStorage(NPC_GLUTH))
+            {
+                if (!gluth->IsAlive())
+                    break;
+                pCreature->getThreatManager().addThreat(gluth, 2000.f);
+                pCreature->GetMotionMaster()->MoveChase(gluth);
+            }
+            break;
+        }
     }
 }
 
