@@ -84,7 +84,6 @@ struct boss_gluthAI : public BossAI
         m_creature->SetSpellList(m_isRegularMode ? SPELLSET_10N : SPELLSET_25N);
         m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_ZOMBIE_CHOW);
         m_creature->RemoveAurasDueToSpell(SPELL_ZOMBIE_CHOW_SEARCH);
-        m_creature->RemoveAurasDueToSpell(SPELL_CALL_ALL_ZOMBIE_CHOW);
         DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
@@ -93,7 +92,6 @@ struct boss_gluthAI : public BossAI
         BossAI::Aggro(who);
         ResetTimer(GLUTH_SUMMON_DELAY, 5s);
         DoCastSpellIfCan(m_creature, SPELL_ZOMBIE_CHOW_SEARCH, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-        DoCastSpellIfCan(m_creature, SPELL_CALL_ALL_ZOMBIE_CHOW, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     std::chrono::milliseconds GetSubsequentActionTimer(uint32 action)
@@ -227,29 +225,6 @@ struct SummonZombieChow : AuraScript
     }
 };
 
-struct CallAllZombieChow : SpellScript
-{
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
-    {
-        Unit* caster = spell->GetCaster();
-        if (!caster)
-            return;
-        Map* map = caster->GetMap();
-        if (!map)
-            return;
-        sLog.outError("CallZombieCalled %d", spell->GetTargetList().size());
-        auto targetList = spell->GetTargetList();
-        for (auto& target : targetList)
-        {
-            auto targetUnit = map->GetUnit(target.targetGUID);
-            if (!targetUnit)
-                continue;
-            targetUnit->GetMotionMaster()->MoveChase(caster);
-            targetUnit->getThreatManager().addThreat(caster, 20.f);
-        }
-    }
-};
-
 struct EatZombieChowAOE : SpellScript
 {
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
@@ -269,7 +244,6 @@ void AddSC_boss_gluth()
 
     RegisterSpellScript<GluthDecimate>("spell_decimate");
     RegisterSpellScript<SummonZombieChow>("spell_summon_zombie_chow");
-    RegisterSpellScript<CallAllZombieChow>("spell_call_all_zombie_chow");
     RegisterSpellScript<ZombieChowSearch>("spell_zombie_chow_search");
     RegisterSpellScript<EatZombieChowAOE>("spell_zombie_chow_search_instakill_aoe");
 }
