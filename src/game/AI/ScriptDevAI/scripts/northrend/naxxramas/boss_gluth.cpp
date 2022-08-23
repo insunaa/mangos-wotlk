@@ -136,7 +136,7 @@ struct ZombieChowSearch : AuraScript
         if (!caster->AI())
             return;
         CreatureList zombiesInRange;
-        GetCreatureListWithEntryInGrid(zombiesInRange, caster, NPC_ZOMBIE_CHOW, 8.f);
+        GetCreatureListWithEntryInGrid(zombiesInRange, caster, NPC_ZOMBIE_CHOW, 10.f);
         for (auto zombieItr = zombiesInRange.begin();zombieItr != zombiesInRange.end();)
         {
             if (!(*zombieItr) || !(*zombieItr)->IsAlive())
@@ -190,7 +190,8 @@ struct GluthDecimate : SpellScript
         unitTarget->AttackStop(true, true);
         unitTarget->AI()->SetReactState(REACT_PASSIVE);
         unitTarget->SetBaseRunSpeed(1.f, true);
-        unitTarget->GetMotionMaster()->MoveChase(spell->GetCaster(), 0, 0, 0, true);
+        unitTarget->SetBaseWalkSpeed(1.f);
+        unitTarget->GetMotionMaster()->MoveChase(spell->GetCaster());
     }
 };
 
