@@ -27,9 +27,10 @@ EndScriptData */
 
 enum
 {
-    EMOTE_ZOMBIE                    = -1533119,
-    EMOTE_BOSS_GENERIC_ENRAGED      = -1000006,
-    EMOTE_DECIMATE                  = -1533152,
+    EMOTE_ZOMBIE                    = 12242,
+    EMOTE_ZOMBIES                   = 12348,
+    EMOTE_BOSS_GENERIC_ENRAGED      = 7798,
+    EMOTE_DECIMATE                  = 32321,
 
     SPELL_DOUBLE_ATTACK             = 19818,
     SPELL_MORTALWOUND               = 54378,                // old vanilla spell was 25646,
@@ -107,10 +108,7 @@ struct boss_gluthAI : public BossAI
     {
         // Restore 5% hp when killing a zombie
         if (pVictim->GetEntry() == NPC_ZOMBIE_CHOW)
-        {
-            DoScriptText(EMOTE_ZOMBIE, m_creature);
             m_creature->SetHealth(m_creature->GetHealth() + m_creature->GetMaxHealth() * 0.05f);
-        }
     }
 
     void ExecuteAction(uint32 action) override
@@ -154,9 +152,11 @@ struct ZombieChowSearch : AuraScript
                 return;
             caster->GetMotionMaster()->MoveCharge(*pZombie, 30.f, EVENT_CHARGE);
             caster->AI()->DoCastSpellIfCan(pZombie, SPELL_ZOMBIE_CHOW_SEARCH_INSTAKILL_TARGETED);
+            DoBroadcastText(EMOTE_ZOMBIE, caster);
             return;
         }
         caster->CastSpell(nullptr, SPELL_ZOMBIE_CHOW_SEARCH_INSTAKILL_AOE, TRIGGERED_OLD_TRIGGERED);
+        DoBroadcastText(EMOTE_ZOMBIES, caster);
     }
 };
 
