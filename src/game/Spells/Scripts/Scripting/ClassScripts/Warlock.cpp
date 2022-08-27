@@ -356,7 +356,7 @@ enum
 {
     DEMONIC_CIRCLE_SUMMON      = 48018,
     DEMONIC_CIRCLE_CLEAR       = 60854,
-    DEMONIC_CIRCLE_CLIENT_AURA = 62388,
+    DEMONIC_CIRCLE_IN_RANGE_AURA = 62388,
 };
 
 struct DemonicCircleTeleport : public SpellScript
@@ -377,10 +377,10 @@ struct DemonicCircleTeleport : public SpellScript
     {
         Player* caster = dynamic_cast<Player*>(spell->GetCaster());
         if (!caster)
-            return SPELL_FAILED_CASTER_DEAD;
+            return SPELL_FAILED_ERROR;
         GameObject* circle = caster->GetGameObject(DEMONIC_CIRCLE_SUMMON);
         if (!circle)
-            return SPELL_FAILED_BAD_TARGETS;
+            return SPELL_FAILED_NO_VALID_TARGETS;
         Position circlePos = circle->GetPosition();
         if (caster->GetDistance(circle) > 40)
             return SPELL_FAILED_OUT_OF_RANGE;
@@ -392,16 +392,33 @@ struct DemonicCircleSummon : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
     {
+        if (apply)
+            return;
+
         Player* caster = dynamic_cast<Player*>(aura->GetCaster());
         if (!caster)
             return;
-        if (apply)
-            caster->CastSpell(caster, DEMONIC_CIRCLE_CLIENT_AURA, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_INSTANT_CAST);
-        else
+        GameObject* circle = caster->GetGameObject(DEMONIC_CIRCLE_SUMMON);
+        if (!circle)
+            return;
+        circle->ForcedDespawn();
+    }
+
+    void OnPeriodicDummy(Aura* aura) const override
+    {
+        Player* caster = dynamic_cast<Player*>(aura->GetCaster());
+        if (!caster)
+            return;      
+        GameObject* circle = caster->GetGameObject(DEMONIC_CIRCLE_SUMMON);
+        if (!circle)
+            return;
+        if (caster->GetDistance(circle) <= 40)
         {
-            caster->CastSpell(nullptr, DEMONIC_CIRCLE_CLEAR, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_INSTANT_CAST);
-            caster->RemoveAurasDueToSpell(DEMONIC_CIRCLE_CLIENT_AURA);
+            if (!caster->HasAura(DEMONIC_CIRCLE_IN_RANGE_AURA))
+                caster->CastSpell(caster, DEMONIC_CIRCLE_IN_RANGE_AURA, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_INSTANT_CAST);
         }
+        else
+            caster->RemoveAurasDueToSpell(DEMONIC_CIRCLE_IN_RANGE_AURA);
     }
 };
 

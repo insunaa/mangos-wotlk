@@ -966,7 +966,9 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (28526,'spell_sapphiron_icebolt'),
 (28560,'spell_sapphiron_blizzard'),
 (30132,'spell_sapphiron_iceblock'),
-(29330,'spell_sapphiron_despawn_buffet');
+(29330,'spell_sapphiron_despawn_buffet'),
+(48018,'spell_demonic_circle_summon'),
+(48020,'spell_demonic_circle_teleport');
 
 -- Pet Scaling
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
