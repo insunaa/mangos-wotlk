@@ -352,6 +352,21 @@ struct ShadowBite : public SpellScript
     }
 };
 
+struct DemonicCircleTeleport : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        Player* caster = dynamic_cast<Player*>(spell->GetCaster());
+        if (!caster)
+            return;
+        GameObject* circle = caster->GetGameObject(spell->m_spellInfo->Id);
+        if (!circle)
+            return;
+        Position circlePos = circle->GetPosition();
+        caster->NearTeleportTo(circlePos.GetPositionX(), circlePos.GetPositionY(), circlePos.GetPositionZ(), circlePos.GetPositionO());
+    }
+};
+
 void LoadWarlockScripts()
 {
     RegisterSpellScript<UnstableAffliction>("spell_unstable_affliction");
@@ -367,4 +382,5 @@ void LoadWarlockScripts()
     RegisterSpellScript<CurseOfDoomEffect>("spell_curse_of_doom_effect");
     RegisterSpellScript<SiphonLifeWotlk>("spell_siphon_life_wotlk");
     RegisterSpellScript<ShadowBite>("spell_shadow_bite");
+    RegisterSpellScript<DemonicCircleTeleport>("spell_demonic_circle_teleport");
 }
