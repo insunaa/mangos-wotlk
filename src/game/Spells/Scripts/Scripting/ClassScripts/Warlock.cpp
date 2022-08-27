@@ -375,7 +375,7 @@ struct DemonicCircleTeleport : public SpellScript
 
 struct DemonicCircleSummon : public SpellScript
 {
-    void OnSuccessfulFinish(Spell* spell) const override
+    void OnCast(Spell* spell) const override
     {
         Player* caster = dynamic_cast<Player*>(spell->GetCaster());
         if (!caster)
