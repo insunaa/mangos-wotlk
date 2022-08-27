@@ -387,6 +387,7 @@ struct DemonicCircleSummon : public SpellScript, public AuraScript
         {
             caster->CastSpell(nullptr, DEMONIC_CIRCLE_CLEAR, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_INSTANT_CAST);
             caster->RemoveAurasDueToSpell(DEMONIC_CIRCLE_CLIENT_AURA);
+            caster->RemoveAllGameObjects();
         }
     }
 
