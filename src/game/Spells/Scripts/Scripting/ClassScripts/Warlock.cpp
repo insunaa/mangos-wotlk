@@ -370,7 +370,10 @@ struct DemonicCircleTeleport : public SpellScript
         if (!circle)
             return;
         Position circlePos = circle->GetPosition();
-        caster->NearTeleportTo(circlePos.GetPositionX(), circlePos.GetPositionY(), circlePos.GetPositionZ(), circlePos.GetPositionO());
+        if (caster->GetDistance(circle) > 40)
+            spell->SendCastResult(SPELL_FAILED_OUT_OF_RANGE);
+        else
+            caster->NearTeleportTo(circlePos.GetPositionX(), circlePos.GetPositionY(), circlePos.GetPositionZ(), circlePos.GetPositionO());
     }
 };
 
