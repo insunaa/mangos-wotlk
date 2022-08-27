@@ -11778,7 +11778,7 @@ void Spell::EffectSummonObject(SpellEffectIndex eff_idx)
     m_caster->AddGameObject(pGameObj);
     if (m_spellInfo->Id == 48018)
     {
-        sLog.outError("GameObject Added. %s, %s", m_caster->GetName(), pGameObj->GetName());
+        sLog.outError("GameObject Added. %s, %d, %d", m_caster->GetName(), pGameObj->GetEntry(), pGameObj->GetObjectGuid().GetCounter());
     }
 
     map->Add(pGameObj);
