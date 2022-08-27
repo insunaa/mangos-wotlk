@@ -28,7 +28,7 @@ EndScriptData */
 enum
 {
     EMOTE_BREATH                = 36542,
-    EMOTE_GENERIC_ENRAGED       = -1000003,
+    EMOTE_GENERIC_ENRAGED       = 7798,
     EMOTE_SAPPHIRON_FLY         = 32801,
     EMOTE_SAPPHIRON_LAND        = 32802,
 
@@ -178,7 +178,7 @@ struct boss_sapphironAI : public BossAI
             {
                 if (DoCastSpellIfCan(nullptr, SPELL_BERSERK) == CAST_OK)
                 {
-                    DoScriptText(EMOTE_GENERIC_ENRAGED, m_creature);
+                    DoBroadcastText(EMOTE_GENERIC_ENRAGED, m_creature);
                     DisableCombatAction(action);
                 }
                 return;
