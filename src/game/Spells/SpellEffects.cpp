@@ -11776,6 +11776,10 @@ void Spell::EffectSummonObject(SpellEffectIndex eff_idx)
     pGameObj->SetSpellId(m_spellInfo->Id);
     pGameObj->SetSpawnerGuid(m_trueCaster->GetObjectGuid());
     m_caster->AddGameObject(pGameObj);
+    if (m_spellInfo->Id == 48018)
+    {
+        sLog.outError("GameObject Added. %s, %s", m_caster->GetName(), pGameObj->GetName());
+    }
 
     map->Add(pGameObj);
     pGameObj->AIM_Initialize();

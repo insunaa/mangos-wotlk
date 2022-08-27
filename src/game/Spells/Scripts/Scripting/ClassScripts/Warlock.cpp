@@ -362,6 +362,7 @@ struct DemonicCircleTeleport : public SpellScript
             sLog.outError("Caster not found!");
             return;
         }
+        
         GameObject* circle = caster->GetGameObject(spell->m_spellInfo->Id);
         if (!circle)
         {
