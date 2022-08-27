@@ -358,10 +358,16 @@ struct DemonicCircleTeleport : public SpellScript
     {
         Player* caster = dynamic_cast<Player*>(spell->GetCaster());
         if (!caster)
+        {
+            sLog.outError("Caster not found!");
             return;
+        }
         GameObject* circle = caster->GetGameObject(spell->m_spellInfo->Id);
         if (!circle)
+        {
+            sLog.outError("Circle not found!");
             return;
+        }
         Position circlePos = circle->GetPosition();
         caster->NearTeleportTo(circlePos.GetPositionX(), circlePos.GetPositionY(), circlePos.GetPositionZ(), circlePos.GetPositionO());
     }
