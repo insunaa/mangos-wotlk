@@ -28,6 +28,7 @@ boss_stalagg
 boss_feugen
 EndContentData */
 
+#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "naxxramas.h"
@@ -35,27 +36,27 @@ EndContentData */
 enum
 {
     // Stalagg
-    SAY_STAL_AGGRO                  = -1533023,
-    SAY_STAL_SLAY                   = -1533024,
-    SAY_STAL_DEATH                  = -1533025,
+    SAY_STAL_AGGRO                  = 13083,
+    SAY_STAL_SLAY                   = 13085,
+    SAY_STAL_DEATH                  = 12195,
 
     // Feugen
-    SAY_FEUG_AGGRO                  = -1533026,
-    SAY_FEUG_SLAY                   = -1533027,
-    SAY_FEUG_DEATH                  = -1533028,
+    SAY_FEUG_AGGRO                  = 13023,
+    SAY_FEUG_SLAY                   = 13025,
+    SAY_FEUG_DEATH                  = 12195,
 
     // Tesla Coils
     EMOTE_LOSING_LINK               = 12156,
     EMOTE_TESLA_OVERLOAD            = 12178,
 
-    // Thaddus
-    SAY_AGGRO_1                     = -1533030,
-    SAY_AGGRO_2                     = -1533031,
-    SAY_AGGRO_3                     = -1533032,
-    SAY_SLAY                        = -1533033,
-    SAY_ELECT                       = -1533034,
-    SAY_DEATH                       = -1533035,
-    EMOTE_POLARITY_SHIFT            = -1533151,
+    // Thaddius
+    SAY_AGGRO_1                     = 13086,
+    SAY_AGGRO_2                     = 13087,
+    SAY_AGGRO_3                     = 13088,
+    SAY_SLAY                        = 13096,
+    SAY_ELECT                       = 13090,
+    SAY_DEATH                       = 13089,
+    EMOTE_POLARITY_SHIFT            = 32324,
 
     // Thaddius Spells
     SPELL_THADIUS_SPAWN             = 28160,
@@ -214,8 +215,8 @@ struct boss_thaddiusAI : public BossAI
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_POLARITY_SHIFT, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
                 {
-                    DoScriptText(SAY_ELECT, m_creature);
-                    DoScriptText(EMOTE_POLARITY_SHIFT, m_creature);
+                    DoBroadcastText(SAY_ELECT, m_creature);
+                    DoBroadcastText(EMOTE_POLARITY_SHIFT, m_creature);
                     break;
                 }
                 return;
@@ -495,6 +496,7 @@ struct boss_stalaggAI : public boss_thaddiusAddsAI
     boss_stalaggAI(Creature* creature) : boss_thaddiusAddsAI(creature)
     {
         AddOnKillText(SAY_STAL_SLAY);
+        AddOnAggroText(SAY_STAL_AGGRO);
         AddCombatAction(THADDIUS_ADD_POWER_SURGE, RandomTimer(10s, 15s));
         Reset();
     }
@@ -504,15 +506,9 @@ struct boss_stalaggAI : public boss_thaddiusAddsAI
         boss_thaddiusAddsAI::Reset();
     }
 
-    void Aggro(Unit* pWho) override
-    {
-        DoScriptText(SAY_STAL_AGGRO, m_creature);
-        boss_thaddiusAddsAI::Aggro(pWho);
-    }
-
     void JustDied(Unit* /*pKiller*/) override
     {
-        DoScriptText(SAY_STAL_DEATH, m_creature);
+        DoBroadcastText(SAY_STAL_DEATH, m_creature);
     }
 
     void ExecuteAction(uint32 action) override
@@ -540,6 +536,7 @@ struct boss_feugenAI : public boss_thaddiusAddsAI
     boss_feugenAI(Creature* creature) : boss_thaddiusAddsAI(creature)
     {
         AddOnKillText(SAY_FEUG_SLAY);
+        AddOnAggroText(SAY_FEUG_AGGRO);
         AddCombatAction(THADDIUS_ADD_STATIC_FIELD, 10s, 15s);
         AddCombatAction(THADDIUS_ADD_MAGNETIC_PULL, 20s);
         Reset();
@@ -550,15 +547,9 @@ struct boss_feugenAI : public boss_thaddiusAddsAI
         boss_thaddiusAddsAI::Reset();
     }
 
-    void Aggro(Unit* pWho) override
-    {
-        DoScriptText(SAY_FEUG_AGGRO, m_creature);
-        boss_thaddiusAddsAI::Aggro(pWho);
-    }
-
     void JustDied(Unit* /*pKiller*/) override
     {
-        DoScriptText(SAY_FEUG_DEATH, m_creature);
+        DoBroadcastText(SAY_FEUG_DEATH, m_creature);
     }
 
     void ExecuteAction(uint32 action) override
@@ -803,18 +794,6 @@ struct ThaddiusTeslaChain : public AuraScript
     void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
     {
         return;
-        /*
-        if (!data.caster || !data.target)
-            return;
-        if (Creature* target = dynamic_cast<Creature*>(data.target))
-            if (Creature* caster = dynamic_cast<Creature*>(data.caster))
-                if (instance_naxxramas* instance = dynamic_cast<instance_naxxramas*>(caster->GetInstanceData()))
-                    if (instance->GetData(TYPE_THADDIUS) == DONE)
-                    {
-                        caster->RemoveAllAuras();
-                        target->RemoveAllAuras();
-                    }
-                    */
     }
 };
 
