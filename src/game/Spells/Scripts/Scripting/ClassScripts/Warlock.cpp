@@ -377,20 +377,18 @@ struct DemonicCircleTeleport : public SpellScript
     {
         Player* caster = dynamic_cast<Player*>(spell->GetCaster());
         if (!caster)
-            return SPELL_FAILED_CASTER_DEAD;      
+            return SPELL_FAILED_CASTER_DEAD;
         GameObject* circle = caster->GetGameObject(DEMONIC_CIRCLE_SUMMON);
         if (!circle)
             return SPELL_FAILED_BAD_TARGETS;
         Position circlePos = circle->GetPosition();
         if (caster->GetDistance(circle) > 40)
-        {
             return SPELL_FAILED_OUT_OF_RANGE;
-        }
         return SPELL_CAST_OK;
     }
 };
 
-struct DemonicCircleSummon : public SpellScript, public AuraScript
+struct DemonicCircleSummon : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
     {
@@ -403,7 +401,6 @@ struct DemonicCircleSummon : public SpellScript, public AuraScript
         {
             caster->CastSpell(nullptr, DEMONIC_CIRCLE_CLEAR, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_INSTANT_CAST);
             caster->RemoveAurasDueToSpell(DEMONIC_CIRCLE_CLIENT_AURA);
-            caster->RemoveAllGameObjects();
         }
     }
 
