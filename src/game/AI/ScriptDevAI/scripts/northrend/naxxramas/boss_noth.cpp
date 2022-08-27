@@ -143,19 +143,8 @@ struct boss_nothAI : public BossAI
 
     void EnterEvadeMode() override
     {
-        Map::PlayerList const& lPlayers = m_instance->instance->GetPlayers();
-
-        if (!lPlayers.isEmpty())
-        {
-            for (const auto& lPlayer : lPlayers)
-            {
-                if (Player* pPlayer = lPlayer.getSource())
-                {
-                    if (pPlayer->IsAlive() && !pPlayer->IsGameMaster() && pPlayer->IsInWorld())
-                        return;
-                }
-            }
-        }
+        if (m_instance->GetPlayerInMap(true, false))
+            return;
         BossAI::EnterEvadeMode();
         m_creature->ForcedDespawn();
         m_creature->SetRespawnDelay(10 * IN_MILLISECONDS, true);
@@ -329,12 +318,10 @@ struct boss_nothAI : public BossAI
 
                     DoBroadcastText(EMOTE_TELEPORT, m_creature);
                     SetRootSelf(true);
-                    m_creature->GetMotionMaster()->MoveIdle();
                     m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, true);
-                    SetReactState(REACT_PASSIVE);
-                    SetMeleeEnabled(false);
                     m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
-                    m_creature->AttackStop(false, true);
+                    SetMeleeEnabled(false);
+                    StopTargeting(true);
                     m_creature->SetTarget(nullptr);
                     ++m_uiPhaseSub;
                     m_uiPhase = PHASE_BALCONY;
@@ -348,18 +335,11 @@ struct boss_nothAI : public BossAI
                 if (DoCastSpellIfCan(m_creature, SPELL_TELEPORT_RETURN) == CAST_OK)
                 {
                     DoScriptText(EMOTE_TELEPORT_RETURN, m_creature);
-                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
                     SetRootSelf(false);
-                    SetReactState(REACT_AGGRESSIVE);
-                    SetMeleeEnabled(true);
                     m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, false);
-                    m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
-                    if (m_uiPhaseSub == PHASE_SKELETON_3)
-                    {
-                        DoCastSpellIfCan(m_creature, SPELL_BERSERK, CAST_TRIGGERED);
-                        DisableCombatAction(action);
-                        return;
-                    }
+                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
+                    SetMeleeEnabled(true);
+                    HandleTargetRestoration();
                     m_uiPhase = PHASE_GROUND;
                     ResetCombatAction(NOTH_PHASE_BALCONY, GetSubsequentActionTimer(NOTH_PHASE_BALCONY));
                     ResetCombatAction(NOTH_CURSE, GetSubsequentActionTimer(NOTH_CURSE));
