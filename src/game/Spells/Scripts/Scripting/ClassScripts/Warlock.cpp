@@ -370,10 +370,23 @@ struct DemonicCircleTeleport : public SpellScript
         if (!circle)
             return;
         Position circlePos = circle->GetPosition();
+        caster->NearTeleportTo(circlePos.GetPositionX(), circlePos.GetPositionY(), circlePos.GetPositionZ(), circlePos.GetPositionO());
+    }
+
+    SpellCastResult OnCheckCast(Spell* spell, bool) const override
+    {
+        Player* caster = dynamic_cast<Player*>(spell->GetCaster());
+        if (!caster)
+            return SPELL_FAILED_CASTER_DEAD;      
+        GameObject* circle = caster->GetGameObject(DEMONIC_CIRCLE_SUMMON);
+        if (!circle)
+            return SPELL_FAILED_BAD_TARGETS;
+        Position circlePos = circle->GetPosition();
         if (caster->GetDistance(circle) > 40)
-            spell->SendCastResult(SPELL_FAILED_OUT_OF_RANGE);
-        else
-            caster->NearTeleportTo(circlePos.GetPositionX(), circlePos.GetPositionY(), circlePos.GetPositionZ(), circlePos.GetPositionO());
+        {
+            return SPELL_FAILED_OUT_OF_RANGE;
+        }
+        return SPELL_CAST_OK;
     }
 };
 
