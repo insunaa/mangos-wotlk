@@ -403,18 +403,6 @@ struct DemonicCircleSummon : public AuraScript
             caster->RemoveAurasDueToSpell(DEMONIC_CIRCLE_CLIENT_AURA);
         }
     }
-
-    void OnPeriodicDummy(Aura* aura) const override
-    {
-        Player* caster = dynamic_cast<Player*>(aura->GetCaster());
-        if (!caster)
-            return;
-        GameObject* circle = caster->GetGameObject(DEMONIC_CIRCLE_SUMMON);
-        if (!circle)
-            return;
-        if (caster->GetDistance(circle) > 100.f)
-            caster->CastSpell(caster, DEMONIC_CIRCLE_CLEAR, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_INSTANT_CAST);
-    }
 };
 
 void LoadWarlockScripts()
