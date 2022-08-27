@@ -380,7 +380,10 @@ struct DemonicCircleTeleport : public SpellScript
             return SPELL_FAILED_ERROR;
         GameObject* circle = caster->GetGameObject(DEMONIC_CIRCLE_SUMMON);
         if (!circle)
-            return SPELL_FAILED_NO_VALID_TARGETS;
+        {
+            spell->SetParam1(SPELL_FAILED_CUSTOM_ERROR_75);
+            return SPELL_FAILED_CUSTOM_ERROR;
+        }
         if (caster->GetDistance(circle) > 40)
             return SPELL_FAILED_OUT_OF_RANGE;
         return SPELL_CAST_OK;
