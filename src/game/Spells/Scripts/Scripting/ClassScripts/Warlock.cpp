@@ -355,6 +355,7 @@ struct ShadowBite : public SpellScript
 enum
 {
     DEMONIC_CIRCLE_SUMMON = 48018,
+    DEMONIC_CIRCLE_CLEAR  = 60854,
 };
 
 struct DemonicCircleTeleport : public SpellScript
@@ -363,19 +364,23 @@ struct DemonicCircleTeleport : public SpellScript
     {
         Player* caster = dynamic_cast<Player*>(spell->GetCaster());
         if (!caster)
-        {
-            sLog.outError("Caster not found!");
-            return;
-        }
-        
+            return;      
         GameObject* circle = caster->GetGameObject(DEMONIC_CIRCLE_SUMMON);
         if (!circle)
-        {
-            sLog.outError("Circle not found!");
             return;
-        }
         Position circlePos = circle->GetPosition();
         caster->NearTeleportTo(circlePos.GetPositionX(), circlePos.GetPositionY(), circlePos.GetPositionZ(), circlePos.GetPositionO());
+    }
+};
+
+struct DemonicCircleSummon : public SpellScript
+{
+    void OnSuccessfulFinish(Spell* spell) const override
+    {
+        Player* caster = dynamic_cast<Player*>(spell->GetCaster());
+        if (!caster)
+            return;
+        caster->CastSpell(nullptr, DEMONIC_CIRCLE_CLEAR, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_INSTANT_CAST);
     }
 };
 
@@ -395,4 +400,5 @@ void LoadWarlockScripts()
     RegisterSpellScript<SiphonLifeWotlk>("spell_siphon_life_wotlk");
     RegisterSpellScript<ShadowBite>("spell_shadow_bite");
     RegisterSpellScript<DemonicCircleTeleport>("spell_demonic_circle_teleport");
+    RegisterSpellScript<DemonicCircleSummon>("spell_demonic_circle_summon");
 }
