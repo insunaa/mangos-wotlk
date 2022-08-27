@@ -354,8 +354,9 @@ struct ShadowBite : public SpellScript
 
 enum
 {
-    DEMONIC_CIRCLE_SUMMON = 48018,
-    DEMONIC_CIRCLE_CLEAR  = 60854,
+    DEMONIC_CIRCLE_SUMMON      = 48018,
+    DEMONIC_CIRCLE_CLEAR       = 60854,
+    DEMONIC_CIRCLE_CLIENT_AURA = 62388,
 };
 
 struct DemonicCircleTeleport : public SpellScript
@@ -373,7 +374,7 @@ struct DemonicCircleTeleport : public SpellScript
     }
 };
 
-struct DemonicCircleSummon : public SpellScript
+struct DemonicCircleSummon : public SpellScript, public AuraScript
 {
     void OnCast(Spell* spell) const override
     {
@@ -381,6 +382,17 @@ struct DemonicCircleSummon : public SpellScript
         if (!caster)
             return;
         caster->CastSpell(nullptr, DEMONIC_CIRCLE_CLEAR, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_INSTANT_CAST);
+    }
+
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Player* caster = dynamic_cast<Player*>(aura->GetCaster());
+        if (!caster)
+            return;
+        if (apply)
+            caster->CastSpell(caster, DEMONIC_CIRCLE_CLIENT_AURA, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_INSTANT_CAST);
+        else
+            caster->RemoveAurasDueToSpell(DEMONIC_CIRCLE_CLIENT_AURA);
     }
 };
 
