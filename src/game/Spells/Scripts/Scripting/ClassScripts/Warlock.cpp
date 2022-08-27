@@ -363,7 +363,7 @@ struct DemonicCircleTeleport : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
-        Player* caster = dynamic_cast<Player*>(spell->GetCaster());
+        Unit* caster = spell->GetCaster();
         if (!caster)
             return;      
         GameObject* circle = caster->GetGameObject(DEMONIC_CIRCLE_SUMMON);
@@ -375,13 +375,12 @@ struct DemonicCircleTeleport : public SpellScript
 
     SpellCastResult OnCheckCast(Spell* spell, bool) const override
     {
-        Player* caster = dynamic_cast<Player*>(spell->GetCaster());
+        Unit* caster = spell->GetCaster();
         if (!caster)
             return SPELL_FAILED_ERROR;
         GameObject* circle = caster->GetGameObject(DEMONIC_CIRCLE_SUMMON);
         if (!circle)
             return SPELL_FAILED_NO_VALID_TARGETS;
-        Position circlePos = circle->GetPosition();
         if (caster->GetDistance(circle) > 40)
             return SPELL_FAILED_OUT_OF_RANGE;
         return SPELL_CAST_OK;
@@ -395,7 +394,7 @@ struct DemonicCircleSummon : public AuraScript
         if (apply)
             return;
 
-        Player* caster = dynamic_cast<Player*>(aura->GetCaster());
+        Unit* caster = aura->GetCaster();
         if (!caster)
             return;
         GameObject* circle = caster->GetGameObject(DEMONIC_CIRCLE_SUMMON);
@@ -406,7 +405,7 @@ struct DemonicCircleSummon : public AuraScript
 
     void OnPeriodicDummy(Aura* aura) const override
     {
-        Player* caster = dynamic_cast<Player*>(aura->GetCaster());
+        Unit* caster = aura->GetCaster();
         if (!caster)
             return;      
         GameObject* circle = caster->GetGameObject(DEMONIC_CIRCLE_SUMMON);

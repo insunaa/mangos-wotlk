@@ -962,11 +962,6 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (54052,'spell_shadow_bite'),
 (54053,'spell_shadow_bite'),
 (63108,'spell_siphon_life_wotlk'),
-(28522,'spell_sapphiron_icebolt_aura'),
-(28526,'spell_sapphiron_icebolt'),
-(28560,'spell_sapphiron_blizzard'),
-(30132,'spell_sapphiron_iceblock'),
-(29330,'spell_sapphiron_despawn_buffet'),
 (48018,'spell_demonic_circle_summon'),
 (48020,'spell_demonic_circle_teleport');
 
