@@ -352,6 +352,11 @@ struct ShadowBite : public SpellScript
     }
 };
 
+enum
+{
+    DEMONIC_CIRCLE_SUMMON = 48018,
+};
+
 struct DemonicCircleTeleport : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
@@ -363,7 +368,7 @@ struct DemonicCircleTeleport : public SpellScript
             return;
         }
         
-        GameObject* circle = caster->GetGameObject(spell->m_spellInfo->Id);
+        GameObject* circle = caster->GetGameObject(DEMONIC_CIRCLE_SUMMON);
         if (!circle)
         {
             sLog.outError("Circle not found!");
