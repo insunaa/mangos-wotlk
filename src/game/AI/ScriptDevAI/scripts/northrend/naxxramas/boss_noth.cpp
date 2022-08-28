@@ -22,26 +22,23 @@ SDCategory: Naxxramas
 EndScriptData */
 
 #include "AI/ScriptDevAI/base/CombatAI.h"
-#include "AI/BaseAI/UnitAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
-#include "Spells/Scripts/SpellScript.h"
-#include "Spells/SpellDefines.h"
 #include "naxxramas.h"
 
 enum
 {
-    SAY_AGGRO1                          = -1533075,
-    SAY_AGGRO2                          = -1533076,
-    SAY_AGGRO3                          = -1533077,
-    SAY_SUMMON                          = -1533078,
-    SAY_SLAY1                           = -1533079,
-    SAY_SLAY2                           = -1533080,
-    SAY_DEATH                           = -1533081,
+    SAY_AGGRO1                          = 13061,
+    SAY_AGGRO2                          = 13062,
+    SAY_AGGRO3                          = 13063,
+    SAY_SUMMON                          = 13067,
+    SAY_SLAY1                           = 13065,
+    SAY_SLAY2                           = 13066,
+    SAY_DEATH                           = 13064,
 
-    EMOTE_WARRIOR                       = -1533130,
-    EMOTE_SKELETON                      = -1533131,
-    EMOTE_TELEPORT                      = -1533132,
-    EMOTE_TELEPORT_RETURN               = -1533133,
+    EMOTE_WARRIOR                       = 32974,
+    EMOTE_SKELETON                      = 32977,
+    EMOTE_TELEPORT                      = 32331,
+    EMOTE_TELEPORT_RETURN               = 32976,
 
     SPELL_TELEPORT                      = 29216,
     SPELL_TELEPORT_RETURN               = 29231,
@@ -334,7 +331,7 @@ struct boss_nothAI : public BossAI
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_TELEPORT_RETURN) == CAST_OK)
                 {
-                    DoScriptText(EMOTE_TELEPORT_RETURN, m_creature);
+                    DoBroadcastText(EMOTE_TELEPORT_RETURN, m_creature);
                     SetRootSelf(false);
                     m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, false);
                     m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_IMMUNE_TO_PLAYER);

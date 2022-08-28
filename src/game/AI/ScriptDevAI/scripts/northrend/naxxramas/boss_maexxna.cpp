@@ -23,6 +23,7 @@ SDComment: Web Wrap works incorrectly: The way it's supposed to work is Maexxna 
 SDCategory: Naxxramas
 EndScriptData */
 
+#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
 #include "AI/ScriptDevAI/base/TimerAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
@@ -52,10 +53,10 @@ enum
 
     TIMER_40_SEC                = 40000,                    // Used by all main abilities
 
-    EMOTE_SPIN_WEB              = -1533146,
-    EMOTE_SPIDERLING            = -1533147,
-    EMOTE_SPRAY                 = -1533148,
-    EMOTE_BOSS_GENERIC_FRENZY   = -1000005,
+    EMOTE_SPIN_WEB              = 32303,
+    EMOTE_SPIDERLING            = 32305,
+    EMOTE_SPRAY                 = 32304,
+    EMOTE_BOSS_GENERIC_FRENZY   = 1191,
 
     SPELL_DOUBLE_ATTACK         = 19818,
 
@@ -177,7 +178,6 @@ struct npc_web_wrapAI : public ScriptedAI
     }
 };
 
-
 /*###################
 #   boss_maexxna
 ###################*/
@@ -254,17 +254,9 @@ struct boss_maexxnaAI : public BossAI
         GetCreatureListWithEntryInGrid(m_summoningTriggers, m_creature, NPC_INVISIBLE_MAN, 100.0f);
     }
 
-    void JustDied(Unit* /*killer*/) override
-    {
-        if (m_instance)
-            m_instance->SetData(TYPE_MAEXXNA, DONE);
-    }
-
     void JustReachedHome() override
     {
-        if (m_instance)
-            m_instance->SetData(TYPE_MAEXXNA, FAIL);
-
+        BossAI::JustReachedHome();
         DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
@@ -322,44 +314,52 @@ struct boss_maexxnaAI : public BossAI
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_FRENZY) == CAST_OK)
                     {
-                        DoScriptText(EMOTE_BOSS_GENERIC_FRENZY, m_creature);
+                        DoBroadcastText(EMOTE_BOSS_GENERIC_FRENZY, m_creature);
                         DisableCombatAction(action);
                     }
                 }
-                break;
+                return;
             }
             case MAEXXNA_WEBWRAP:
             {
                 if (DoCastWebWrap())
-                    ResetCombatAction(action, GetSubsequentActionTimer(action));
-                break;
+                {
+                    DoBroadcastText(EMOTE_SPIN_WEB, m_creature);
+                    break;
+                }
+                return;
             }
             case MAEXXNA_WEBSPRAY:
             {
                 if (DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_WEBSPRAY : SPELL_WEBSPRAY_H) == CAST_OK)
-                    ResetCombatAction(action, GetSubsequentActionTimer(action));
-                break;
+                {
+                    DoBroadcastText(EMOTE_SPRAY, m_creature);
+                    break;
+                }
+                return;
             }
             case MAEXXNA_POISON_SHOCK:
             {
                 if (DoCastSpellIfCan(m_creature->GetVictim(), m_isRegularMode ? SPELL_POISONSHOCK : SPELL_POISONSHOCK_H) == CAST_OK)
-                    ResetCombatAction(action, GetSubsequentActionTimer(action));
-                break;
+                    break;
+                return;
             }
             case MAEXXNA_NECROTIC_POISON:
             {
                 if (DoCastSpellIfCan(m_creature->GetVictim(), m_isRegularMode ? SPELL_NECROTICPOISON : SPELL_NECROTICPOISON_H) == CAST_OK)
-                    ResetCombatAction(action, GetSubsequentActionTimer(action));
-                break;
+                    break;
+                return;
             }
             case MAEXXNA_SUMMON_SPIDERLING:
             {
                 SummonSpiderlings();
-                ResetCombatAction(action, GetSubsequentActionTimer(action));
+                DoBroadcastText(EMOTE_SPIDERLING, m_creature);
+                break;
             }
             default:
-                break;
+                return;
         }
+        ResetCombatAction(action, GetSubsequentActionTimer(action));
     }
 };
 
