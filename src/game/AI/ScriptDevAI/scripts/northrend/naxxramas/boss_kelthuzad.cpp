@@ -31,30 +31,30 @@ EndScriptData */
 
 enum
 {
-    SAY_SUMMON_MINIONS                  = -1533105,         // start of phase 1
+    SAY_SUMMON_MINIONS                  = 12999,         // start of phase 1
 
-    EMOTE_PHASE2                        = -1533135,         // start of phase 2
-    SAY_AGGRO1                          = -1533094,
-    SAY_AGGRO2                          = -1533095,
-    SAY_AGGRO3                          = -1533096,
+    EMOTE_PHASE2                        = 32803,         // start of phase 2
+    SAY_AGGRO1                          = 12995,
+    SAY_AGGRO2                          = 12996,
+    SAY_AGGRO3                          = 12997,
 
-    SAY_SLAY1                           = -1533097,
-    SAY_SLAY2                           = -1533098,
+    SAY_SLAY1                           = 13021,
+    SAY_SLAY2                           = 13022,
 
-    SAY_DEATH                           = -1533099,
+    SAY_DEATH                           = 13019,
 
-    SAY_CHAIN1                          = -1533100,
-    SAY_CHAIN2                          = -1533101,
-    SAY_FROST_BLAST                     = -1533102,
+    SAY_CHAIN1                          = 13017,
+    SAY_CHAIN2                          = 13018,
+    SAY_FROST_BLAST                     = 13020,
 
-    SAY_REQUEST_AID                     = -1533103,         // start of phase 3
-    SAY_ANSWER_REQUEST                  = -1533104,         // lich king answer
+    SAY_REQUEST_AID                     = 12998,         // start of phase 3
+    SAY_ANSWER_REQUEST                  = 12994,         // lich king answer
 
-    SAY_SPECIAL1_MANA_DET               = -1533106,
+    SAY_SPECIAL1_MANA_DET               = 13492,
     SAY_SPECIAL3_MANA_DET               = -1533107,
     SAY_SPECIAL2_DISPELL                = -1533108,
 
-    EMOTE_GUARDIAN                      = -1533134,         // at each guardian summon
+    EMOTE_GUARDIAN                      = 32804,         // at each guardian summon
 
     // spells to be casted
     SPELL_FROST_BOLT                    = 28478,
