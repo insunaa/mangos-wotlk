@@ -111,7 +111,7 @@ struct boss_gothikAI : public BossAI, private DialogueHelper
         AddCombatAction(GOTHIK_SHADOW_BOLT, true);
         AddCombatAction(GOTHIK_HARVEST_SOUL, true);
         AddCombatAction(GOTHIK_TELEPORT, true);
-        AddCombatAction(GOTHIK_GROUND_PHASE, 4min + 7s);
+        AddCombatAction(GOTHIK_GROUND_PHASE, 3min + 47s);
         AddTimerlessCombatAction(GOTHIK_OPEN_GATES, true);
         AddCustomAction(GOTHIK_CONTROL_ZONES, true, [&](){ HandleZoneCheck(); });
         AddCustomAction(GOTHIK_START_PHASE, true, [&](){ HandlePhaseTransition(); });
@@ -251,19 +251,8 @@ struct boss_gothikAI : public BossAI, private DialogueHelper
     {
         if (!m_instance)
             return;
-        Map::PlayerList const& lPlayers = m_instance->instance->GetPlayers();
-
-        if (!lPlayers.isEmpty())
-        {
-            for (const auto& lPlayer : lPlayers)
-            {
-                if (Player* pPlayer = lPlayer.getSource())
-                {
-                    if (pPlayer->IsAlive() && !pPlayer->IsGameMaster() && pPlayer->IsInWorld())
-                        return;
-                }
-            }
-        }
+        if (m_instance->GetPlayerInMap(true, false))
+            return;
         BossAI::EnterEvadeMode();
         m_creature->ForcedDespawn();
         m_creature->SetRespawnDelay(10 * IN_MILLISECONDS, true);
