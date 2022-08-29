@@ -282,8 +282,12 @@ struct boss_maexxnaAI : public BossAI
 
     void SummonSpiderlings()
     {
+        float x, y, z;
         for (uint8 i = 0; i < MAX_SPIDERLINGS; ++i)
-            m_creature->SummonCreature(NPC_SPIDERLING, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+        {
+            m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 4.f, x, y, z);
+            m_creature->SummonCreature(NPC_SPIDERLING, x, y, z, 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+        }
     }
 
     bool DoCastWebWrap()
