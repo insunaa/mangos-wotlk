@@ -1050,6 +1050,7 @@ struct npc_living_poisonAI : public ScriptedAI
 
 bool AreaTrigger_at_naxxramas(Player* pPlayer, AreaTriggerEntry const* pAt)
 {
+    sLog.outError("Areatrigger hit: %d", pAt->id);
     if (pAt->id == AREATRIGGER_KELTHUZAD)
     {
         if (pPlayer->IsGameMaster() || !pPlayer->IsAlive())
