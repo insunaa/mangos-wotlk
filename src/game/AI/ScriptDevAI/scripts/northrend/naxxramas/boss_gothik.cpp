@@ -28,10 +28,10 @@ EndScriptData */
 
 enum
 {
-    SAY_SPEECH_1                = -1533040, // 13030
-    SAY_SPEECH_2                = -1533140, // 13031
-    SAY_SPEECH_3                = -1533141, // 13032
-    SAY_SPEECH_4                = -1533142, // 13033
+    SAY_SPEECH_1                = 13030,
+    SAY_SPEECH_2                = 13031,
+    SAY_SPEECH_3                = 13032,
+    SAY_SPEECH_4                = 13033,
 
     SAY_KILL                    = 13027,
     SAY_DEATH                   = 13026,
