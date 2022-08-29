@@ -111,7 +111,7 @@ struct boss_gothikAI : public BossAI, private DialogueHelper
         AddCombatAction(GOTHIK_SHADOW_BOLT, true);
         AddCombatAction(GOTHIK_HARVEST_SOUL, true);
         AddCombatAction(GOTHIK_TELEPORT, true);
-        AddCombatAction(GOTHIK_GROUND_PHASE, 3min + 47s);
+        AddCombatAction(GOTHIK_GROUND_PHASE, 4min);
         AddTimerlessCombatAction(GOTHIK_OPEN_GATES, true);
         AddCustomAction(GOTHIK_CONTROL_ZONES, true, [&](){ HandleZoneCheck(); });
         AddCustomAction(GOTHIK_START_PHASE, true, [&](){ HandlePhaseTransition(); });
