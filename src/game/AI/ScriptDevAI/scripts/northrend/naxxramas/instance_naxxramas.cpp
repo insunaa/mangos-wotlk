@@ -1101,7 +1101,7 @@ bool AreaTrigger_at_naxxramas(Player* pPlayer, AreaTriggerEntry const* pAt)
         Creature* gluth = instance->GetSingleCreatureFromStorage(NPC_GLUTH);
         if (!gluth)
             return false;
-        if (gluth->IsAlive() && pPlayer->GetPositionZ() > pAt->x + 10.f)
+        if (gluth->IsAlive() && pPlayer->GetPositionZ() > pAt->z + 10.f)
             gluth->SetInCombatWith(pPlayer);
     }
 
