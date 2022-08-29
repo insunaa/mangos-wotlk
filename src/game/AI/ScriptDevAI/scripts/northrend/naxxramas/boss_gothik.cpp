@@ -28,17 +28,17 @@ EndScriptData */
 
 enum
 {
-    SAY_SPEECH_1                = -1533040,
-    SAY_SPEECH_2                = -1533140,
-    SAY_SPEECH_3                = -1533141,
-    SAY_SPEECH_4                = -1533142,
+    SAY_SPEECH_1                = -1533040, // 13030
+    SAY_SPEECH_2                = -1533140, // 13031
+    SAY_SPEECH_3                = -1533141, // 13032
+    SAY_SPEECH_4                = -1533142, // 13033
 
-    SAY_KILL                    = -1533041,
-    SAY_DEATH                   = -1533042,
-    SAY_TELEPORT                = -1533043,
+    SAY_KILL                    = 13027,
+    SAY_DEATH                   = 13026,
+    SAY_TELEPORT                = 13028,
 
-    EMOTE_TO_FRAY               = -1533138,
-    EMOTE_GATE                  = -1533139,
+    EMOTE_TO_FRAY               = 32306,
+    EMOTE_GATE                  = 32307,
 
     PHASE_SPEECH                = 0,
     PHASE_BALCONY               = 1,
@@ -153,8 +153,8 @@ struct boss_gothikAI : public BossAI, private DialogueHelper
         {
             m_uiPhase = m_instance ? PHASE_TELEPORTING : PHASE_STOP_TELEPORTING;
 
-            DoScriptText(SAY_TELEPORT, m_creature);
-            DoScriptText(EMOTE_TO_FRAY, m_creature);
+            DoBroadcastText(SAY_TELEPORT, m_creature);
+            DoBroadcastText(EMOTE_TO_FRAY, m_creature);
 
             // Remove Immunity
             m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, false);
@@ -224,7 +224,7 @@ struct boss_gothikAI : public BossAI, private DialogueHelper
         if (IsCentralDoorClosed())
         {
             m_instance->SetData(TYPE_GOTHIK, SPECIAL);
-            DoScriptText(EMOTE_GATE, m_creature);
+            DoBroadcastText(EMOTE_GATE, m_creature);
         }
     }
 
