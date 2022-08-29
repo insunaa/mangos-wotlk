@@ -119,7 +119,7 @@ struct boss_gothikAI : public BossAI
         {
             switch (m_speechStep)
             {
-                case 0: DoBroadcastText(SAY_SPEECH_1, m_creature); ResetTimer(GOTHIK_SPEECH, 4s); break;
+                case 0: DoBroadcastText(SAY_SPEECH_1, m_creature); DoPlaySoundToSet(m_creature, 8807); ResetTimer(GOTHIK_SPEECH, 4s); break;
                 case 1: DoBroadcastText(SAY_SPEECH_2, m_creature); ResetTimer(GOTHIK_SPEECH, 6s); break;
                 case 2: DoBroadcastText(SAY_SPEECH_3, m_creature); ResetTimer(GOTHIK_SPEECH, 5s); break;
                 case 3:
