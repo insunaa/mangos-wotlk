@@ -403,7 +403,7 @@ struct boss_gothikAI : public BossAI, private DialogueHelper
             }
             case GOTHIK_SUMMON_TRAINEE:
             {
-                if (!PHASE_BALCONY)
+                if (m_uiPhase != PHASE_BALCONY)
                 {
                     DisableCombatAction(action);
                     return;
@@ -413,7 +413,7 @@ struct boss_gothikAI : public BossAI, private DialogueHelper
             }
             case GOTHIK_SUMMON_DEATH_KNIGHT:
             {
-                if (!PHASE_BALCONY)
+                if (m_uiPhase != PHASE_BALCONY)
                 {
                     DisableCombatAction(action);
                     return;
@@ -423,7 +423,7 @@ struct boss_gothikAI : public BossAI, private DialogueHelper
             }
             case GOTHIK_SUMMON_RIDER:
             {
-                if (!PHASE_BALCONY)
+                if (m_uiPhase != PHASE_BALCONY)
                 {
                     DisableCombatAction(action);
                     return;
@@ -444,6 +444,7 @@ struct boss_gothikAI : public BossAI, private DialogueHelper
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_HARVESTSOUL) == CAST_OK)
                     break;
+                return;
             }
             case GOTHIK_TELEPORT:
             {
@@ -459,6 +460,8 @@ struct boss_gothikAI : public BossAI, private DialogueHelper
             {
                 ResetTimer(GOTHIK_START_PHASE, 27s);
                 m_uiPhase = PHASE_STOP_SUMMONING;
+                DisableCombatAction(GOTHIK_GROUND_PHASE);
+                return;
             }
         }
         ResetCombatAction(action, GetSubsequentActionTimer(action));
