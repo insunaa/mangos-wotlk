@@ -206,6 +206,7 @@ struct boss_maexxnaAI : public BossAI
     m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())),
     m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
+        SetDataType(TYPE_MAEXXNA);
         AddTimerlessCombatAction(MAEXXNA_ENRAGE_HP_CHECK, true);         // Soft enrage à 30%
         AddCombatAction(MAEXXNA_WEBWRAP, 20s);
         AddCombatAction(MAEXXNA_WEBSPRAY, 40s);
