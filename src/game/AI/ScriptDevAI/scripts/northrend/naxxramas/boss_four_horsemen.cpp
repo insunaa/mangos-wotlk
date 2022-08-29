@@ -29,39 +29,38 @@ enum
 {
     // ***** Yells *****
     // lady blaumeux
-    SAY_BLAU_AGGRO          = -1533044,
-    SAY_BLAU_SPECIAL        = -1533048,
-    SAY_BLAU_SLAY           = -1533049,
-    SAY_BLAU_DEATH          = -1533050,
-    EMOTE_UNYIELDING_PAIN   = -1533156,
+    SAY_BLAU_AGGRO          = 13010,
+    SAY_BLAU_SPECIAL        = 13013,
+    SAY_BLAU_SLAY           = 13012,
+    SAY_BLAU_DEATH          = 13011,
+    EMOTE_UNYIELDING_PAIN   = 33087,
 
     // baron rivendare
-    SAY_RIVE_AGGRO1         = -1533065,
-    SAY_RIVE_AGGRO2         = -1533066,
-    SAY_RIVE_AGGRO3         = -1533067,
-    SAY_RIVE_SLAY1          = -1533068,
-    SAY_RIVE_SLAY2          = -1533069,
-    SAY_RIVE_SPECIAL        = -1533070,
-    SAY_RIVE_DEATH          = -1533074,
+    SAY_RIVE_AGGRO1         = 13051,
+    SAY_RIVE_AGGRO2         = 13052,
+    SAY_RIVE_AGGRO3         = 13053,
+    SAY_RIVE_SLAY1          = 13055,
+    SAY_RIVE_SLAY2          = 13056,
+    SAY_RIVE_SPECIAL        = 13057,
+    SAY_RIVE_DEATH          = 33116,
 
     // thane korthazz
-    SAY_KORT_AGGRO          = -1533051,
-    SAY_KORT_SPECIAL        = -1533055,
-    SAY_KORT_SLAY           = -1533056,
-    SAY_KORT_DEATH          = -1533057,
+    SAY_KORT_AGGRO          = 13034,
+    SAY_KORT_SPECIAL        = 13037,
+    SAY_KORT_SLAY           = 13036,
+    SAY_KORT_DEATH          = 13035,
 
     // sir zeliek
-    SAY_ZELI_AGGRO          = -1533058,
-    SAY_ZELI_SPECIAL        = -1533062,
-    SAY_ZELI_SLAY           = -1533063,
-    SAY_ZELI_DEATH          = -1533064,
-    EMOTE_CONDEMATION       = -1533157,
+    SAY_ZELI_AGGRO          = 13097,
+    SAY_ZELI_SPECIAL        = 13100,
+    SAY_ZELI_SLAY           = 13099,
+    SAY_ZELI_DEATH          = 13098,
+    EMOTE_CONDEMATION       = 33088,
 
     MAX_MARK_STACKS         = 100,              // Berserk is applied once 100 marks are casted
 
     // ***** Spells *****
     // all horsemen
-    // SPELL_SHIELDWALL     = 29061,            // not used in 3.x.x
     SPELL_BERSERK           = 26662,
     SPELL_ACHIEV_CHECK      = 59450,
 
@@ -90,12 +89,6 @@ enum
     SPELL_HOLY_BOLT         = 57376,
     SPELL_HOLY_BOLT_H       = 57465,
     SPELL_CONDEMNATION      = 57377,
-
-    // horseman spirits (not used in 3.x.x)
-    // NPC_SPIRIT_OF_BLAUMEUX = 16776,
-    // NPC_SPIRIT_OF_MOGRAINE = 16775,
-    // NPC_SPIRIT_OF_KORTHAZZ = 16778,
-    // NPC_SPIRIT_OF_ZELIREK  = 16777
 };
 
 static const float aHorseMenMoveCoords[4][3] =
@@ -111,6 +104,7 @@ enum BlaumeuxActions
     BLAUMEUX_MARK,
     BLAUMEUX_VOID_ZONE,
     BLAUMEUX_SHADOW_BOLT,
+    BLAUMEUX_SPECIAL,
     BLAUMEUX_ACTIONS_MAX,
 };
 
@@ -127,6 +121,7 @@ struct boss_lady_blaumeuxAI : public BossAI
         AddCombatAction(BLAUMEUX_MARK, 20s);
         AddCombatAction(BLAUMEUX_VOID_ZONE, 15s);
         AddCombatAction(BLAUMEUX_SHADOW_BOLT, 10s);
+        AddCombatAction(BLAUMEUX_SPECIAL, 5s, 120s);
         Reset();
     }
 
@@ -182,6 +177,7 @@ struct boss_lady_blaumeuxAI : public BossAI
             case BLAUMEUX_MARK: return 12s;
             case BLAUMEUX_VOID_ZONE: return 15s;
             case BLAUMEUX_SHADOW_BOLT: return RandomTimer(2s, 3s);
+            case BLAUMEUX_SPECIAL: return RandomTimer(5s, 120s);
             default: return 0s;
         }
     }
@@ -221,6 +217,11 @@ struct boss_lady_blaumeuxAI : public BossAI
                 }
                 break;
             }
+            case BLAUMEUX_SPECIAL:
+            {
+                DoBroadcastText(SAY_BLAU_SPECIAL, m_creature);
+                break;
+            }
             ResetCombatAction(action, GetSubsequentActionTimer(action));
         }
     }
@@ -230,6 +231,7 @@ enum RivendareActions
 {
     RIVENDARE_MARK,
     RIVENDARE_UNHOLY_SHADOW,
+    RIVENDARE_SPECIAL,
     RIVENDARE_ACTIONS_MAX,
 };
 
@@ -245,6 +247,7 @@ struct boss_rivendare_naxxAI : public BossAI
         AddOnAggroText(SAY_RIVE_AGGRO1, SAY_RIVE_AGGRO2, SAY_RIVE_AGGRO3);
         AddCombatAction(RIVENDARE_MARK, 20s);
         AddCombatAction(RIVENDARE_UNHOLY_SHADOW, 15s);
+        AddCombatAction(RIVENDARE_SPECIAL, 5s, 120s);
         Reset();
     }
 
@@ -301,6 +304,7 @@ struct boss_rivendare_naxxAI : public BossAI
         {
             case RIVENDARE_MARK: return 12s;
             case RIVENDARE_UNHOLY_SHADOW: return 15s;
+            case RIVENDARE_SPECIAL: return RandomTimer(5s, 120s);
             default: return 0s;
         }
     }
@@ -326,6 +330,11 @@ struct boss_rivendare_naxxAI : public BossAI
                     break;
                 return;
             }
+            case RIVENDARE_SPECIAL:
+            {
+                DoBroadcastText(SAY_RIVE_SPECIAL, m_creature);
+                break;
+            }
         }
     }
 };
@@ -334,6 +343,7 @@ enum KorthazActions
 {
     KORTHAZ_MARK,
     KORTHAZ_METEOR,
+    KORTHAZ_SPECIAL,
     KORTHAZ_ACTIONS_MAX,
 };
 
@@ -349,6 +359,7 @@ struct boss_thane_korthazzAI : public BossAI
         AddOnAggroText(SAY_KORT_AGGRO);
         AddCombatAction(KORTHAZ_MARK, 20s);
         AddCombatAction(KORTHAZ_METEOR, 30s);
+        AddCombatAction(KORTHAZ_SPECIAL, 5s, 120s);
         Reset();
     }
 
@@ -405,6 +416,7 @@ struct boss_thane_korthazzAI : public BossAI
         {
             case KORTHAZ_MARK: return 12s;
             case KORTHAZ_METEOR: return 20s;
+            case KORTHAZ_SPECIAL: return RandomTimer(5s, 120s);
             default: return 0s;
         }
     }
@@ -430,6 +442,11 @@ struct boss_thane_korthazzAI : public BossAI
                     break;
                 return;
             }
+            case KORTHAZ_SPECIAL:
+            {
+                DoBroadcastText(SAY_KORT_SPECIAL, m_creature);
+                break;
+            }
             ResetCombatAction(action, GetSubsequentActionTimer(action));
         }
     }
@@ -440,6 +457,7 @@ enum ZeliekActions
     ZELIEK_MARK,
     ZELIEK_HOLY_WRATH,
     ZELIEK_HOLY_BOLT,
+    ZELIEK_SPECIAL,
     ZELIEK_ACTIONS_MAX,
 };
 
@@ -456,6 +474,7 @@ struct boss_sir_zeliekAI : public BossAI
         AddCombatAction(ZELIEK_MARK, 20s);
         AddCombatAction(ZELIEK_HOLY_WRATH, 12s);
         AddCombatAction(ZELIEK_HOLY_BOLT, 10s);
+        AddCombatAction(ZELIEK_SPECIAL, 5s, 120s);
         Reset();
     }
 
@@ -511,6 +530,7 @@ struct boss_sir_zeliekAI : public BossAI
             case ZELIEK_MARK: return 12s;
             case ZELIEK_HOLY_BOLT: return RandomTimer(2s, 3s);
             case ZELIEK_HOLY_WRATH: return 15s;
+            case ZELIEK_SPECIAL: return RandomTimer(5s, 120s);
             default: return 0s;
         }
     }
@@ -549,6 +569,11 @@ struct boss_sir_zeliekAI : public BossAI
                         break;
                 }
                 return;
+            }
+            case ZELIEK_SPECIAL:
+            {
+                DoBroadcastText(SAY_ZELI_SPECIAL, m_creature);
+                break;
             }
             ResetCombatAction(action, GetSubsequentActionTimer(action));
         }
