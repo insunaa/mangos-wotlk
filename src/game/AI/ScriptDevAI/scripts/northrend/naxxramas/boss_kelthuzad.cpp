@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Boss_KelThuzad
 SD%Complete: 75
-SDComment: Timers will need adjustments, along with tweaking positions and amounts
+SDComment: Timers need major overhault. Find good data.
 SDCategory: Naxxramas
 EndScriptData */
 
@@ -51,8 +51,6 @@ enum
     SAY_ANSWER_REQUEST                  = 12994,         // lich king answer
 
     SAY_SPECIAL1_MANA_DET               = 13492,
-    SAY_SPECIAL3_MANA_DET               = -1533107,
-    SAY_SPECIAL2_DISPELL                = -1533108,
 
     EMOTE_GUARDIAN                      = 32804,         // at each guardian summon
 
@@ -491,12 +489,7 @@ struct boss_kelthuzadAI : public BossAI
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_SHADOW_FISSURE) == CAST_OK)
-                    {
-                        if (urand(0, 1))
-                            DoScriptText(SAY_SPECIAL3_MANA_DET, m_creature);
-
                         break;
-                    }
                 }
                 return;
             }
