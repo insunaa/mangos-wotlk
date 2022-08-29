@@ -120,7 +120,7 @@ struct boss_thaddiusAI : public BossAI
         AddOnAggroText(SAY_AGGRO_1, SAY_AGGRO_2, SAY_AGGRO_3);
         AddCombatAction(THADDIUS_POLARITY_SHIFT, 15s);
         AddCombatAction(THADDIUS_CHAIN_LIGHTNING, 8s);
-        AddCombatAction(THADDIUS_BALL_LIGHTNING, true);
+        AddCombatAction(THADDIUS_BALL_LIGHTNING, 1s);
         AddCombatAction(THADDIUS_BERSERK, 6min);
         Reset();
     }
@@ -183,6 +183,15 @@ struct boss_thaddiusAI : public BossAI
         DoCastSpellIfCan(nullptr, SPELL_CLEAR_CHARGES);
     }
 
+    void OnSpellCooldownAdded(SpellEntry const* spellInfo) override
+    {
+        if (spellInfo->Id == SPELL_POLARITY_SHIFT)
+        {
+            DoBroadcastText(SAY_ELECT, m_creature);
+            DoBroadcastText(EMOTE_POLARITY_SHIFT, m_creature);
+        }
+    }
+
     std::chrono::milliseconds GetSubsequentActionTimer(uint32 action)
     {
         switch (action)
@@ -214,11 +223,7 @@ struct boss_thaddiusAI : public BossAI
             case THADDIUS_POLARITY_SHIFT:
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_POLARITY_SHIFT, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
-                {
-                    DoBroadcastText(SAY_ELECT, m_creature);
-                    DoBroadcastText(EMOTE_POLARITY_SHIFT, m_creature);
                     break;
-                }
                 return;
             }
             case THADDIUS_BALL_LIGHTNING:
