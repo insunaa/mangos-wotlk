@@ -1090,6 +1090,29 @@ bool AreaTrigger_at_naxxramas(Player* pPlayer, AreaTriggerEntry const* pAt)
         }
     }
 
+    if (pAt->id == AREATRIGGER_GLUTH_ENTR)
+    {
+        instance_naxxramas* instance = dynamic_cast<instance_naxxramas*>(pPlayer->GetInstanceData());
+        if (!instance)
+            return false;
+        if (instance->GetData(TYPE_GLUTH) == DONE)
+            return false;
+        Creature* gluth = instance->GetSingleCreatureFromStorage(NPC_GLUTH);
+        if (!gluth)
+            return false;
+        if (gluth->IsAlive() && pPlayer->GetPositionZ() > pAt->x + 10.f)
+            gluth->SetInCombatWith(pPlayer);
+    }
+
+    if (pAt->id == AREATRIGGER_CENTRAL_TELEPORT)
+    {
+        instance_naxxramas* instance = dynamic_cast<instance_naxxramas*>(pPlayer->GetInstanceData());
+        if (!instance)
+            return true;
+        if (instance->GetData(TYPE_THADDIUS) != DONE || instance->GetData(TYPE_LOATHEB) != DONE || instance->GetData(TYPE_MAEXXNA) != DONE || instance->GetData(TYPE_FOUR_HORSEMEN) != DONE)
+            return true;
+    }
+
     return false;
 }
 
