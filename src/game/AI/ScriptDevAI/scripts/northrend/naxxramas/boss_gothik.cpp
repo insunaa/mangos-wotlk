@@ -130,6 +130,7 @@ struct boss_gothikAI : public BossAI
                     ResetTimer(GOTHIK_CONTROL_ZONES, 127s);
                 }
             }
+            ++m_speechStep;
         });
         Reset();
     }
