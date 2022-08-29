@@ -93,14 +93,14 @@ enum GothikActions
     GOTHIK_ACTIONS_MAX,
     GOTHIK_CONTROL_ZONES,
     GOTHIK_START_PHASE,
+    GOTHIK_SPEECH,
 };
 
-struct boss_gothikAI : public BossAI, private DialogueHelper
+struct boss_gothikAI : public BossAI
 {
     boss_gothikAI(Creature* creature) : BossAI(creature, GOTHIK_ACTIONS_MAX),
     m_instance(dynamic_cast<instance_naxxramas*>(creature->GetInstanceData())),
-    m_isRegularMode(creature->GetMap()->IsRegularDifficulty()),
-    DialogueHelper(aIntroDialogue)
+    m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
         SetDataType(TYPE_GOTHIK);
         AddOnKillText(SAY_KILL);
@@ -115,6 +115,22 @@ struct boss_gothikAI : public BossAI, private DialogueHelper
         AddTimerlessCombatAction(GOTHIK_OPEN_GATES, true);
         AddCustomAction(GOTHIK_CONTROL_ZONES, true, [&](){ HandleZoneCheck(); });
         AddCustomAction(GOTHIK_START_PHASE, true, [&](){ HandlePhaseTransition(); });
+        AddCustomAction(GOTHIK_SPEECH, true, [&]()
+        {
+            switch (m_speechStep)
+            {
+                case 0: DoBroadcastText(SAY_SPEECH_1, m_creature); ResetTimer(GOTHIK_SPEECH, 4s); break;
+                case 1: DoBroadcastText(SAY_SPEECH_2, m_creature); ResetTimer(GOTHIK_SPEECH, 6s); break;
+                case 2: DoBroadcastText(SAY_SPEECH_3, m_creature); ResetTimer(GOTHIK_SPEECH, 5s); break;
+                case 3:
+                {
+                    DoBroadcastText(SAY_SPEECH_4, m_creature);
+                    SetCombatScriptStatus(false);
+                    m_uiPhase = PHASE_BALCONY;
+                    ResetTimer(GOTHIK_CONTROL_ZONES, 127s);
+                }
+            }
+        });
         Reset();
     }
 
@@ -128,8 +144,7 @@ struct boss_gothikAI : public BossAI, private DialogueHelper
 
     uint8 m_uiPhase;
     uint8 m_uiSpeech;
-
-    uint32 m_uiSpeechTimer;
+    uint8 m_speechStep;
 
     void HandleZoneCheck()
     {
@@ -183,6 +198,7 @@ struct boss_gothikAI : public BossAI, private DialogueHelper
         SetCombatScriptStatus(false);
 
         m_uiPhase = PHASE_SPEECH;
+        m_speechStep = 0;
 
         // Despawn Adds
         for (GuidList::const_iterator itr = m_lSummonedAddGuids.begin(); itr != m_lSummonedAddGuids.end(); ++itr)
@@ -211,7 +227,7 @@ struct boss_gothikAI : public BossAI, private DialogueHelper
         m_instance->SetGothTriggers();
         PrepareSummonPlaces();
         SetCombatScriptStatus(true);
-        StartNextDialogueText(NPC_GOTHIK);
+        ResetTimer(GOTHIK_SPEECH, 1s);
     }
 
     bool IsCentralDoorClosed() const
@@ -368,18 +384,6 @@ struct boss_gothikAI : public BossAI, private DialogueHelper
         return 0s;
     }
 
-    void JustDidDialogueStep(int32 iEntry) override
-    {
-        if (!m_instance)
-            return;
-        if (iEntry == SAY_SPEECH_4)
-        {
-            SetCombatScriptStatus(false);
-            m_uiPhase = PHASE_BALCONY;
-            ResetTimer(GOTHIK_CONTROL_ZONES, 127s);
-        }
-    }
-
     void ExecuteAction(uint32 action) override
     {
         if (!m_instance)
@@ -465,17 +469,6 @@ struct boss_gothikAI : public BossAI, private DialogueHelper
             }
         }
         ResetCombatAction(action, GetSubsequentActionTimer(action));
-    }
-
-    void UpdateAI(const uint32 diff) override
-    {
-        if (!m_instance)
-            return;
-        // Update only the intro related stuff
-        if (m_uiPhase == PHASE_SPEECH)
-            DialogueUpdate(diff); // Dialogue updates outside of combat too
-
-        CombatAI::UpdateAI(diff);
     }
 };
 
