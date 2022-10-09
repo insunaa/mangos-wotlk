@@ -1313,6 +1313,26 @@ struct spell_lava_strike : public SpellScript
     }
 };
 
+/*######
+## spell_will_of_sartharion_aura - 61254
+######*/
+
+struct spell_will_of_sartharion_aura : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!target || !target->IsPlayer())
+            return;
+
+        if (apply)
+        {
+            target->RemoveAurasDueToSpell(57620);
+            target->CastSpell(target, 61885, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
 void AddSC_boss_sartharion()
 {
     Script* pNewScript = new Script;
