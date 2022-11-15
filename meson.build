@@ -82,25 +82,33 @@ if get_option('BUILD_DOCS')
   subdir('doc')
 endif
 
+subdir('dep')
+
+if get_option('BUILD_GAME_SERVER') or get_option('BUILD_LOGIN_SERVER') or get_option('BUILD_EXTRACTORS')
+  subdir('src')
+endif
+
 if get_option('BUILD_RECASTDEMOMOD')
-  error('RECASTDEMOMOD currently unavailable')
-  if build_machine.system() == 'windows'
+  #  error('RECASTDEMOMOD currently unavailable')
+  cmake = import('cmake')
+
+#  rcdm = cmake.subproject('recastdemomod')
+#  detourcrowd = cmake.subproject('DetourCrowd')
+#  detourtilecache = cmake.subproject('DetourTileCache')
+#  debugutils = cmake.subproject('DebugUtils')
+
+#  if build_machine.system() == 'windows'
     if not get_option('BUILD_EXTRACTORS')
       subdir('contrib/mmap')
     endif
     subdir('contrib/recastdemomod')
-  else
-    message('BUILD_RECASTDEMOMOD forced to OFF. Not supported on non windows system.')
-  endif
+#  else
+#    message('BUILD_RECASTDEMOMOD forced to OFF. Not supported on non windows system.')
+#  endif
 endif
 
 if get_option('BUILD_GIT_ID')
   subdir('contrib/git_id')
-endif
-
-subdir('dep')
-if get_option('BUILD_GAME_SERVER') or get_option('BUILD_LOGIN_SERVER') or get_option('BUILD_EXTRACTORS')
-  subdir('src')
 endif
 
 if get_option('BUILD_EXTRACTORS')
