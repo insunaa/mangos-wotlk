@@ -7,7 +7,7 @@ detourtilecache_src = files(
 detourtilecache = static_library(
   'detourtilecache',
   detourtilecache_src,
-  build_by_default : false,
+  build_by_default : true,
   link_args : [],
   link_with : [],
   include_directories : detourtilecache_inc,

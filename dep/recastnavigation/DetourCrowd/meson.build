@@ -12,7 +12,7 @@ detourcrowd_src = files(
 detourcrowd = static_library(
   'detourcrowd',
   detourcrowd_src,
-  build_by_default : false,
+  build_by_default : true,
   link_args : [],
   link_with : [],
   include_directories : detourcrowd_inc,

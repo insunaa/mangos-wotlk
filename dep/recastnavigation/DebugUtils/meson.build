@@ -9,7 +9,7 @@ debugutils_src = files(
 debugutils = static_library(
   'debugutils',
   debugutils_src,
-  build_by_default : false,
+  build_by_default : true,
   link_args : [],
   link_with : [],
   include_directories : debugutils_inc,

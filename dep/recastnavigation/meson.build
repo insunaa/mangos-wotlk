@@ -8,7 +8,7 @@ if get_option('BUILD_EXTRACTORS') or get_option('BUILD_RECASTDEMOMOD')
 endif
 
 if get_option('BUILD_RECASTDEMOMOD')
+  subdir('DebugUtils')
   subdir('DetourCrowd')
   subdir('DetourTileCache')
-  subdir('DebugUtils')
 endif
