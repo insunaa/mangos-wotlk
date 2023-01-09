@@ -18,8 +18,8 @@
 #define BOSS_AI_H
 
 #include "AI/ScriptDevAI/include/sc_instance.h"
-#include "Entities/Creature.h"
 #include "AI/ScriptDevAI/include/sc_creature.h"
+#include "Entities/Creature.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum InstanceActions
@@ -54,6 +54,7 @@ class BossAI : public CombatAI
             for (auto& id : m_entranceObjects)
                 instance->DoUseOpenableObject(id, open);
         }
+
         void OpenExits()
         {
             ScriptedInstance* instance = dynamic_cast<ScriptedInstance*>(m_creature->GetInstanceData());
@@ -113,7 +114,7 @@ class BossAI : public CombatAI
         void EnterEvadeMode() override;
 
         /**
-        * Adds one or more Spells to cast with DoCastSpellIfCan on creature death
+        * Adds one or more Spells to cast with CastSpell on creature death
         * @param cast Initialized struct of QueuedCast type
         */
         void AddCastOnDeath(QueuedCast cast);
@@ -130,30 +131,6 @@ class BossAI : public CombatAI
         */
         void AddRespawnOnEvade(std::chrono::seconds delay);
 
-        /**
-        * Adds one or more Creatures to despawn alongside this Creature on Evade
-        * Uses the same timer for respawn as was set in AddRespawnOnEvade
-        * @param guid ObjectGuid of the creature to respawn
-        */
-        void DespawnSubordinateOnEvade(ObjectGuid guid);
-        template <typename... Targs>
-        void DespawnSubordinateOnEvade(ObjectGuid guid, Targs... fargs)
-        {
-            DespawnSubordinateOnEvade(guid);
-            DespawnSubordinateOnEvade(fargs...);
-        }
-
-        template<typename T, typename W>
-        void ResetValueTo(T& var, W val)
-        {
-            static_assert(std::is_convertible<W, T>::value, "Value must be of castable type to the variable!");
-            T* ptr = &var;
-            m_resetValues.emplace_back([&]()
-            {
-                *ptr = static_cast<T>(val);
-            });
-        }
-
         std::chrono::seconds TimeSinceEncounterStart()
         {
             return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - m_combatStartTimestamp);
@@ -166,14 +143,11 @@ class BossAI : public CombatAI
     private:
         std::vector<uint32> m_onKilledTexts;
         std::vector<uint32> m_onAggroTexts;
-        std::vector<ObjectGuid> m_despawnSubordinateOnEvade;
 
         std::vector<uint32> m_entranceObjects;
         std::vector<uint32> m_exitObjects;
         std::chrono::milliseconds m_gateDelay = 3s;
         std::vector<QueuedCast> m_castOnDeath;
-
-        std::vector<std::function<void()>> m_resetValues;
 
         uint32 m_instanceDataType = -1;
 
