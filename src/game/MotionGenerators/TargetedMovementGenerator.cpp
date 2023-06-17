@@ -745,7 +745,7 @@ float FollowMovementGenerator::GetSpeed(Unit& owner) const
     if (i_target->IsClientControlled() || m_boost)
     {
         const float bonus = (i_target->GetDistance(owner.GetPositionX(), owner.GetPositionY(), owner.GetPositionZ(), DIST_CALC_NONE) / speed);
-        return std::max(owner.GetSpeed(MOVE_WALK), std::min((speed + bonus), 40.0f));
+        return std::clamp(speed + bonus, owner.GetSpeed(MOVE_WALK), 40.f);
     }
 
     return std::max(speed, owner.GetSpeed(MOVE_RUN));
@@ -1032,7 +1032,7 @@ uint32 FollowMovementGenerator::_getPollRate(Unit& owner, bool movingNow, bool m
     const uint32 multiplier = _getPollRateMultiplier(owner, movingNow, movingBefore);
     const uint32 rate = (_getPollRateBase() * uint32(owner.GetSpeedRateInMotion()));
     const uint32 max = (_getPollRateMax() * uint32(owner.GetSpeedRateInMotion()));
-    return std::min(std::max(rate, (rate * multiplier)), max);
+    return std::clamp(rate * multiplier, rate, max);
 }
 
 // Max distance from movement target point (+moving unit size) and targeted object (+size) for target to be considered too far away.
@@ -1327,8 +1327,7 @@ float FormationMovementGenerator::BuildPath(Unit& owner, PointsArray& path)
             speed = (slaveTravelDistance / (masterTravelTime / 1000.0f));
 
             // clamp the speed to some limit
-            speed = std::max(1.0f, speed);
-            speed = std::min(masterSpline->Speed() * 1.5f, speed);
+            speed = std::clamp(speed, 1.f, masterSpline->Speed() * 1.5f);
         }
     }
     return speed;

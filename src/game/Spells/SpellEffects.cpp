@@ -6014,7 +6014,7 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
     else    // Use invoker level in all other cases (to be confirmed)
     {
         if (CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(m_spellInfo->EffectMiscValue[eff_idx]))
-            level = std::max(std::min(petInvoker->GetLevel(), cInfo->MaxLevel), cInfo->MinLevel);
+            level = std::clamp(petInvoker->GetLevel(), cInfo->MinLevel, cInfo->MaxLevel);
         else
         {
             sLog.outError("Spell Effect EFFECT_SUMMON (%u) - no creature template found for summoned NPC %u (spell id %u, effIndex %u)", m_spellInfo->Effect[eff_idx], m_spellInfo->EffectMiscValue[eff_idx], m_spellInfo->Id, eff_idx);

@@ -34,7 +34,7 @@
 #include <regex>
 
 template <typename T>
-static inline T clamp(T v, T lo, T hi) { return std::min(std::max(v, lo), hi); }
+static inline T clamp(T v, T lo, T hi) { return std::clamp(v, lo, hi); }
 
 bool GMTicket::Compare(GMTicket* a, GMTicket* b)
 {

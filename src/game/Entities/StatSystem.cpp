@@ -514,7 +514,7 @@ void Player::UpdateBlockPercentage()
         value += (int32(GetDefenseSkillValue()) - int32(GetSkillMaxForLevel())) * 0.04f;
     }
     m_modBlockChance = real;
-    SetStatFloatValue(PLAYER_BLOCK_PERCENTAGE, std::max(0.0f, std::min(value, 100.0f)));
+    SetStatFloatValue(PLAYER_BLOCK_PERCENTAGE, std::clamp(value, 0.f, 100.f));
 }
 
 void Player::UpdateCritPercentage(WeaponAttackType attType)
@@ -547,7 +547,7 @@ void Player::UpdateCritPercentage(WeaponAttackType attType)
     m_modCritChance[attType] = value;
     // Modify crit from weapon skill and maximized defense skill of same level victim difference
     value += (int32(GetWeaponSkillValue(attType)) - int32(GetSkillMaxForLevel())) * 0.04f;
-    SetStatFloatValue(index, std::max(0.0f, std::min(value, 100.0f)));
+    SetStatFloatValue(index, std::clamp(value, 0.f, 100.f));
 }
 
 void Player::UpdateAllCritPercentages()
@@ -583,7 +583,7 @@ void Player::UpdateParryPercentage()
     }
     // Set current dodge chance
     m_modParryChance = real;
-    SetStatFloatValue(PLAYER_PARRY_PERCENTAGE, std::max(0.0f, std::min(value, 100.0f)));
+    SetStatFloatValue(PLAYER_PARRY_PERCENTAGE, std::clamp(value, 0.f, 100.f));
 }
 
 // Base static dodge values in percentages (%)
@@ -620,7 +620,7 @@ void Player::UpdateDodgePercentage()
     m_modDodgeChanceDiminishing += GetRatingBonusValue(CR_DODGE);
     // Set UI display value: modify value from defense skill against same level target
     value += (int32(GetDefenseSkillValue()) - int32(GetSkillMaxForLevel())) * 0.04f;
-    SetStatFloatValue(PLAYER_DODGE_PERCENTAGE, std::max(0.0f, std::min(value, 100.0f)));
+    SetStatFloatValue(PLAYER_DODGE_PERCENTAGE, std::clamp(value, 0.f, 100.f));
 }
 
 void Player::UpdateSpellCritChance(uint32 school)
@@ -639,7 +639,7 @@ void Player::UpdateSpellCritChance(uint32 school)
     // Set current crit chance
     m_modSpellCritChance[school] = crit;
     // Set UI display value:
-    SetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + school, std::max(0.0f, std::min(crit, 100.0f)));
+    SetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + school, std::clamp(crit, 0.f, 100.f));
 }
 
 void Player::UpdateMeleeHitChances()

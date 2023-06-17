@@ -24859,9 +24859,7 @@ void Player::AddGCD(SpellEntry const& spellEntry, uint32 /*forcedDuration = 0*/,
         spellEntry.DmgClass != SPELL_DAMAGE_CLASS_MELEE && spellEntry.DmgClass != SPELL_DAMAGE_CLASS_RANGED &&
         !spellEntry.HasAttribute(SPELL_ATTR_USES_RANGED_SLOT) && !spellEntry.HasAttribute(SPELL_ATTR_IS_ABILITY))
     {
-        gcdDuration = int32(float(gcdDuration) * GetFloatValue(UNIT_MOD_CAST_SPEED));
-        gcdDuration = std::max(gcdDuration, 1000);
-        gcdDuration = std::min(gcdDuration, 1500);
+        gcdDuration = std::clamp(int32(float(gcdDuration) * GetFloatValue(UNIT_MOD_CAST_SPEED)), 1000, 1500);
     }
 
     if (!gcdDuration)

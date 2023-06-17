@@ -50,7 +50,7 @@ std::string Tracker::Save()
     // Save resume node for the current route
     uint32 node = GetMap().at(size_t(m_locationIndex))->index;
     // Make sure resume node is not the very first one or the very last one - saving and loading those makes no practical sense to us
-    node = std::max(std::min(node, (GetRoute().nodeEnd - 1)), (GetRoute().nodeStart + 1));
+    node = std::clamp(node, GetRoute().nodeStart + 1, GetRoute().nodeEnd - 1);
     stream << node;
 
     const size_t count = (sWorld.getConfig(CONFIG_BOOL_LONG_TAXI_PATHS_PERSISTENCE) ? m_routes.size() : 1);

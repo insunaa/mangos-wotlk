@@ -3857,7 +3857,7 @@ float Unit::CalculateEffectiveDodgeChance(const Unit* attacker, WeaponAttackType
     chance += attacker->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_COMBAT_RESULT_CHANCE, VICTIMSTATE_DODGE);
     // Attacker's expertise reduction
     chance -= attacker->GetExpertisePercent(attType);
-    return std::max(0.0f, std::min(chance, 100.0f));
+    return std::clamp(chance, 0.f, 100.f);
 }
 
 const float AVOIDANCE_DIMINISHING_PARRY_CAP[MAX_CLASSES] =
@@ -3886,7 +3886,7 @@ float Unit::CalculateEffectiveParryChance(const Unit* attacker, WeaponAttackType
         // TODO: Attack brom behind: verify if chance from behind should be additive
         if (deflect && attacker->IsFacingTargetsBack(this))
             chance = float(deflect) * (float(GetTotalAuraModifier(SPELL_AURA_MOD_PARRY_FROM_BEHIND_PERCENT)) / 100.0f);
-        return std::max(0.0f, std::min(chance, 100.0f));
+        return std::clamp(chance, 0.f, 100.f);
     }
 
     chance += GetParryChance();
@@ -3951,7 +3951,7 @@ float Unit::CalculateEffectiveParryChance(const Unit* attacker, WeaponAttackType
     if (attacker->IsFacingTargetsBack(this))
         chance = chance * (float(GetTotalAuraModifier(SPELL_AURA_MOD_PARRY_FROM_BEHIND_PERCENT)) / 100.0f);
 
-    return std::max(0.0f, std::min(chance, 100.0f));
+    return std::clamp(chance, 0.f, 100.f);
 }
 
 float Unit::CalculateEffectiveBlockChance(const Unit* attacker, WeaponAttackType attType, const SpellEntry* ability) const
@@ -3977,7 +3977,7 @@ float Unit::CalculateEffectiveBlockChance(const Unit* attacker, WeaponAttackType
     chance += (difference * factor);
     // Attacker's SPELL_AURA_MOD_COMBAT_RESULT_CHANCE contribution (or reduction)
     chance += attacker->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_COMBAT_RESULT_CHANCE, VICTIMSTATE_BLOCKS);
-    return std::max(0.0f, std::min(chance, 100.0f));
+    return std::clamp(chance, 0.f, 100.f);
 }
 
 float Unit::CalculateEffectiveCrushChance(const Unit* victim, WeaponAttackType attType) const
@@ -3991,7 +3991,7 @@ float Unit::CalculateEffectiveCrushChance(const Unit* victim, WeaponAttackType a
     const int32 deficit = (int32(GetWeaponSkillValue(attType, victim)) - int32(defense));
     if (deficit >= 20)
         chance += ((2 * deficit) - 15);
-    return std::max(0.0f, std::min(chance, 100.0f));
+    return std::clamp(chance, 0.f, 100.f);
 }
 
 float Unit::CalculateEffectiveGlanceChance(const Unit* victim, WeaponAttackType attType) const
@@ -4004,7 +4004,7 @@ float Unit::CalculateEffectiveGlanceChance(const Unit* victim, WeaponAttackType 
     const uint32 skill = std::min(GetWeaponSkillValue(attType, victim), cap);
     const uint32 defense = victim->GetDefenseSkillValue(this);
     chance += (10 + int32(defense - skill));
-    return std::max(0.0f, std::min(chance, 100.0f));
+    return std::clamp(chance, 0.f, 100.f);
 }
 
 float Unit::CalculateEffectiveDazeChance(const Unit* victim, WeaponAttackType attType) const
@@ -4021,7 +4021,7 @@ float Unit::CalculateEffectiveDazeChance(const Unit* victim, WeaponAttackType at
     // Same mechanics as miss chance, but premultiplied by 4 (20% base instead of 5% base)
     chance += (int32(GetWeaponSkillValue(attType, victim)) - int32(victim->GetDefenseSkillValue(this))) * 0.04f * 4;
     // Chance is capped at 40%
-    return std::max(0.0f, std::min(chance, 40.0f));
+    return std::clamp(chance, 0.f, 40.f);
 }
 
 uint32 Unit::CalculateGlanceAmount(CalcDamageInfo* meleeInfo) const
@@ -4045,7 +4045,7 @@ uint32 Unit::CalculateGlanceAmount(CalcDamageInfo* meleeInfo) const
     float highEnd = baseHighEnd - (0.03f * difference);
     float lowEnd = baseLowEnd - (0.05f * difference);
     // 0.2f <= highEnd <= 0.99f
-    highEnd = std::min(std::max(highEnd, 0.2f), 0.99f);
+    highEnd = std::clamp(highEnd, 0.2f, 0.99f);
     // 0.01f <= lowEnd <= maxLowEnd <= highEnd
     lowEnd = std::min(std::max(lowEnd, 0.01f), std::min(maxLowEnd, highEnd));
     // Roll for final glance damage multiplier and calculate amount of damage glancing blow will deal
@@ -4497,7 +4497,7 @@ float Unit::CalculateEffectiveCritChance(const Unit* victim, WeaponAttackType at
         return 0.0f;
     // Skip victim calculation if positive ability
     if (ability && IsPositiveSpell(ability, this, victim))
-        return std::max(0.0f, std::min(chance, 100.0f));
+        return std::clamp(chance, 0.f, 100.f);
     const bool weapon = (!ability || ability->EquippedItemClass == ITEM_CLASS_WEAPON);
     // Skill difference can be both negative and positive.
     // a) Positive means that attacker's level is higher or additional weapon +skill bonuses
@@ -4516,7 +4516,7 @@ float Unit::CalculateEffectiveCritChance(const Unit* victim, WeaponAttackType at
     // Victim's crit taken chance
     const SpellDmgClass dmgClass = (ranged ? SPELL_DAMAGE_CLASS_RANGED : SPELL_DAMAGE_CLASS_MELEE);
     chance += victim->GetCritTakenChance(this, SPELL_SCHOOL_MASK_NORMAL, dmgClass, ability);
-    return std::max(0.0f, std::min(chance, 100.0f));
+    return std::clamp(chance, 0.f, 100.f);
 }
 
 const float AVOIDANCE_DIMINISHING_MISS_CAP[MAX_CLASSES] =
@@ -4610,7 +4610,7 @@ float Unit::CalculateEffectiveMissChance(const Unit* victim, WeaponAttackType at
     // Finally, take hit chance
     chance -= (ability ? GetHitChance(ability, SPELL_SCHOOL_MASK_NORMAL) : GetHitChance(attType));
     float minimum = (ability && ability->DmgClass == SPELL_DAMAGE_CLASS_MAGIC) || difference > 10 ? 1.f : 0;
-    return std::max(minimum, std::min(chance, 100.0f));
+    return std::clamp(chance, minimum, 100.f);
 }
 
 float Unit::CalculateSpellCritChance(const Unit* victim, SpellSchoolMask schoolMask, const SpellEntry* spell) const
@@ -4736,7 +4736,7 @@ float Unit::CalculateSpellCritChance(const Unit* victim, SpellSchoolMask schoolM
             }
             break;
     }
-    return std::max(0.0f, std::min(chance, 100.0f));
+    return std::clamp(chance, 0.f, 100.f);
 }
 
 float Unit::CalculateSpellMissChance(const Unit* victim, SpellSchoolMask schoolMask, const SpellEntry* spell) const
@@ -4791,7 +4791,7 @@ float Unit::CalculateSpellMissChance(const Unit* victim, SpellSchoolMask schoolM
     chance -= GetHitChance(spell, schoolMask);
     // Reduce (or increase) by victim SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE auras
     chance -= victim->GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE, schoolMask);
-    return std::max(minimum, std::min(chance, 100.0f));
+    return std::clamp(chance, minimum, 100.f);
 }
 
 bool Unit::RollSpellCritOutcome(Unit* caster, const Unit* victim, SpellSchoolMask schoolMask, const SpellEntry* spell)
@@ -4952,7 +4952,7 @@ float Unit::CalculateSpellResistChance(const Unit* victim, SpellSchoolMask schoo
     }
     chance += effects;
     //
-    return std::max(0.0f, std::min(chance, 100.0f));
+    return std::clamp(chance, 0.f, 100.f);
 }
 
 uint32 Unit::GetWeaponSkillValue(WeaponAttackType attType, Unit const* target) const
