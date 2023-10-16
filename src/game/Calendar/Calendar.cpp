@@ -626,7 +626,11 @@ void CalendarMgr::LoadCalendarsFromDB()
             // delete all events (no event exist without at least one invite)
             m_EventStore.clear();
             m_MaxEventId = 0;
+#ifndef DO_SQLITE
             CharacterDatabase.DirectExecute("TRUNCATE TABLE calendar_events");
+#else
+            CharacterDatabase.DirectExecute("DELETE FROM calendar_events");
+#endif
             sLog.outString(">> calendar_invites table is empty, cleared calendar_events table!");
         }
         else
@@ -674,7 +678,11 @@ void CalendarMgr::LoadCalendarsFromDB()
         else
         {
             // delete all invites (no invites exist without events)
+#ifndef DO_SQLITE
             CharacterDatabase.DirectExecute("TRUNCATE TABLE calendar_invites");
+#else
+            CharacterDatabase.DirectExecute("DELETE FROM calendar_invites");
+#endif
             sLog.outString(">> calendar_invites table is cleared! (invites without events found)");
         }
         delete invitesQuery;

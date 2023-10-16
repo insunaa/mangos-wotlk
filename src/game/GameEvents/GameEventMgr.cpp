@@ -755,16 +755,23 @@ uint32 GameEventMgr::Initialize()                           // return the next e
 
     if (QueryResult* result = CharacterDatabase.Query("SELECT event FROM game_event_status"))
     {
-        do
+        if (result)
         {
-            Field* fields = result->Fetch();
-            uint16 event_id = fields[0].GetUInt16();
-            activeAtShutdown.insert(event_id);
-        }
-        while (result->NextRow());
-        delete result;
+            do
+            {
+                Field* fields = result->Fetch();
+                uint16 event_id = fields[0].GetUInt16();
+                activeAtShutdown.insert(event_id);
+            }
+            while (result->NextRow());
+            delete result;
 
-        CharacterDatabase.Execute("TRUNCATE game_event_status");
+#ifndef DO_SQLITE
+            CharacterDatabase.Execute("TRUNCATE TABLE game_event_status");
+#else
+            CharacterDatabase.Execute("DELETE FROM game_event_status");
+#endif
+        }
     }
 
     uint32 delay = Update(&activeAtShutdown);

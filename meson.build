@@ -16,6 +16,7 @@ dblib_dep = dependency('mariadb', 'libmariadb', 'mysql', 'libmysql', 'postgresql
 zlib_dep = dependency('zlib', version: '>=1.2.13', static: true, fallback: ['zlib', 'zlib_dep'], required: true)
 openssl_dep = dependency('openssl', version: '>=1.1.1', static: true, fallback: ['openssl'], required: true)
 utfcpp_dep = dependency('utf8cpp', 'utfcpp', static: true, required: false)
+sqlite_dep = dependency('sqlite3', static: true, required: true)
 
 global_includes = include_directories('src/game', 'dep/libmpq', 'src', 'src/framework', 'src/game/Vmap',
                                       'dep/json', 'dep/g3dlite', 'src/shared', 'dep/recastnavigation',

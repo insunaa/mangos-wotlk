@@ -26,6 +26,8 @@
 #include "Database/Field.h"
 #include "Database/QueryResult.h"
 
+#define DO_SQLITE 1
+
 #ifdef DO_POSTGRESQL
 #include "Database/QueryResultPostgre.h"
 #include "Database/Database.h"
@@ -35,6 +37,15 @@ typedef DatabasePostgre DatabaseType;
 #define _TABLE_SIM_      "\""
 #define _CONCAT3_(A,B,C) "( " A " || " B " || " C " )"
 #define _OFFSET_         "LIMIT 1 OFFSET %d"
+#elif DO_SQLITE
+#include "Database/QueryResultSqlite.h"
+#include "Database/Database.h"
+#include "Database/DatabaseSqlite.h"
+typedef DatabaseSqlite DatabaseType;
+#define _LIKE_           "LIKE"
+#define _TABLE_SIM_      '`'
+#define _CONCAT3_(A,B,C) "CONCAT( " A " , " B " , " C " )"
+#define _OFFSET_         "LIMIT %d,1"
 #else
 #include "Database/QueryResultMysql.h"
 #include "Database/Database.h"

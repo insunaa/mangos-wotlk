@@ -21,7 +21,7 @@ executable('realmd',
             realmd_sources,
             link_with: [sharedlib],
             include_directories: [realmd_inc, global_includes],
-            dependencies: [boost_dep, dblib_dep, zlib_dep, openssl_dep, utfcpp_dep],
+            dependencies: [boost_dep, dblib_dep, zlib_dep, openssl_dep, utfcpp_dep, sqlite_dep],
             link_args: _linker_args,
             install: true
 )

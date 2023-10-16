@@ -26,7 +26,7 @@ if get_option('BUILD_GAME_SERVER')
               mangosd_sources,
               link_with: [sharedlib, gamelib, gsoaplib],
               include_directories: [mangosd_inc, global_includes],
-              dependencies: [boost_dep, dblib_dep, zlib_dep, openssl_dep, utfcpp_dep],
+              dependencies: [boost_dep, dblib_dep, zlib_dep, openssl_dep, utfcpp_dep, sqlite_dep],
               link_args: _linker_args,
               install: true
   )

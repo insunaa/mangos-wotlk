@@ -796,7 +796,7 @@ if get_option('BUILD_GAME_SERVER')
 gamelib = static_library('game',
                         game_sources,
                         include_directories: [game_inc, global_includes],
-                        dependencies: [zlib_dep, boost_dep, dblib_dep, utfcpp_dep],
+                        dependencies: [zlib_dep, boost_dep, dblib_dep, utfcpp_dep, sqlite_dep],
                         link_with: [frameworklib, sharedlib, g3dlib, detourlib],
                         cpp_args: game_args,
                         cpp_pch: pch_files,

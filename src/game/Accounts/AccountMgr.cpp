@@ -55,9 +55,21 @@ AccountOpResult AccountMgr::CreateAccount(std::string username, std::string pass
     const char* s_hex = srp.GetSalt().AsHexStr();
     const char* v_hex = srp.GetVerifier().AsHexStr();
 
+    // Get the current time point
+    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+
+    // Convert the time point to a time_t for C-style date and time functions
+    std::time_t now_c = std::chrono::system_clock::to_time_t(now);
+
+    // Convert the time_t to a struct tm for formatted output
+    std::tm* now_tm = std::localtime(&now_c);
+
+    char buffer[80];
+    std::strftime(buffer, 80, "%Y-%m-%d %H:%M:%S", now_tm);
+
     bool update_sv = LoginDatabase.PExecute(
-        "INSERT INTO account(username,v,s,joindate) VALUES('%s','%s','%s',NOW())",
-            username.c_str(), v_hex, s_hex);
+        "INSERT INTO account(username,v,s,joindate) VALUES('%s','%s','%s','%s')",
+            username.c_str(), v_hex, s_hex, buffer);
 
     OPENSSL_free((void*)s_hex);
     OPENSSL_free((void*)v_hex);
@@ -89,9 +101,21 @@ AccountOpResult AccountMgr::CreateAccount(std::string username, std::string pass
     const char* s_hex = srp.GetSalt().AsHexStr();
     const char* v_hex = srp.GetVerifier().AsHexStr();
 
+    // Get the current time point
+    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+
+    // Convert the time point to a time_t for C-style date and time functions
+    std::time_t now_c = std::chrono::system_clock::to_time_t(now);
+
+    // Convert the time_t to a struct tm for formatted output
+    std::tm* now_tm = std::localtime(&now_c);
+
+    char buffer[80];
+    std::strftime(buffer, 80, "%Y-%m-%d %H:%M:%S", now_tm);
+
     bool update_sv = LoginDatabase.PExecute(
-        "INSERT INTO account(username,v,s,joindate,expansion) VALUES('%s','%s','%s',NOW(), %u)",
-            username.c_str(), v_hex, s_hex, expansion);
+        "INSERT INTO account(username,v,s,joindate,expansion) VALUES('%s','%s','%s','%s',%u)",
+            username.c_str(), v_hex, s_hex, buffer, expansion);
 
     OPENSSL_free((void*)s_hex);
     OPENSSL_free((void*)v_hex);
