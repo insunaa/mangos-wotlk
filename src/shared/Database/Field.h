@@ -20,6 +20,8 @@
 #define FIELD_H
 
 #include "Common.h"
+#include "Platform/Define.h"
+#include "Log.h"
 
 class Field
 {

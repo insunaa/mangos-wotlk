@@ -57,6 +57,8 @@
 #include "Loot/LootMgr.h"
 #include "World/WorldState.h"
 #include "Arena/ArenaTeam.h"
+#include <chrono>
+#include <sstream>
 #ifdef BUILD_METRICS
 #include "Metric/Metric.h"
 #endif
@@ -5847,7 +5849,9 @@ bool ChatHandler::HandleBanInfoIPCommand(char* args)
 
 bool ChatHandler::HandleBanListCharacterCommand(char* args)
 {
-    LoginDatabase.Execute("DELETE FROM ip_banned WHERE expires_at<=UNIX_TIMESTAMP() AND expires_at<>banned_at");
+    std::stringstream query;
+    query << "DELETE FROM ip_banned WHERE expires_at<=" << std::chrono::steady_clock::now().time_since_epoch().count() << " AND expires_at<>banned_at";
+    LoginDatabase.Execute(query.str().c_str());
 
     char* cFilter = ExtractLiteralArg(&args);
     if (!cFilter)

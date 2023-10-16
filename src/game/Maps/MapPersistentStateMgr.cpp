@@ -16,6 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include <chrono>
 #include <list>
 
 #include "Maps/MapPersistentStateMgr.h"
@@ -1066,8 +1067,10 @@ void MapPersistentStateManager::InitWorldMaps()
 
 void MapPersistentStateManager::LoadCreatureRespawnTimes()
 {
+    std::stringstream query;
+    query << "DELETE FROM creature_respawn WHERE respawntime <= " << std::chrono::steady_clock::now().time_since_epoch().count();
     // remove outdated data
-    CharacterDatabase.DirectExecute("DELETE FROM creature_respawn WHERE respawntime <= UNIX_TIMESTAMP(NOW())");
+    CharacterDatabase.DirectExecute(query.str().c_str());
 
     uint32 count = 0;
 
@@ -1135,8 +1138,10 @@ void MapPersistentStateManager::LoadCreatureRespawnTimes()
 
 void MapPersistentStateManager::LoadGameobjectRespawnTimes()
 {
+    std::stringstream query;
+    query << "DELETE FROM gameobject_respawn WHERE respawntime <= " << std::chrono::steady_clock::now().time_since_epoch().count();
     // remove outdated data
-    CharacterDatabase.DirectExecute("DELETE FROM gameobject_respawn WHERE respawntime <= UNIX_TIMESTAMP(NOW())");
+    CharacterDatabase.DirectExecute(query.str().c_str());
 
     uint32 count = 0;
 
