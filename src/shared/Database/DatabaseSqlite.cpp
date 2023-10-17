@@ -33,39 +33,21 @@
 size_t DatabaseSqlite::db_count = 0;
 
 void DatabaseSqlite::ThreadStart()
-{
-    mysql_thread_init();
-}
+{ };
 
 void DatabaseSqlite::ThreadEnd()
-{
-    mysql_thread_end();
-}
+{ };
 
 DatabaseSqlite::DatabaseSqlite()
 {
     // before first connection
-    if (db_count++ == 0)
-    {
-        // Mysql Library Init
-        mysql_library_init(-1, nullptr, nullptr);
-
-        if (!mysql_thread_safe())
-        {
-            sLog.outError("FATAL ERROR: Used MySQL library isn't thread-safe.");
-            Log::WaitBeforeContinueIfNeed();
-            exit(1);
-        }
-    }
+    if (db_count++ == 0);
 }
 
 DatabaseSqlite::~DatabaseSqlite()
 {
     StopServer();
-
-    // Free Mysql library pointers for last ~DB
-    if (--db_count == 0)
-        mysql_library_end();
+    if (--db_count == 0);
 }
 
 SqlConnection* DatabaseSqlite::CreateConnection()
@@ -77,6 +59,7 @@ SQLiteConnection::~SQLiteConnection()
 {
     FreePreparedStatements();
     //mysql_close(mSqlite);
+    sqlite3_close(mSqlite);
 }
 
 bool SQLiteConnection::Initialize(const char* infoString)
@@ -87,6 +70,7 @@ bool SQLiteConnection::Initialize(const char* infoString)
         return false;
     }
     sqlite3_exec(mSqlite, "PRAGMA journal_mode=WAL;", 0, 0, 0);
+    sqlite3_busy_timeout(mSqlite, 2);
 
     Tokens tokens = StrSplit(infoString, ";");
 
@@ -329,7 +313,11 @@ void SqlitePreparedStatement::addParam(unsigned int nIndex, const SqlStmtFieldDa
     switch (data.type()) {
         case FIELD_BOOL:
         case FIELD_UI8:
+            result = sqlite3_bind_int(*m_stmt, nIndex + 1, *static_cast<const uint8*>(data.buff()));
+            break;
         case FIELD_UI16:
+            result = sqlite3_bind_int(*m_stmt, nIndex + 1, *static_cast<const uint16*>(data.buff()));
+            break;
         case FIELD_UI32:
             result = sqlite3_bind_int(*m_stmt, nIndex + 1, *static_cast<const uint32*>(data.buff()));
             break;
@@ -337,7 +325,11 @@ void SqlitePreparedStatement::addParam(unsigned int nIndex, const SqlStmtFieldDa
             result = sqlite3_bind_int64(*m_stmt, nIndex + 1, *static_cast<const uint64*>(data.buff()));
             break;
         case FIELD_I8:
+            result = sqlite3_bind_int(*m_stmt, nIndex + 1, *static_cast<const int8*>(data.buff()));
+            break;
         case FIELD_I16:
+            result = sqlite3_bind_int(*m_stmt, nIndex + 1, *static_cast<const int16*>(data.buff()));
+            break;
         case FIELD_I32:
             result = sqlite3_bind_int(*m_stmt, nIndex + 1, *static_cast<const int32*>(data.buff()));
             break;
