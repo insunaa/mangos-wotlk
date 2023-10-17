@@ -16,10 +16,6 @@ shared_sources = [
     'Database/DBCFileLoader.cpp',
     'Database/DatabasePostgre.cpp',
     'Database/SQLStorage.cpp',
-#    'Database/QueryResultMysql.cpp',
-#    'Database/DatabaseMysql.cpp',
-    'Database/QueryResultSqlite.cpp',
-    'Database/DatabaseSqlite.cpp',
     'Auth/SRP6.cpp',
     'Auth/SARC4.cpp',
     'Auth/base32.cpp',
@@ -32,6 +28,16 @@ shared_sources = [
     'Network/Listener.cpp',
     'Config/Config.cpp'
 ]
+
+if get_option('SQLITE')
+shared_sources = [shared_sources,
+    'Database/QueryResultSqlite.cpp',
+    'Database/DatabaseSqlite.cpp']
+else
+shared_sources = [shared_sources,
+    'Database/QueryResultMysql.cpp',
+    'Database/DatabaseMysql.cpp']
+endif
 
 shared_linux = [
     'Platform/PosixDaemon.cpp'

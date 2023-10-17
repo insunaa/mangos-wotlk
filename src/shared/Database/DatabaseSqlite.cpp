@@ -20,7 +20,7 @@
 #include <cstdint>
 #include <cstring>
 #include <sqlite3.h>
-#ifndef DO_POSTGRESQL
+#ifdef DO_SQLITE
 
 #include "Util/Util.h"
 #include "Policies/Singleton.h"
