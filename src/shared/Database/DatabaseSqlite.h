@@ -26,7 +26,6 @@
 #include "Policies/Singleton.h"
 #include "QueryResultSqlite.h"
 
-#include <mysql.h>
 #include <sqlite3.h>
 
 // MySQL prepared statement class
@@ -48,8 +47,6 @@ class SqlitePreparedStatement : public SqlPreparedStatement
     protected:
         // bind parameters
         void addParam(unsigned int nIndex, const SqlStmtFieldData& data);
-
-        static enum_field_types ToMySQLType(const SqlStmtFieldData& data, bool& bUnsigned);
 
     private:
         void RemoveBinds();
