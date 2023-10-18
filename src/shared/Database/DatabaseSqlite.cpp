@@ -117,8 +117,6 @@ QueryResult* SQLiteConnection::Query(const char* sql)
 
 QueryNamedResult* SQLiteConnection::QueryNamed(const char* sql)
 {
-    MYSQL_RES* result = nullptr;
-    MYSQL_FIELD* fields = nullptr;
     uint64 rowCount = 0;
     uint32 fieldCount = 0;
 
@@ -131,7 +129,7 @@ QueryNamedResult* SQLiteConnection::QueryNamed(const char* sql)
 
     QueryFieldNames names(fieldCount);
     for (uint32 i = 0; i < fieldCount; ++i)
-        names[i] = fields[i].name;
+        names[i] = sqlite3_column_name(*pStmt, i);
 
     QueryResultSqlite* queryResult = new QueryResultSqlite(pStmt);
 
@@ -390,31 +388,5 @@ bool SqlitePreparedStatement::execute()
     sqlite3_reset(*m_stmt);
 
     return true;
-}
-
-enum_field_types SqlitePreparedStatement::ToMySQLType(const SqlStmtFieldData& data, bool& bUnsigned)
-{
-    bUnsigned = 0;
-    enum_field_types dataType = MYSQL_TYPE_NULL;
-
-    switch (data.type())
-    {
-        case FIELD_NONE:    dataType = MYSQL_TYPE_NULL;                     break;
-        // MySQL does not support MYSQL_TYPE_BIT as input type
-        case FIELD_BOOL:    // dataType = MYSQL_TYPE_BIT;      bUnsigned = 1;  break;
-        case FIELD_UI8:     dataType = MYSQL_TYPE_TINY;     bUnsigned = 1;  break;
-        case FIELD_I8:      dataType = MYSQL_TYPE_TINY;                     break;
-        case FIELD_I16:     dataType = MYSQL_TYPE_SHORT;                    break;
-        case FIELD_UI16:    dataType = MYSQL_TYPE_SHORT;    bUnsigned = 1;  break;
-        case FIELD_I32:     dataType = MYSQL_TYPE_LONG;                     break;
-        case FIELD_UI32:    dataType = MYSQL_TYPE_LONG;     bUnsigned = 1;  break;
-        case FIELD_I64:     dataType = MYSQL_TYPE_LONGLONG;                 break;
-        case FIELD_UI64:    dataType = MYSQL_TYPE_LONGLONG; bUnsigned = 1;  break;
-        case FIELD_FLOAT:   dataType = MYSQL_TYPE_FLOAT;                    break;
-        case FIELD_DOUBLE:  dataType = MYSQL_TYPE_DOUBLE;                   break;
-        case FIELD_STRING:  dataType = MYSQL_TYPE_STRING;                   break;
-    }
-
-    return dataType;
 }
 #endif
