@@ -454,7 +454,7 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         LoginDatabase.PQuery("SELECT 1 FROM account_banned WHERE account_id = %u AND active = 1 AND (expires_at > %d OR expires_at = banned_at)"
                              "UNION "
                              "SELECT 1 FROM ip_banned WHERE (expires_at = banned_at OR expires_at > %d) AND ip = '%s'",
-                             id, std::chrono::steady_clock::now().time_since_epoch().count(), std::chrono::steady_clock::now().time_since_epoch().count(), GetRemoteAddress().c_str());
+                             id, std::chrono::system_clock::now().time_since_epoch().count(), std::chrono::system_clock::now().time_since_epoch().count(), GetRemoteAddress().c_str());
 
     if (banresult) // if account banned
     {

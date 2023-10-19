@@ -1068,7 +1068,7 @@ void MapPersistentStateManager::InitWorldMaps()
 void MapPersistentStateManager::LoadCreatureRespawnTimes()
 {
     std::stringstream query;
-    query << "DELETE FROM creature_respawn WHERE respawntime <= " << std::chrono::steady_clock::now().time_since_epoch().count();
+    query << "DELETE FROM creature_respawn WHERE respawntime <= " << std::chrono::system_clock::now().time_since_epoch().count();
     // remove outdated data
     CharacterDatabase.DirectExecute(query.str().c_str());
 
@@ -1139,7 +1139,7 @@ void MapPersistentStateManager::LoadCreatureRespawnTimes()
 void MapPersistentStateManager::LoadGameobjectRespawnTimes()
 {
     std::stringstream query;
-    query << "DELETE FROM gameobject_respawn WHERE respawntime <= " << std::chrono::steady_clock::now().time_since_epoch().count();
+    query << "DELETE FROM gameobject_respawn WHERE respawntime <= " << std::chrono::system_clock::now().time_since_epoch().count();
     // remove outdated data
     CharacterDatabase.DirectExecute(query.str().c_str());
 

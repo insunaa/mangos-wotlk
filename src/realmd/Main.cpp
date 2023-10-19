@@ -229,10 +229,10 @@ int main(int argc, char* argv[])
     // set expired bans to inactive
     LoginDatabase.BeginTransaction();
     std::stringstream query;
-    query << "UPDATE account_banned SET active = 0 WHERE expires_at<=" << std::chrono::steady_clock::now().time_since_epoch().count() << " AND expires_at<>banned_at";
+    query << "UPDATE account_banned SET active = 0 WHERE expires_at<=" << std::chrono::system_clock::now().time_since_epoch().count() << " AND expires_at<>banned_at";
     LoginDatabase.Execute(query.str().c_str());
     query.str("");
-    query << "DELETE FROM ip_banned WHERE expires_at<=" << std::chrono::steady_clock::now().time_since_epoch().count() << " AND expires_at<>banned_at";
+    query << "DELETE FROM ip_banned WHERE expires_at<=" << std::chrono::system_clock::now().time_since_epoch().count() << " AND expires_at<>banned_at";
     LoginDatabase.Execute(query.str().c_str());
     LoginDatabase.CommitTransaction();
 
