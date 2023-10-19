@@ -383,7 +383,7 @@ bool AuthSocket::_HandleLogonChallenge()
     ///- Verify that this IP is not in the ip_banned table
     // No SQL injection possible (paste the IP address as passed by the socket)
     std::unique_ptr<QueryResult> ip_banned_result(LoginDatabase.PQuery("SELECT expires_at FROM ip_banned "
-            "WHERE (expires_at = banned_at OR expires_at > %d) AND ip = '%s'", std::chrono::steady_clock::now().time_since_epoch().count(), m_address.c_str()));
+            "WHERE (expires_at = banned_at OR expires_at > %d) AND ip = '%s'", std::chrono::system_clock::now().time_since_epoch().count(), m_address.c_str()));
 
     if (ip_banned_result)
     {
@@ -432,7 +432,7 @@ bool AuthSocket::_HandleLogonChallenge()
             {
                 ///- If the account is banned, reject the logon attempt
                 QueryResult* banresult = LoginDatabase.PQuery("SELECT banned_at,expires_at FROM account_banned WHERE "
-                                         "account_id = %u AND active = 1 AND (expires_at > %d OR expires_at = banned_at)", fields[0].GetUInt32(), std::chrono::steady_clock::now().time_since_epoch().count());
+                                         "account_id = %u AND active = 1 AND (expires_at > %d OR expires_at = banned_at)", fields[0].GetUInt32(), std::chrono::system_clock::now().time_since_epoch().count());
                 if (banresult)
                 {
                     if ((*banresult)[0].GetUInt64() == (*banresult)[1].GetUInt64())
@@ -669,7 +669,7 @@ bool AuthSocket::_HandleLogonProof()
                             uint32 acc_id = fields[0].GetUInt32();
                             LoginDatabase.PExecute("INSERT INTO account_banned(account_id, banned_at, expires_at, banned_by, reason, active)"
                                                 "VALUES ('%u',%d,%d+'%u','MaNGOS realmd','Failed login autoban',1)",
-                                                acc_id, std::chrono::steady_clock::now().time_since_epoch().count(), std::chrono::steady_clock::now().time_since_epoch().count(), WrongPassBanTime);
+                                                acc_id, std::chrono::system_clock::now().time_since_epoch().count(), std::chrono::system_clock::now().time_since_epoch().count(), WrongPassBanTime);
                             BASIC_LOG("[AuthChallenge] account %s got banned for '%u' seconds because it failed to authenticate '%u' times",
                                     _login.c_str(), WrongPassBanTime, failed_logins);
                         }
@@ -678,7 +678,7 @@ bool AuthSocket::_HandleLogonProof()
                             std::string current_ip = m_address;
                             LoginDatabase.escape_string(current_ip);
                             LoginDatabase.PExecute("INSERT INTO ip_banned VALUES ('%s'%d,%d+'%u','MaNGOS realmd','Failed login autoban')",
-                                                current_ip.c_str(), std::chrono::steady_clock::now().time_since_epoch().count(), std::chrono::steady_clock::now().time_since_epoch().count(), WrongPassBanTime);
+                                                current_ip.c_str(), std::chrono::system_clock::now().time_since_epoch().count(), std::chrono::system_clock::now().time_since_epoch().count(), WrongPassBanTime);
                             BASIC_LOG("[AuthChallenge] IP %s got banned for '%u' seconds because account %s failed to authenticate '%u' times",
                                     current_ip.c_str(), WrongPassBanTime, _login.c_str(), failed_logins);
                         }

@@ -5866,7 +5866,7 @@ bool ChatHandler::HandleBanInfoIPCommand(char* args)
 bool ChatHandler::HandleBanListCharacterCommand(char* args)
 {
     std::stringstream query;
-    query << "DELETE FROM ip_banned WHERE expires_at<=" << std::chrono::steady_clock::now().time_since_epoch().count() << " AND expires_at<>banned_at";
+    query << "DELETE FROM ip_banned WHERE expires_at<=" << std::chrono::system_clock::now().time_since_epoch().count() << " AND expires_at<>banned_at";
     LoginDatabase.Execute(query.str().c_str());
 
     char* cFilter = ExtractLiteralArg(&args);
