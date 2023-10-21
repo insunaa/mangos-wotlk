@@ -87,8 +87,8 @@ jobs:
 
       - name: Archive files
         run: |
-          cd ${{env.BUILD_DIR}}/bin/Release
-          7z a -tzip ${{env.ARCHIVE_FILENAME}} "x64_${{env.BUILD_TYPE}}"
+          cd ${{env.BUILD_DIR}}
+          7z a -tzip ${{env.ARCHIVE_FILENAME}} "Release"
       - name: Archive this artefact
         uses: actions/upload-artifact@v2
         with:
