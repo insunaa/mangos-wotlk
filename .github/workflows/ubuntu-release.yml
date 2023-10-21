@@ -96,7 +96,7 @@ jobs:
           path: "${{env.BUILD_DIR}}/${{env.ARCHIVE_FILENAME}}"
 
   upload:
-    runs-on:  ${{ matrix.os }}
+    runs-on: ubuntu-22.04
     permissions:
       contents: write  # for marvinpinto/action-automatic-releases to generate pre-release
     needs: build
