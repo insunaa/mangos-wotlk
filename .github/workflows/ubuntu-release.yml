@@ -82,7 +82,6 @@ jobs:
           MAKEFLAGS: "-j8"
         run: |
             cmake --build ${{env.BUILD_DIR}} --config ${{env.BUILD_TYPE}}
-            cmake --install ${{env.BUILD_DIR}}
 
       - name: Archive files
         run: |
