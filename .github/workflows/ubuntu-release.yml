@@ -93,7 +93,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: snapshot-${{matrix.TYPE}}
-          path: "${{env.BUILD_DIR}}/bin/Release/${{env.ARCHIVE_FILENAME}}"
+          path: "${{env.BUILD_DIR}}/${{env.ARCHIVE_FILENAME}}"
 
   upload:
     runs-on:  ${{ matrix.os }}
