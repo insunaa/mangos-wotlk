@@ -66,7 +66,7 @@ class SQLiteConnection : public SqlConnection
         /*! infoString should be formated like hostname;username;password;database. */
         bool Initialize(const char* infoString) override;
 
-        QueryResult* Query(const char* sql) override;
+        std::unique_ptr<QueryResult> Query(const char* sql) override;
         QueryNamedResult* QueryNamed(const char* sql) override;
         bool Execute(const char* sql) override;
 

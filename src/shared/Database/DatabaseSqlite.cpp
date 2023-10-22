@@ -102,13 +102,13 @@ bool SQLiteConnection::_Query(const char* sql, sqlite3_stmt** pStmt)
     return true;
 }
 
-QueryResult* SQLiteConnection::Query(const char* sql)
+std::unique_ptr<QueryResult> SQLiteConnection::Query(const char* sql)
 {
     sqlite3_stmt** pStmt = new(sqlite3_stmt*);
     if (!_Query(sql, pStmt))
         return nullptr;
 
-    QueryResultSqlite* queryResult = new QueryResultSqlite(pStmt);
+    auto queryResult = std::make_unique<QueryResultSqlite>(pStmt);
 
     if (queryResult->NextRow())
         return queryResult;

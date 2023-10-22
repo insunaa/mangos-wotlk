@@ -764,11 +764,10 @@ uint32 GameEventMgr::Initialize()                           // return the next e
         while (queryResult->NextRow());
 
 #ifndef DO_SQLITE
-            CharacterDatabase.Execute("TRUNCATE TABLE game_event_status");
+        CharacterDatabase.Execute("TRUNCATE TABLE game_event_status");
 #else
-            CharacterDatabase.Execute("DELETE FROM game_event_status");
+        CharacterDatabase.Execute("DELETE FROM game_event_status");
 #endif
-        }
     }
 
     uint32 delay = Update(&activeAtShutdown);
