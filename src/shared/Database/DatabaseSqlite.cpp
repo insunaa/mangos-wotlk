@@ -52,9 +52,8 @@ SqlConnection* DatabaseSqlite::CreateConnection()
 SQLiteConnection::~SQLiteConnection()
 {
     FreePreparedStatements();
-    //mysql_close(mSqlite);
-    sqlite3_close(mSqlite);
     sqlite3_exec(mSqlite, "PRAGMA optimize;", 0, 0, 0);
+    sqlite3_close(mSqlite);
 }
 
 bool SQLiteConnection::Initialize(const char* infoString)
