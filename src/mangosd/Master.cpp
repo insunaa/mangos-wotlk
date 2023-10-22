@@ -129,12 +129,10 @@ int Master::Run()
     // server loaded successfully => enable async DB requests
     // this is done to forbid any async transactions during server startup!
 
-//#ifndef DO_SQLITE
     CharacterDatabase.AllowAsyncTransactions();
     WorldDatabase.AllowAsyncTransactions();
     LoginDatabase.AllowAsyncTransactions();
     LogsDatabase.AllowAsyncTransactions();
-//#endif
 
     ///- Catch termination signals
     _HookSignals();

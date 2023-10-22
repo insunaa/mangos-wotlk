@@ -228,12 +228,13 @@ int main(int argc, char* argv[])
     // cleanup query
     // set expired bans to inactive
     LoginDatabase.BeginTransaction();
-    std::stringstream query;
-    query << "UPDATE account_banned SET active = 0 WHERE expires_at<=" << std::chrono::system_clock::now().time_since_epoch().count() << " AND expires_at<>banned_at";
-    LoginDatabase.Execute(query.str().c_str());
-    query.str("");
-    query << "DELETE FROM ip_banned WHERE expires_at<=" << std::chrono::system_clock::now().time_since_epoch().count() << " AND expires_at<>banned_at";
-    LoginDatabase.Execute(query.str().c_str());
+#ifdef DO_SQLITE
+    LoginDatabase.Execute("UPDATE account_banned SET active = 0 WHERE expires_at<=unixepoch() AND expires_at<>banned_at");
+    LoginDatabase.Execute("DELETE FROM ip_banned WHERE expires_at<=unixepoch() AND expires_at<>banned_at");
+#else
+    LoginDatabase.Execute("UPDATE account_banned SET active = 0 WHERE expires_at<=UNIX_TIMESTAMP() AND expires_at<>banned_at");
+    LoginDatabase.Execute("DELETE FROM ip_banned WHERE expires_at<=UNIX_TIMESTAMP() AND expires_at<>banned_at");
+#endif
     LoginDatabase.CommitTransaction();
 
     // FIXME - more intelligent selection of thread count is needed here.  config option?
@@ -290,9 +291,7 @@ int main(int argc, char* argv[])
 #endif
 
     // server has started up successfully => enable async DB requests
-//#ifndef DO_SQLITE
     LoginDatabase.AllowAsyncTransactions();
-//#endif
 
     // maximum counter for next ping
     auto const numLoops = sConfig.GetIntDefault("MaxPingTime", 30) * MINUTE * 10;

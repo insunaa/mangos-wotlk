@@ -450,12 +450,19 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 	std::string platform = fields[12].GetString();
 
     // Re-check account ban (same check as in realmd)
+#ifdef DO_SQLITE
     auto banresult =
-        LoginDatabase.PQuery("SELECT 1 FROM account_banned WHERE account_id = %u AND active = 1 AND (expires_at > %d OR expires_at = banned_at)"
+        LoginDatabase.PQuery("SELECT 1 FROM account_banned WHERE account_id = %u AND active = 1 AND (expires_at > unixepoch() OR expires_at = banned_at)"
                              "UNION "
-                             "SELECT 1 FROM ip_banned WHERE (expires_at = banned_at OR expires_at > %d) AND ip = '%s'",
-                             id, std::chrono::system_clock::now().time_since_epoch().count(), std::chrono::system_clock::now().time_since_epoch().count(), GetRemoteAddress().c_str());
-
+                             "SELECT 1 FROM ip_banned WHERE (expires_at = banned_at OR expires_at > unixepoch()) AND ip = '%s'",
+                             id, GetRemoteAddress().c_str());
+#else
+    auto banresult =
+        LoginDatabase.PQuery("SELECT 1 FROM account_banned WHERE account_id = %u AND active = 1 AND (expires_at > UNIX_TIMESTAMP() OR expires_at = banned_at)"
+                             "UNION "
+                             "SELECT 1 FROM ip_banned WHERE (expires_at = banned_at OR expires_at > UNIX_TIMESTAMP()) AND ip = '%s'",
+                             id, GetRemoteAddress().c_str());
+#endif
     if (banresult) // if account banned
     {
         WorldPacket packet(SMSG_AUTH_RESPONSE, 1);
@@ -525,23 +532,12 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     // No SQL injection, username escaped.
     static SqlStatementID updAccount;
 
-    // Get the current time point
-    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-
-    // Convert the time point to a time_t for C-style date and time functions
-    std::time_t now_c = std::chrono::system_clock::to_time_t(now);
-
-    // Convert the time_t to a struct tm for formatted output
-    std::tm* now_tm = std::localtime(&now_c);
-
-    // Format and print the current date and time
-    char buffer[80];
-    std::strftime(buffer, 80, "%Y-%m-%d %H:%M:%S", now_tm);
-
-    std::string bStrng(buffer);
-
-    SqlStatement stmt = LoginDatabase.CreateStatement(updAccount, "INSERT INTO account_logons(accountId,ip,loginTime,loginSource) VALUES(?,?,?,?)");
-    stmt.PExecute(id, address.c_str(), bStrng.c_str(), std::to_string(LOGIN_TYPE_MANGOSD).c_str());
+#ifdef DO_SQLITE
+    SqlStatement stmt = LoginDatabase.CreateStatement(updAccount, "INSERT INTO account_logons(accountId,ip,loginTime,loginSource) VALUES(?,?,datetime(),?)");
+#else
+    SqlStatement stmt = LoginDatabase.CreateStatement(updAccount, "INSERT INTO account_logons(accountId,ip,loginTime,loginSource) VALUES(?,?,NOW(),?)");
+#endif
+    stmt.PExecute(id, address.c_str(), std::to_string(LOGIN_TYPE_MANGOSD).c_str());
 
     m_crypt.Init(&K);
 

@@ -1067,11 +1067,12 @@ void MapPersistentStateManager::InitWorldMaps()
 
 void MapPersistentStateManager::LoadCreatureRespawnTimes()
 {
-    std::stringstream query;
-    query << "DELETE FROM creature_respawn WHERE respawntime <= " << std::chrono::system_clock::now().time_since_epoch().count();
     // remove outdated data
-    CharacterDatabase.DirectExecute(query.str().c_str());
-
+#ifdef DO_SQLITE
+    CharacterDatabase.DirectExecute("DELETE FROM creature_respawn WHERE respawntime <= unixepoch('now')");
+#else
+    CharacterDatabase.DirectExecute("DELETE FROM creature_respawn WHERE respawntime <= UNIX_TIMESTAMP(NOW())");
+#endif
     uint32 count = 0;
 
     //                                                 0     1            2    3         4           5          6
@@ -1138,10 +1139,12 @@ void MapPersistentStateManager::LoadCreatureRespawnTimes()
 
 void MapPersistentStateManager::LoadGameobjectRespawnTimes()
 {
-    std::stringstream query;
-    query << "DELETE FROM gameobject_respawn WHERE respawntime <= " << std::chrono::system_clock::now().time_since_epoch().count();
     // remove outdated data
-    CharacterDatabase.DirectExecute(query.str().c_str());
+#ifdef DO_SQLITE
+    CharacterDatabase.DirectExecute("DELETE FROM gameobject_respawn WHERE respawntime <= unixepoch('now')");
+#else
+    CharacterDatabase.DirectExecute("DELETE FROM gameobject_respawn WHERE respawntime <= UNIX_TIMESTAMP(NOW())");
+#endif
 
     uint32 count = 0;
 
