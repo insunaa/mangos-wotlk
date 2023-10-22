@@ -73,7 +73,6 @@
 #include "Anticheat/Anticheat.hpp"
 #include "LFG/LFGMgr.h"
 #include "Vmap/GameObjectModel.h"
-#include <chrono>
 
 #ifdef BUILD_AHBOT
  #include "AuctionHouseBot/AuctionHouseBot.h"
@@ -2024,10 +2023,10 @@ BanReturn World::BanAccount(WorldSession *session, uint32 duration_secs, const s
             session->GetAccountId(), author.c_str(), reason.c_str());
 #else
     if (duration_secs)
-        LoginDatabase.PExecute("INSERT INTO account_banned(account_id, banned_at, expires_at, banned_by, reason, active) VALUES ('%u',  UNIX_TIMESTAMP(),  UNIX_TIMESTAMP()+%u, '%s', '%s', '1')",
+        LoginDatabase.PExecute("INSERT INTO account_banned(account_id, banned_at, expires_at, banned_by, reason, active) VALUES ('%u', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()+%u, '%s', '%s', '1')",
             session->GetAccountId(), duration_secs, author.c_str(), reason.c_str());
     else
-        LoginDatabase.PExecute("INSERT INTO account_banned(account_id, banned_at, expires_at, banned_by, reason, active) VALUES ('%u',  UNIX_TIMESTAMP(), 0, '%s', '%s', '1')",
+        LoginDatabase.PExecute("INSERT INTO account_banned(account_id, banned_at, expires_at, banned_by, reason, active) VALUES ('%u', UNIX_TIMESTAMP(), 0, '%s', '%s', '1')",
             session->GetAccountId(), author.c_str(), reason.c_str());
 #endif
 
@@ -2580,7 +2579,7 @@ void World::ResetMonthlyQuests()
     DETAIL_LOG("Monthly quests reset for all characters.");
 
 #ifndef DO_SQLITE
-    CharacterDatabase.Execute("TRUNCATE TABLE character_queststatus_monthly");
+    CharacterDatabase.Execute("TRUNCATE character_queststatus_monthly");
 #else
     CharacterDatabase.Execute("DELETE FROM character_queststatus_monthly");
 #endif

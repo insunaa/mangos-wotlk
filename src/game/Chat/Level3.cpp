@@ -57,8 +57,6 @@
 #include "Loot/LootMgr.h"
 #include "World/WorldState.h"
 #include "Arena/ArenaTeam.h"
-#include <chrono>
-#include <sstream>
 #ifdef BUILD_METRICS
 #include "Metric/Metric.h"
 #endif

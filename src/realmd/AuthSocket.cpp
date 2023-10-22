@@ -32,7 +32,6 @@
 #include "Auth/SRP6.h"
 #include "Util/CommonDefines.h"
 
-#include <chrono>
 #include <openssl/md5.h>
 #include <ctime>
 #include <memory>
@@ -646,47 +645,42 @@ bool AuthSocket::_HandleLogonProof()
 
             if (auto loginfail = LoginDatabase.PQuery("SELECT id, failed_logins FROM account WHERE username = '%s'", _safelogin.c_str()))
             {
-                if (loginfail->GetFieldCount() >= 1)
+                Field* fields = loginfail->Fetch();
+                uint32 failed_logins = fields[1].GetUInt32();
+
+                if (failed_logins >= MaxWrongPassCount)
                 {
-                    sLog.outError("Loginfail not failed?");
-                    Field* fields = loginfail->Fetch();
-                    uint32 failed_logins = fields[1].GetUInt32();
-                    sLog.outError("Failed: %d", failed_logins);
+                    uint32 WrongPassBanTime = sConfig.GetIntDefault("WrongPass.BanTime", 600);
+                    bool WrongPassBanType = sConfig.GetBoolDefault("WrongPass.BanType", false);
 
-                    if (failed_logins >= MaxWrongPassCount)
+                    if (WrongPassBanType)
                     {
-                        uint32 WrongPassBanTime = sConfig.GetIntDefault("WrongPass.BanTime", 600);
-                        bool WrongPassBanType = sConfig.GetBoolDefault("WrongPass.BanType", false);
-
-                        if (WrongPassBanType)
-                        {
-                            uint32 acc_id = fields[0].GetUInt32();
+                        uint32 acc_id = fields[0].GetUInt32();
 #ifdef DO_SQLITE
-                            LoginDatabase.PExecute("INSERT INTO account_banned(account_id, banned_at, expires_at, banned_by, reason, active)"
-                                                "VALUES ('%u',unixepoch(),unixepoch()+'%u','MaNGOS realmd','Failed login autoban',1)",
-                                                acc_id, WrongPassBanTime);
+                        LoginDatabase.PExecute("INSERT INTO account_banned(account_id, banned_at, expires_at, banned_by, reason, active)"
+                                               "VALUES ('%u',unixepoch(),unixepoch()+'%u','MaNGOS realmd','Failed login autoban',1)",
+                                               acc_id, WrongPassBanTime);
 #else
-                            LoginDatabase.PExecute("INSERT INTO account_banned(account_id, banned_at, expires_at, banned_by, reason, active)"
-                                                "VALUES ('%u',UNIX_TIMESTAMP(),UNIX_TIMESTAMP()+'%u','MaNGOS realmd','Failed login autoban',1)",
-                                                acc_id, WrongPassBanTime);
+                        LoginDatabase.PExecute("INSERT INTO account_banned(account_id, banned_at, expires_at, banned_by, reason, active)"
+                                               "VALUES ('%u',UNIX_TIMESTAMP(),UNIX_TIMESTAMP()+'%u','MaNGOS realmd','Failed login autoban',1)",
+                                               acc_id, WrongPassBanTime);
 #endif
-                            BASIC_LOG("[AuthChallenge] account %s got banned for '%u' seconds because it failed to authenticate '%u' times",
-                                    _login.c_str(), WrongPassBanTime, failed_logins);
-                        }
-                        else
-                        {
-                            std::string current_ip = m_address;
-                            LoginDatabase.escape_string(current_ip);
+                        BASIC_LOG("[AuthChallenge] account %s got banned for '%u' seconds because it failed to authenticate '%u' times",
+                                  _login.c_str(), WrongPassBanTime, failed_logins);
+                    }
+                    else
+                    {
+                        std::string current_ip = m_address;
+                        LoginDatabase.escape_string(current_ip);
 #ifdef DO_SQLITE
-                            LoginDatabase.PExecute("INSERT INTO ip_banned VALUES ('%s',unixepoch(),unixepoch()+'%u','MaNGOS realmd','Failed login autoban')",
-                                                current_ip.c_str(), WrongPassBanTime);
+                        LoginDatabase.PExecute("INSERT INTO ip_banned VALUES ('%s',unixepoch(),unixepoch()+'%u','MaNGOS realmd','Failed login autoban')",
+                                               current_ip.c_str(), WrongPassBanTime);
 #else
-                            LoginDatabase.PExecute("INSERT INTO ip_banned VALUES ('%s',UNIX_TIMESTAMP(),UNIX_TIMESTAMP()+'%u','MaNGOS realmd','Failed login autoban')",
-                                                current_ip.c_str(), WrongPassBanTime);
+                        LoginDatabase.PExecute("INSERT INTO ip_banned VALUES ('%s',UNIX_TIMESTAMP(),UNIX_TIMESTAMP()+'%u','MaNGOS realmd','Failed login autoban')",
+                                               current_ip.c_str(), WrongPassBanTime);
 #endif
-                            BASIC_LOG("[AuthChallenge] IP %s got banned for '%u' seconds because account %s failed to authenticate '%u' times",
-                                    current_ip.c_str(), WrongPassBanTime, _login.c_str(), failed_logins);
-                        }
+                        BASIC_LOG("[AuthChallenge] IP %s got banned for '%u' seconds because account %s failed to authenticate '%u' times",
+                                  current_ip.c_str(), WrongPassBanTime, _login.c_str(), failed_logins);
                     }
                 }
             }

@@ -101,7 +101,7 @@ AccountOpResult AccountMgr::CreateAccount(std::string username, std::string pass
             username.c_str(), v_hex, s_hex, expansion);
 #else
     bool update_sv = LoginDatabase.PExecute(
-        "INSERT INTO account(username,v,s,joindate,expansion) VALUES('%s','%s','%s',NOW(),%u)",
+        "INSERT INTO account(username,v,s,joindate,expansion) VALUES('%s','%s','%s',NOW(), %u)",
             username.c_str(), v_hex, s_hex, expansion);
 #endif
 

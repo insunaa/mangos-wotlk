@@ -16,7 +16,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include <chrono>
 #include <list>
 
 #include "Maps/MapPersistentStateMgr.h"
@@ -1073,6 +1072,7 @@ void MapPersistentStateManager::LoadCreatureRespawnTimes()
 #else
     CharacterDatabase.DirectExecute("DELETE FROM creature_respawn WHERE respawntime <= UNIX_TIMESTAMP(NOW())");
 #endif
+
     uint32 count = 0;
 
     //                                                 0     1            2    3         4           5          6

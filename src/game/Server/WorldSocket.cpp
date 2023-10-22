@@ -463,6 +463,7 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
                              "SELECT 1 FROM ip_banned WHERE (expires_at = banned_at OR expires_at > UNIX_TIMESTAMP()) AND ip = '%s'",
                              id, GetRemoteAddress().c_str());
 #endif
+
     if (banresult) // if account banned
     {
         WorldPacket packet(SMSG_AUTH_RESPONSE, 1);
