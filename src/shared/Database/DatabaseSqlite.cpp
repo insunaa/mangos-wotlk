@@ -32,12 +32,6 @@
 
 size_t DatabaseSqlite::db_count = 0;
 
-void DatabaseSqlite::ThreadStart()
-{ };
-
-void DatabaseSqlite::ThreadEnd()
-{ };
-
 DatabaseSqlite::DatabaseSqlite()
 {
     // before first connection
@@ -60,6 +54,7 @@ SQLiteConnection::~SQLiteConnection()
     FreePreparedStatements();
     //mysql_close(mSqlite);
     sqlite3_close(mSqlite);
+    sqlite3_exec(mSqlite, "PRAGMA optimize;", 0, 0, 0);
 }
 
 bool SQLiteConnection::Initialize(const char* infoString)
@@ -70,17 +65,14 @@ bool SQLiteConnection::Initialize(const char* infoString)
         return false;
     }
     sqlite3_exec(mSqlite, "PRAGMA journal_mode=WAL;", 0, 0, 0);
+    sqlite3_exec(mSqlite, "PRAGMA synchronous=1;", 0, 0, 0);
+    sqlite3_exec(mSqlite, "PRAGMA secure_delete=off;", 0, 0, 0);
+    sqlite3_exec(mSqlite, "PRAGMA encoding='UTF-8';", 0, 0, 0);
     sqlite3_busy_timeout(mSqlite, 2);
 
     Tokens tokens = StrSplit(infoString, ";");
 
     DETAIL_LOG("Connected to SQLite database at %s", infoString);
-
-
-    // set connection properties to UTF8 to properly handle locales for different
-    // server configs - core sends data in UTF8, so MySQL must expect UTF8 too
-//    Execute("SET NAMES `utf8`");
-//    Execute("SET CHARACTER SET `utf8`");
 
     return true;
 }
@@ -214,12 +206,13 @@ unsigned long SQLiteConnection::escape_string(char* to, const char* from, unsign
     std::string newFrom(from);
     std::string newTo;
 
-    for (char& c : newFrom)
+    for (const char& c : newFrom)
     {
-        if (c == '\'') {
-            newTo += "''";  // Replace single quotes with two single quotes
-        } else {
-            newTo += c;
+        switch (c)
+        {
+            [[unlikely]] case '\'': newTo += "''"; break;
+            [[unlikely]] case '\\': newTo += "\\"; break;
+            [[likely]]   default:   newTo += c;    break;
         }
     }
     strcpy(to, newTo.c_str());

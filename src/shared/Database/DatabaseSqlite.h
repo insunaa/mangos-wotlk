@@ -94,11 +94,6 @@ class DatabaseSqlite : public Database
         DatabaseSqlite();
         ~DatabaseSqlite();
 
-        // must be call before first query in thread
-        void ThreadStart() override;
-        // must be call before finish thread run
-        void ThreadEnd() override;
-
     protected:
         virtual SqlConnection* CreateConnection() override;
 
