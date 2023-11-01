@@ -1,6 +1,7 @@
 #define _CRT_SECURE_NO_DEPRECATE
 
 #include "adt.h"
+#include <cstdio>
 
 // Helper
 int holetab_h[4] = {0x1111, 0x2222, 0x4444, 0x8888};
@@ -51,18 +52,31 @@ bool ADT_file::prepareLoadedData()
 bool adt_MHDR::prepareLoadedData()
 {
     if (fcc != fcc_MHDR)
+    {
+        printf("adt-fcc!=fcc_MHDR");
         return false;
+    }
 
     if (size != sizeof(adt_MHDR) - 8)
+    {
+        printf("adt-wrong-sizeof-mhdr");
         return false;
+    }
 
     // Check and prepare MCIN
+    
     if (offsMCIN && !getMCIN().prepareLoadedData())
+    {
+        printf("adt-wrong-getmcin");
         return false;
+    }
 
     // Check and prepare MH2O
     if (offsMH2O && !getMH2O().prepareLoadedData())
+    {
+        printf("adt-wrong-mh2o");
         return false;
+    }
 
     return true;
 }
@@ -76,7 +90,10 @@ bool adt_MCIN::prepareLoadedData()
     for (int i = 0; i < ADT_CELLS_PER_GRID; i++)
         for (int j = 0; j < ADT_CELLS_PER_GRID; j++)
             if (cells[i][j].offsMCNK && !getMCNK(i, j).prepareLoadedData())
+            {
+                printf("mcin-wrong-mcnk");
                 return false;
+            }
 
     return true;
 }
@@ -84,7 +101,10 @@ bool adt_MCIN::prepareLoadedData()
 bool adt_MH2O::prepareLoadedData()
 {
     if (fcc != fcc_MH2O)
+    {
+        printf("m2ho-wrong-fcc");
         return false;
+    }
 
     // Check liquid data
 //    for (int i=0; i<ADT_CELLS_PER_GRID;i++)
@@ -96,13 +116,16 @@ bool adt_MH2O::prepareLoadedData()
 bool adt_MCNK::prepareLoadedData()
 {
     if (fcc != fcc_MCNK)
+    {
+        printf("mcnk-wrong-fcc");
         return false;
+    }
 
     // Check height map
-    if (offsMCVT && !getMCVT()->prepareLoadedData())
+    if (offsMCVT && !getMCVT().prepareLoadedData())
         return false;
     // Check liquid data
-    if (offsMCLQ && !getMCLQ()->prepareLoadedData())
+    if (offsMCLQ && !getMCLQ().prepareLoadedData())
         return false;
 
     return true;

@@ -447,7 +447,8 @@ bool ConvertADT(char* filename, char* filename2, int cell_y, int cell_x, uint32 
                 }
             }
             // Get custom height
-            adt_MCVT* v = cell->getMCVT();
+            adt_MCVT tv = cell->getMCVT();
+            adt_MCVT* v = &tv;
             if (!v)
                 continue;
             // get V9 height map
@@ -583,8 +584,8 @@ bool ConvertADT(char* filename, char* filename2, int cell_y, int cell_x, uint32 
             adt_MCNK* cell = &tcell;
             if (!cell)
                 continue;
-
-            adt_MCLQ* liquid = cell->getMCLQ();
+            adt_MCLQ tliquid = cell->getMCLQ();
+            adt_MCLQ* liquid = &tliquid;
             int count = 0;
             if (!liquid || cell->sizeMCLQ <= 8)
                 continue;

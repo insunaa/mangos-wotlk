@@ -120,17 +120,19 @@ class adt_MCNK
         uint32 effectId;
 
         bool   prepareLoadedData();
-        adt_MCVT* getMCVT()
+        adt_MCVT getMCVT()
         {
+            adt_MCVT tmpMCVT;
             if (offsMCVT)
-                return (adt_MCVT*)((uint8*)this + offsMCVT);
-            return 0;
+                memcpy(&tmpMCVT, (uint8*)this + offsMCVT, sizeof(adt_MCVT));
+            return tmpMCVT;
         }
-        adt_MCLQ* getMCLQ()
+        adt_MCLQ getMCLQ()
         {
+            adt_MCLQ tmpMCLQ;
             if (offsMCLQ)
-                return (adt_MCLQ*)((uint8*)this + offsMCLQ);
-            return 0;
+                memcpy(&tmpMCLQ, (uint8*)this + offsMCLQ, sizeof(adt_MCLQ));
+            return tmpMCLQ;
         }
 };
 
