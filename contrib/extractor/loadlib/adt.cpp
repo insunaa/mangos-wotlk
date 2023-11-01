@@ -41,7 +41,7 @@ bool ADT_file::prepareLoadedData()
         return false;
 
     // Check and prepare MHDR
-    memcpy(&a_grid, GetData() + 8 + version->size, sizeof(adt_MHDR));
+    memcpy(&a_grid, GetData() + 8 + version.size, sizeof(adt_MHDR));
     if (!a_grid.prepareLoadedData())
         return false;
 

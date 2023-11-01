@@ -53,7 +53,7 @@ class FileLoader
         uint8* GetData()     {return data;}
         uint32 GetDataSize() {return data_size;}
 
-        file_MVER* version;
+        file_MVER version;
         FileLoader();
         ~FileLoader();
         bool loadFile(char* filename, bool log = true);
