@@ -901,7 +901,7 @@ void ExtractMapsFromMpq(uint32 build)
         // Loadup map grid data
         sprintf(mpq_map_name, "World\\Maps\\%s\\%s.wdt", map_ids[z].name, map_ids[z].name);
         WDT_file wdt;
-        if (!wdt.loadFile(mpq_map_name, false))
+        if (!wdt.loadFile(mpq_map_name, true))
         {
             printf("Error loading %s map wdt data\n", map_ids[z].name);
             continue;
