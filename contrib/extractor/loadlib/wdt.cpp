@@ -44,13 +44,13 @@ bool WDT_file::prepareLoadedData()
     if (!FileLoader::prepareLoadedData())
         return false;
 
-    memcpy(&mphd, (uint8*)GetData() + version.size + 8, sizeof(wdt_MPHD));
+    memcpy(&mphd, GetData() + version.size + 8, sizeof(wdt_MPHD));
     if (!mphd.prepareLoadedData())
         return false;
-    memcpy(&main, (uint8*)&mphd + mphd.size + 8, sizeof(wdt_MAIN));
+    memcpy(&main, GetData() + sizeof(wdt_MPHD) + mphd.size + 8, sizeof(wdt_MAIN));
     if (!main.prepareLoadedData())
         return false;
-    memcpy(&wmo, (uint8*)&main + main.size + 8, sizeof(wdt_MWMO));
+    memcpy(&wmo, GetData() + sizeof(wdt_MPHD) + sizeof(wdt_MAIN) + main.size + 8, sizeof(wdt_MWMO));
     if (!wmo.prepareLoadedData())
         return false;
     return true;
