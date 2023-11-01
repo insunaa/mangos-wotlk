@@ -1,19 +1,26 @@
 #define _CRT_SECURE_NO_DEPRECATE
 
 #include "wdt.h"
+#include <cstdio>
 
 bool wdt_MWMO::prepareLoadedData()
 {
+    if (fcc != fcc_MWMO)
+        printf("wrong fcc: %#010x\n", fcc);
     return fcc == fcc_MWMO;
 }
 
 bool wdt_MPHD::prepareLoadedData()
 {
+    if (fcc != fcc_MPHD)
+        printf("wrong fcc: %#010x\n", fcc);
     return fcc == fcc_MPHD;
 }
 
 bool wdt_MAIN::prepareLoadedData()
 {
+    if (fcc != fcc_MAIN)
+        printf("wrong fcc: %#010x\n", fcc);
     return fcc == fcc_MAIN;
 }
 
