@@ -1,6 +1,8 @@
 #ifndef LOAD_LIB_H
 #define LOAD_LIB_H
 
+#include <cstring>
+
 #ifdef _MSC_VER
 typedef __int64            int64;
 typedef __int32            int32;

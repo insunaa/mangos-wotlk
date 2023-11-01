@@ -65,9 +65,9 @@ class WDT_file : public FileLoader
         ~WDT_file();
         void free();
 
-        wdt_MPHD* mphd;
-        wdt_MAIN* main;
-        wdt_MWMO* wmo;
+        wdt_MPHD mphd;
+        wdt_MAIN main;
+        wdt_MWMO wmo;
 };
 
 #endif
