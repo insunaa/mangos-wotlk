@@ -34,6 +34,7 @@ bool FileLoader::loadFile(char* filename, bool log)
     data = new uint8 [data_size];
     mf.read(data, data_size);
     mf.close();
+    memcpy(&version, data, sizeof(file_MVER));
     if (prepareLoadedData())
         return true;
 
@@ -46,7 +47,6 @@ bool FileLoader::loadFile(char* filename, bool log)
 bool FileLoader::prepareLoadedData()
 {
     // Check version
-    memcpy(&version, data, sizeof(file_MVER));
     if (version.fcc != fcc_MVER)
     {
         printf("wrong fcc: %#010x\n", version.fcc);
