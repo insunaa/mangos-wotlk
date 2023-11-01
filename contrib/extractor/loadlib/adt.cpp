@@ -90,7 +90,7 @@ bool adt_MCIN::prepareLoadedData(FileLoader* parent, uint32 offsMCIN)
     // Check cells data
     for (int i = 0; i < ADT_CELLS_PER_GRID; i++)
         for (int j = 0; j < ADT_CELLS_PER_GRID; j++)
-            if (cells[i][j].offsMCNK && !getMCNK(i, j, parent, offsMCIN).prepareLoadedData())
+            if (cells[i][j].offsMCNK && !getMCNK(i, j, parent, offsMCIN).prepareLoadedData(parent, cells[i][j].offsMCNK))
             {
                 printf("mcin-wrong-mcnk");
                 return false;
@@ -114,7 +114,7 @@ bool adt_MH2O::prepareLoadedData()
     return true;
 }
 
-bool adt_MCNK::prepareLoadedData()
+bool adt_MCNK::prepareLoadedData(FileLoader* parent, uint32 offsMCNK)
 {
     if (fcc != fcc_MCNK)
     {
@@ -123,10 +123,10 @@ bool adt_MCNK::prepareLoadedData()
     }
 
     // Check height map
-    if (offsMCVT && !getMCVT().prepareLoadedData())
+    if (offsMCVT && !getMCVT(parent, offsMCNK).prepareLoadedData())
         return false;
     // Check liquid data
-    if (offsMCLQ && !getMCLQ().prepareLoadedData())
+    if (offsMCLQ && !getMCLQ(parent, offsMCNK).prepareLoadedData())
         return false;
 
     return true;

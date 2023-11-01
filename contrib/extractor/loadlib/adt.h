@@ -119,19 +119,19 @@ class adt_MCNK
         uint32 props;
         uint32 effectId;
 
-        bool   prepareLoadedData();
-        adt_MCVT getMCVT()
+        bool   prepareLoadedData(FileLoader* parent, uint32 offsMCNK);
+        adt_MCVT getMCVT(FileLoader* parent, uint32 offsMCNK)
         {
             adt_MCVT tmpMCVT;
             if (offsMCVT)
-                memcpy(&tmpMCVT, (uint8*)this + offsMCVT, sizeof(adt_MCVT));
+                memcpy(&tmpMCVT, parent->GetData() + 8 + parent->version.size + 8 + offsMCVT, sizeof(adt_MCVT));
             return tmpMCVT;
         }
-        adt_MCLQ getMCLQ()
+        adt_MCLQ getMCLQ(FileLoader* parent, uint32 offsMCNK)
         {
             adt_MCLQ tmpMCLQ;
             if (offsMCLQ)
-                memcpy(&tmpMCLQ, (uint8*)this + offsMCLQ, sizeof(adt_MCLQ));
+                memcpy(&tmpMCLQ, parent->GetData() + 8 + parent->version.size + 8 + offsMCLQ, sizeof(adt_MCLQ));
             return tmpMCLQ;
         }
 };
@@ -165,6 +165,7 @@ class adt_MCIN
                 //return (adt_MCNK*)((uint8*)this + cells[x][y].offsMCNK - 84);
             return tmpMCNK;
         }
+        uint32 getOffsMCNK() { return getOffsMCNK(); }
 };
 
 #define ADT_LIQUID_HEADER_FULL_LIGHT   0x01
