@@ -43,14 +43,16 @@ bool WDT_file::prepareLoadedData()
     // Check parent
     if (!FileLoader::prepareLoadedData())
         return false;
-
-    memcpy(&mphd, GetData() + version.size + 8, sizeof(wdt_MPHD));
+    uint32 offset = version.size + 8;
+    memcpy(&mphd, GetData() + offset, sizeof(wdt_MPHD));
     if (!mphd.prepareLoadedData())
         return false;
-    memcpy(&main, GetData() + sizeof(wdt_MPHD) + version.size + mphd.size + 8 + 8, sizeof(wdt_MAIN));
+    offset += mphd.size + 8;
+    memcpy(&main, GetData() + offset, sizeof(wdt_MAIN));
     if (!main.prepareLoadedData())
         return false;
-    memcpy(&wmo, GetData() + sizeof(wdt_MPHD) + sizeof(wdt_MAIN) + version.size + mphd.size + main.size + 8 + 8 + 8, sizeof(wdt_MWMO));
+    offset += main.size + 8;
+    memcpy(&wmo, GetData() + offset, sizeof(wdt_MWMO));
     if (!wmo.prepareLoadedData())
         return false;
     return true;
