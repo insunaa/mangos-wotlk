@@ -6,21 +6,21 @@
 bool wdt_MWMO::prepareLoadedData()
 {
     if (fcc != fcc_MWMO)
-        printf("wrong fcc: %#010x\n", fcc);
+        printf("wrong wmo-fcc: %#010x\n", fcc);
     return fcc == fcc_MWMO;
 }
 
 bool wdt_MPHD::prepareLoadedData()
 {
     if (fcc != fcc_MPHD)
-        printf("wrong fcc: %#010x\n", fcc);
+        printf("wrong phd-fcc: %#010x\n", fcc);
     return fcc == fcc_MPHD;
 }
 
 bool wdt_MAIN::prepareLoadedData()
 {
     if (fcc != fcc_MAIN)
-        printf("wrong fcc: %#010x\n", fcc);
+        printf("wrong main-fcc: %#010x\n", fcc);
     return fcc == fcc_MAIN;
 }
 
