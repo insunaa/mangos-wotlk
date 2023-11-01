@@ -44,7 +44,7 @@ bool WDT_file::prepareLoadedData()
     if (!FileLoader::prepareLoadedData())
         return false;
 
-    memcpy(&mphd, (uint8*)&version + version.size + 8, sizeof(wdt_MPHD));
+    memcpy(&mphd, (uint8*)GetData() + version.size + 8, sizeof(wdt_MPHD));
     if (!mphd.prepareLoadedData())
         return false;
     memcpy(&main, (uint8*)&mphd + mphd.size + 8, sizeof(wdt_MAIN));
