@@ -154,13 +154,14 @@ class adt_MCIN
             uint32 asyncId;
         } cells[ADT_CELLS_PER_GRID][ADT_CELLS_PER_GRID];
 
-        bool   prepareLoadedData();
+        bool   prepareLoadedData(FileLoader* parent, uint32 offsMCIN);
         // offset from begin file (used this-84)
-        adt_MCNK getMCNK(int x, int y)
+        adt_MCNK getMCNK(int x, int y, FileLoader* parent, uint32 offsMCIN)
         {
             adt_MCNK tmpMCNK;
             if (cells[x][y].offsMCNK)
-                memcpy(&tmpMCNK, reinterpret_cast<uint8*>(this) + cells[x][y].offsMCNK - 84, sizeof(adt_MCNK));
+                //memcpy(&tmpMCNK, reinterpret_cast<uint8*>(this) + cells[x][y].offsMCNK - 84, sizeof(adt_MCNK));
+                memcpy(&tmpMCNK,parent->GetData() + 8 + parent->version.size + 8 + offsMCIN + cells[x][y].offsMCNK - 84, sizeof(adt_MCNK));
                 //return (adt_MCNK*)((uint8*)this + cells[x][y].offsMCNK - 84);
             return tmpMCNK;
         }
@@ -292,6 +293,7 @@ class adt_MHDR
                 memcpy(&tmpMH2O, parent->GetData() + 8 + parent->version.size + 8 + offsMH2O, sizeof(adt_MH2O));
             return tmpMH2O;
         }
+        uint32 getOffsMCIN() { return offsMCIN; }
 };
 
 class ADT_file : public FileLoader

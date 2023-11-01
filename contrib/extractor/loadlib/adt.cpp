@@ -66,7 +66,7 @@ bool adt_MHDR::prepareLoadedData(FileLoader* parent)
 
     // Check and prepare MCIN
     
-    if (offsMCIN && !getMCIN(parent).prepareLoadedData())
+    if (offsMCIN && !getMCIN(parent).prepareLoadedData(parent, offsMCIN))
     {
         printf("adt-wrong-getmcin");
         return false;
@@ -82,7 +82,7 @@ bool adt_MHDR::prepareLoadedData(FileLoader* parent)
     return true;
 }
 
-bool adt_MCIN::prepareLoadedData()
+bool adt_MCIN::prepareLoadedData(FileLoader* parent, uint32 offsMCIN)
 {
     if (fcc != fcc_MCIN)
         return false;
@@ -90,7 +90,7 @@ bool adt_MCIN::prepareLoadedData()
     // Check cells data
     for (int i = 0; i < ADT_CELLS_PER_GRID; i++)
         for (int j = 0; j < ADT_CELLS_PER_GRID; j++)
-            if (cells[i][j].offsMCNK && !getMCNK(i, j).prepareLoadedData())
+            if (cells[i][j].offsMCNK && !getMCNK(i, j, parent, offsMCIN).prepareLoadedData())
             {
                 printf("mcin-wrong-mcnk");
                 return false;
