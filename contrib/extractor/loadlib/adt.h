@@ -2,6 +2,7 @@
 #define ADT_H
 
 #include "loadlib.h"
+#include <cstring>
 
 #define TILESIZE (533.33333f)
 #define CHUNKSIZE ((TILESIZE) / 16.0f)
@@ -274,8 +275,19 @@ class adt_MHDR
         uint32 data5;
     public:
         bool prepareLoadedData();
-        adt_MCIN* getMCIN() { return (adt_MCIN*)((uint8*)&flags + offsMCIN); }
-        adt_MH2O* getMH2O() { return offsMH2O ? (adt_MH2O*)((uint8*)&flags + offsMH2O) : 0; }
+        adt_MCIN getMCIN()
+        {
+            adt_MCIN tmpMCIN;
+            memcpy(&tmpMCIN, (uint8*)&flags + offsMCIN, sizeof(adt_MCIN));
+            return tmpMCIN;
+        }
+        adt_MH2O getMH2O()
+        {
+            adt_MH2O tmpMH2O;
+            if (offsMH2O)
+                memcpy(&tmpMH2O, (uint8*)&flags + offsMH2O, sizeof(adt_MH2O));
+            return tmpMH2O;
+        }
 };
 
 class ADT_file : public FileLoader

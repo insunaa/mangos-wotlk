@@ -328,8 +328,8 @@ bool ConvertADT(char* filename, char* filename2, int cell_y, int cell_x, uint32 
 
     if (!adt.loadFile(filename))
         return false;
-
-    adt_MCIN* cells = adt.a_grid->getMCIN();
+    adt_MCIN tmpCells = adt.a_grid->getMCIN();
+    adt_MCIN* cells = &tmpCells;
     if (!cells)
     {
         printf("Can't find cells in '%s'\n", filename);
@@ -635,7 +635,8 @@ bool ConvertADT(char* filename, char* filename2, int cell_y, int cell_x, uint32 
     }
 
     // Get liquid map for grid (in WOTLK used MH2O chunk)
-    adt_MH2O* h2o = adt.a_grid->getMH2O();
+    adt_MH2O tmph2o = adt.a_grid->getMH2O();
+    adt_MH2O* h2o = &tmph2o;
     if (h2o)
     {
         for (int i = 0; i < ADT_CELLS_PER_GRID; i++)
