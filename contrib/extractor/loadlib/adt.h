@@ -154,11 +154,13 @@ class adt_MCIN
 
         bool   prepareLoadedData();
         // offset from begin file (used this-84)
-        adt_MCNK* getMCNK(int x, int y)
+        adt_MCNK getMCNK(int x, int y)
         {
+            adt_MCNK tmpMCNK;
             if (cells[x][y].offsMCNK)
-                return (adt_MCNK*)((uint8*)this + cells[x][y].offsMCNK - 84);
-            return 0;
+                memcpy(&tmpMCNK, (uint8*)this + cells[x][y].offsMCNK - 84, sizeof(adt_MCNK));
+                //return (adt_MCNK*)((uint8*)this + cells[x][y].offsMCNK - 84);
+            return tmpMCNK;
         }
 };
 

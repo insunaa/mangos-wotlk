@@ -351,7 +351,8 @@ bool ConvertADT(char* filename, char* filename2, int cell_y, int cell_x, uint32 
     {
         for (int j = 0; j < ADT_CELLS_PER_GRID; j++)
         {
-            adt_MCNK* cell = cells->getMCNK(i, j);
+            adt_MCNK tcell = cells->getMCNK(i, j);
+            adt_MCNK* cell = &tcell;
             uint32 areaid = cell->areaid;
             if (areaid && areaid <= maxAreaId)
             {
@@ -406,7 +407,8 @@ bool ConvertADT(char* filename, char* filename2, int cell_y, int cell_x, uint32 
     {
         for (int j = 0; j < ADT_CELLS_PER_GRID; j++)
         {
-            adt_MCNK* cell = cells->getMCNK(i, j);
+            adt_MCNK tcell = cells->getMCNK(i, j);
+            adt_MCNK* cell = &tcell;
             if (!cell)
                 continue;
             // Height values for triangles stored in order:
@@ -577,7 +579,8 @@ bool ConvertADT(char* filename, char* filename2, int cell_y, int cell_x, uint32 
     {
         for (int j = 0; j < ADT_CELLS_PER_GRID; j++)
         {
-            adt_MCNK* cell = cells->getMCNK(i, j);
+            adt_MCNK tcell = cells->getMCNK(i, j);
+            adt_MCNK* cell = &tcell;
             if (!cell)
                 continue;
 
@@ -808,7 +811,8 @@ bool ConvertADT(char* filename, char* filename2, int cell_y, int cell_x, uint32 
     {
         for (int j = 0; j < ADT_CELLS_PER_GRID; ++j)
         {
-            adt_MCNK* cell = cells->getMCNK(i, j);
+            adt_MCNK tcell = cells->getMCNK(i, j);
+            adt_MCNK* cell = &tcell;
             if (!cell)
                 continue;
             holes[i][j] = cell->holes;
