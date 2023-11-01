@@ -37,7 +37,7 @@ bool FileLoader::loadFile(char* filename, bool log)
     if (prepareLoadedData())
         return true;
 
-    printf("Error loading %s", filename);
+    printf("Error loading %s\n", filename);
     mf.close();
     free();
     return false;
@@ -48,9 +48,15 @@ bool FileLoader::prepareLoadedData()
     // Check version
     memcpy(&version, data, sizeof(file_MVER));
     if (version.fcc != fcc_MVER)
+    {
+        printf("wrong fcc: %#010x\n", version.fcc);
         return false;
+    }
     if (version.ver != FILE_FORMAT_VERSION)
+    {
+        printf("wrong ver: %d\n", version.ver);
         return false;
+    }
     return true;
 }
 
