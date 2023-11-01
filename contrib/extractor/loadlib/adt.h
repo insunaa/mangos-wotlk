@@ -278,18 +278,18 @@ class adt_MHDR
         uint32 data4;
         uint32 data5;
     public:
-        bool prepareLoadedData();
-        adt_MCIN getMCIN()
+        bool prepareLoadedData(FileLoader* parent);
+        adt_MCIN getMCIN(FileLoader* parent)
         {
             adt_MCIN tmpMCIN;
-            memcpy(&tmpMCIN, (uint8*)&flags + offsMCIN, sizeof(adt_MCIN));
+            memcpy(&tmpMCIN, parent->GetData() + 8 + parent->version.size + 8 + offsMCIN, sizeof(adt_MCIN));
             return tmpMCIN;
         }
-        adt_MH2O getMH2O()
+        adt_MH2O getMH2O(FileLoader* parent)
         {
             adt_MH2O tmpMH2O;
             if (offsMH2O)
-                memcpy(&tmpMH2O, (uint8*)&flags + offsMH2O, sizeof(adt_MH2O));
+                memcpy(&tmpMH2O, parent->GetData() + 8 + parent->version.size + 8 + offsMH2O, sizeof(adt_MH2O));
             return tmpMH2O;
         }
 };

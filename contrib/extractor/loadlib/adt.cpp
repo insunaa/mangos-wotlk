@@ -1,3 +1,4 @@
+#include "loadlib.h"
 #define _CRT_SECURE_NO_DEPRECATE
 
 #include "adt.h"
@@ -43,13 +44,13 @@ bool ADT_file::prepareLoadedData()
 
     // Check and prepare MHDR
     memcpy(&a_grid, GetData() + 8 + version.size, sizeof(adt_MHDR));
-    if (!a_grid.prepareLoadedData())
+    if (!a_grid.prepareLoadedData(this))
         return false;
 
     return true;
 }
 
-bool adt_MHDR::prepareLoadedData()
+bool adt_MHDR::prepareLoadedData(FileLoader* parent)
 {
     if (fcc != fcc_MHDR)
     {
@@ -65,14 +66,14 @@ bool adt_MHDR::prepareLoadedData()
 
     // Check and prepare MCIN
     
-    if (offsMCIN && !getMCIN().prepareLoadedData())
+    if (offsMCIN && !getMCIN(parent).prepareLoadedData())
     {
         printf("adt-wrong-getmcin");
         return false;
     }
 
     // Check and prepare MH2O
-    if (offsMH2O && !getMH2O().prepareLoadedData())
+    if (offsMH2O && !getMH2O(parent).prepareLoadedData())
     {
         printf("adt-wrong-mh2o");
         return false;
