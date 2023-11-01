@@ -19,9 +19,7 @@ bool isHole(int holes, int i, int j)
 // Adt file loader class
 //
 ADT_file::ADT_file()
-{
-    a_grid = 0;
-}
+{}
 
 ADT_file::~ADT_file()
 {
@@ -30,7 +28,6 @@ ADT_file::~ADT_file()
 
 void ADT_file::free()
 {
-    a_grid = 0;
     FileLoader::free();
 }
 
@@ -44,8 +41,8 @@ bool ADT_file::prepareLoadedData()
         return false;
 
     // Check and prepare MHDR
-    a_grid = (adt_MHDR*)(GetData() + 8 + version->size);
-    if (!a_grid->prepareLoadedData())
+    memcpy(&a_grid, GetData() + 8 + version->size, sizeof(adt_MHDR));
+    if (!a_grid.prepareLoadedData())
         return false;
 
     return true;

@@ -300,7 +300,7 @@ class ADT_file : public FileLoader
         ~ADT_file();
         void free();
 
-        adt_MHDR* a_grid;
+        adt_MHDR a_grid;
 };
 
 bool isHole(int holes, int i, int j);
