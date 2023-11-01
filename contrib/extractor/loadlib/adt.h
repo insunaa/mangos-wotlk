@@ -158,7 +158,7 @@ class adt_MCIN
         {
             adt_MCNK tmpMCNK;
             if (cells[x][y].offsMCNK)
-                memcpy(&tmpMCNK, (uint8*)this + cells[x][y].offsMCNK - 84, sizeof(adt_MCNK));
+                memcpy(&tmpMCNK, reinterpret_cast<uint8*>(this) + cells[x][y].offsMCNK - 84, sizeof(adt_MCNK));
                 //return (adt_MCNK*)((uint8*)this + cells[x][y].offsMCNK - 84);
             return tmpMCNK;
         }
