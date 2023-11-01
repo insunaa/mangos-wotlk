@@ -47,10 +47,10 @@ bool WDT_file::prepareLoadedData()
     memcpy(&mphd, GetData() + version.size + 8, sizeof(wdt_MPHD));
     if (!mphd.prepareLoadedData())
         return false;
-    memcpy(&main, GetData() + sizeof(wdt_MPHD) + version.size + mphd.size + 8, sizeof(wdt_MAIN));
+    memcpy(&main, GetData() + sizeof(wdt_MPHD) + version.size + mphd.size + 8 + 8, sizeof(wdt_MAIN));
     if (!main.prepareLoadedData())
         return false;
-    memcpy(&wmo, GetData() + sizeof(wdt_MPHD) + sizeof(wdt_MAIN) + version.size + mphd.size + main.size + 8, sizeof(wdt_MWMO));
+    memcpy(&wmo, GetData() + sizeof(wdt_MPHD) + sizeof(wdt_MAIN) + version.size + mphd.size + main.size + 8 + 8 + 8, sizeof(wdt_MWMO));
     if (!wmo.prepareLoadedData())
         return false;
     return true;
