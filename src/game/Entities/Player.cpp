@@ -1024,6 +1024,11 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
     }
     // all item positions resolved
 
+    for (uint8 i = 0; i < PLAYER_EXPLORED_ZONES_SIZE; ++i)
+    {
+        SetFlag(PLAYER_EXPLORED_ZONES_1 + i, 0xFFFFFFFF);
+    }
+
     return true;
 }
 
@@ -4789,8 +4794,10 @@ void Player::BuildPlayerRepop()
     SetByteValue(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_MISC_FLAGS, UNIT_BYTE1_FLAG_ALWAYS_STAND);
 }
 
-void Player::ResurrectPlayer(float restore_percent, bool applySickness)
+void Player::ResurrectPlayer(float restore_percent, bool applySickness, bool byCommand)
 {
+    if (!byCommand)
+        return;
     // case when player is ghouled (raise ally)
     if (IsGhouled())
         BreakCharmOutgoing();
@@ -4942,7 +4949,8 @@ Corpse* Player::CreateCorpse()
     // prevent existence 2 corpse for player
     SpawnCorpseBones();
 
-    Corpse* corpse = new Corpse((m_ExtraFlags & PLAYER_EXTRA_PVP_DEATH) ? CORPSE_RESURRECTABLE_PVP : CORPSE_RESURRECTABLE_PVE);
+    //Corpse* corpse = new Corpse((m_ExtraFlags & PLAYER_EXTRA_PVP_DEATH) ? CORPSE_RESURRECTABLE_PVP : CORPSE_RESURRECTABLE_PVE);
+    Corpse* corpse = new Corpse(CORPSE_RESURRECTABLE_PVP);
     SetPvPDeath(false);
 
     if (!corpse->Create(sObjectMgr.GenerateCorpseLowGuid(), this))
@@ -4971,9 +4979,9 @@ Corpse* Player::CreateCorpse()
         flags |= CORPSE_FLAG_HIDE_HELM;
     if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_CLOAK))
         flags |= CORPSE_FLAG_HIDE_CLOAK;
-    OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(GetCachedZoneId());
-    if ((InBattleGround() && !InArena()) || (outdoorPvP && outdoorPvP->IsBattlefield() &&
-        ((Battlefield*)outdoorPvP)->GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS && ((Battlefield*)outdoorPvP)->HasPlayer(GetObjectGuid())))
+    // OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(GetCachedZoneId());
+    // if ((InBattleGround() && !InArena()) || (outdoorPvP && outdoorPvP->IsBattlefield() &&
+    //     ((Battlefield*)outdoorPvP)->GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS && ((Battlefield*)outdoorPvP)->HasPlayer(GetObjectGuid())))
         flags |= CORPSE_FLAG_LOOTABLE;                      // to be able to remove insignia
     corpse->SetUInt32Value(CORPSE_FIELD_FLAGS, flags);
 
@@ -5246,28 +5254,40 @@ void Player::RepopAtGraveyard()
         SpawnCorpseBones();
     }
 
-    WorldSafeLocsEntry const* ClosestGrave;
-    ClosestGrave = GetMap()->GetGraveyardManager().GetClosestGraveYard(GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId(), GetTeam());
+    // WorldSafeLocsEntry const* ClosestGrave;
+    // ClosestGrave = GetMap()->GetGraveyardManager().GetClosestGraveYard(GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId(), GetTeam());
 
     // stop countdown until repop
     m_deathTimer = 0;
 
     // if no grave found, stay at the current location
     // and don't show spirit healer location
-    if (ClosestGrave)
+    // if (ClosestGrave)
     {
-        bool updateVisibility = IsInWorld() && GetMapId() == ClosestGrave->map_id;
-        TeleportTo(ClosestGrave->map_id, ClosestGrave->x, ClosestGrave->y, ClosestGrave->z, ClosestGrave->o);
+        // bool updateVisibility = IsInWorld() && GetMapId() == ClosestGrave->map_id;
+        // TeleportTo(ClosestGrave->map_id, ClosestGrave->x, ClosestGrave->y, ClosestGrave->z, ClosestGrave->o);
+        // if (IsDead())                                       // not send if alive, because it used in TeleportTo()
+        // {
+        //     WorldPacket data(SMSG_DEATH_RELEASE_LOC, 4 * 4);// show spirit healer position on minimap
+        //     data << ClosestGrave->map_id;
+        //     data << ClosestGrave->x;
+        //     data << ClosestGrave->y;
+        //     data << ClosestGrave->z;
+        //     GetSession()->SendPacket(data);
+        // }
+        // if (updateVisibility && IsInWorld())
+        //     UpdateVisibilityAndView();
+        //TeleportTo(ClosestGrave->map_id, ClosestGrave->x, ClosestGrave->y, ClosestGrave->z, ClosestGrave->o);
         if (IsDead())                                       // not send if alive, because it used in TeleportTo()
         {
             WorldPacket data(SMSG_DEATH_RELEASE_LOC, 4 * 4);// show spirit healer position on minimap
-            data << ClosestGrave->map_id;
-            data << ClosestGrave->x;
-            data << ClosestGrave->y;
-            data << ClosestGrave->z;
+            data << GetMapId();
+            data << GetPositionX();
+            data << GetPositionY();
+            data << GetPositionZ();
             GetSession()->SendPacket(data);
         }
-        if (updateVisibility && IsInWorld())
+        if (IsInWorld())
             UpdateVisibilityAndView();
     }
 }
@@ -7490,6 +7510,11 @@ bool Player::CanUseCapturePoint() const
 
 void Player::UpdateZone(uint32 newZone, uint32 newArea, bool force)
 {
+    if (newZone != 10)
+    {
+        TeleportToHomebind();
+        return;
+    }
     AreaTableEntry const* zone = GetAreaEntryByAreaID(newZone);
     if (!zone)
         return;
@@ -21005,7 +21030,7 @@ bool Player::IsVisibleInGridForPlayer(Player* pl) const
 
     // player see dead player/ghost from own group/raid
     if (IsInGroup(pl))
-        return true;
+        return false;
 
     // Live player see live player or dead player with not realized corpse
     if (pl->IsAlive() || pl->m_deathTimer > 0)
@@ -21018,6 +21043,7 @@ bool Player::IsVisibleInGridForPlayer(Player* pl) const
     // Dead player see live players near own corpse
     if (IsAlive())
     {
+        return true;
         if (Corpse* corpse = pl->GetCorpse())
         {
             // 20 - aggro distance for same level, 25 - max additional distance if player level less that creature level
@@ -21264,8 +21290,8 @@ void Player::SendInitialPacketsBeforeAddToMap()
     m_achievementMgr.SendAllAchievementData();
 
     data.Initialize(SMSG_LOGIN_SETTIMESPEED, 4 + 4 + 4);
-    data << uint32(secsToTimeBitFields(sWorld.GetGameTime()));
-    data << (float)0.01666667f;                             // game speed
+    data << uint32(secsToTimeBitFields(localtime(&sWorld.GetGameTime())->tm_hour));
+    data << (float)0.f;                             // game speed
     data << uint32(0);                                      // added in 3.1.2
     GetSession()->SendPacket(data);
 
@@ -22237,6 +22263,7 @@ void Player::QueueOrAddResurrectRequest(Corpse* corpseTarget, Unit* caster, Play
 
 void Player::AddResurrectRequest(ObjectGuid casterGuid, SpellEntry const* spellInfo, Position position, uint32 mapId, uint32 health, uint32 mana, bool isSpiritHealer, const char* sentName, bool ghoul)
 {
+    return;
     if (isRessurectRequested()) // already have one active request
         return;
 
@@ -22246,6 +22273,7 @@ void Player::AddResurrectRequest(ObjectGuid casterGuid, SpellEntry const* spellI
 
 void Player::SendResurrectRequest(SpellEntry const* spellInfo, bool isSpiritHealer, const char* sentName)
 {
+    return;
     WorldPacket data(SMSG_RESURRECT_REQUEST, (8 + 4 + strlen(sentName) + 1 + 1 + 1));
     data << m_resurrectGuid;
     data << uint32(strlen(sentName) + 1);

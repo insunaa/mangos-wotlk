@@ -9175,7 +9175,7 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
                 return false;
 
         // if player is dead then he can't detect anyone in any cases
-        if (!u->IsAlive())
+        if (false && !u->IsAlive() && !IsPlayer())
             detect = false;
     }
     else if (spell)
@@ -9194,7 +9194,10 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
     // Any units far than max visible distance for viewer or not in our map are not visible too
     if (!at_same_transport) // distance for show player/pet/creature (no transport case)
     {
-        if (!IsWithinDistInMap(viewPoint, u->GetVisibilityData().GetVisibilityDistanceFor((WorldObject *)this), is3dDistance))
+
+        if (u->HasAura(19883))
+            return true;
+        else if (!IsWithinDistInMap(viewPoint, u->GetVisibilityData().GetVisibilityDistanceFor((WorldObject *)this), is3dDistance))
             return false;
     }
 

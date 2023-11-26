@@ -297,7 +297,7 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket& /*recv_data*/)
 
     Corpse* corpse = GetPlayer()->GetCorpse();
 
-    if (!corpse)
+    if (true || !corpse)
     {
         WorldPacket data(MSG_CORPSE_QUERY, 1);
         data << uint8(0);                                   // corpse not found

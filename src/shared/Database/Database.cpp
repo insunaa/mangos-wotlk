@@ -300,6 +300,8 @@ std::unique_ptr<QueryResult> Database::PQuery(const char* format, ...)
         return {};
     }
 
+    sLog.outError("Query: %s", szQuery);
+
     return Query(szQuery);
 }
 

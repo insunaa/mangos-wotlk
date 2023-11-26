@@ -637,6 +637,7 @@ void WorldSession::HandleBugOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleReclaimCorpseOpcode(WorldPacket& recv_data)
 {
+    return;
     DETAIL_LOG("WORLD: Received opcode CMSG_RECLAIM_CORPSE");
 
     ObjectGuid guid;
@@ -674,6 +675,7 @@ void WorldSession::HandleReclaimCorpseOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleResurrectResponseOpcode(WorldPacket& recv_data)
 {
+    return;
     DETAIL_LOG("WORLD: Received opcode CMSG_RESURRECT_RESPONSE");
 
     ObjectGuid guid;

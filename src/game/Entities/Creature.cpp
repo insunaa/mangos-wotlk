@@ -2132,6 +2132,7 @@ bool Creature::IsVisibleInGridForPlayer(Player* pl) const
     // Dead player see live creatures near own corpse
     if (IsAlive())
     {
+        return true;
         Corpse* corpse = pl->GetCorpse();
         if (corpse)
         {

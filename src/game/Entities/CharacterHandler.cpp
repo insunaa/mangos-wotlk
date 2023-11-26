@@ -267,6 +267,14 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
     ChrClassesEntry const* classEntry = sChrClassesStore.LookupEntry(class_);
     ChrRacesEntry const* raceEntry = sChrRacesStore.LookupEntry(race_);
 
+    if (class_ != 2 || race_ != 1)
+    {
+        data << (uint8)CHAR_CREATE_FAILED;
+        SendPacket(data);
+        sLog.outError("Account:[%u] attempted to create non-Human non-Paladin of invalid Class (%u) or Race (%u)", GetAccountId(), class_, race_);
+        return;
+    }
+
     if (!classEntry || !raceEntry)
     {
         data << (uint8)CHAR_CREATE_FAILED;
@@ -494,7 +502,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
         return;
     }
 
-    if ((have_same_race && skipCinematics == CINEMATICS_SKIP_SAME_RACE) || skipCinematics == CINEMATICS_SKIP_ALL)
+    // if ((have_same_race && skipCinematics == CINEMATICS_SKIP_SAME_RACE) || skipCinematics == CINEMATICS_SKIP_ALL)
         pNewChar->setCinematic(1);                          // not show intro
 
     pNewChar->SetAtLoginFlag(AT_LOGIN_FIRST);               // First login

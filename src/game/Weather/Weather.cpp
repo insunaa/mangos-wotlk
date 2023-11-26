@@ -64,6 +64,8 @@ bool Weather::Update(uint32 diff, Map const* _map)
 /// Calculate the new weather, returns true if and only if the weather changed
 bool Weather::ReGenerate()
 {
+    NormalizeGrade();
+    return true;
     if (m_isPermanentWeather)
         return false;
 
@@ -195,7 +197,7 @@ void Weather::SendWeatherUpdateToPlayer(Player* player)
     WorldPacket data(SMSG_WEATHER, 4 + 4 + 1);
     data << uint32(GetWeatherState());
     data << float(m_grade);
-    data << uint8(0);       // 1 = instant change, 0 = smooth change
+    data << uint8(1);       // 1 = instant change, 0 = smooth change
 
     player->GetSession()->SendPacket(data);
 }
@@ -210,7 +212,7 @@ bool Weather::SendWeatherForPlayersInZone(Map const* _map)
     WorldPacket data(SMSG_WEATHER, 4 + 4 + 1);
     data << uint32(state);
     data << float(m_grade);
-    data << uint8(0);       // 1 = instant change, 0 = smooth change
+    data << uint8(1);       // 1 = instant change, 0 = smooth change
 
     ///- Send the weather packet to all players in this zone
     if (!_map->SendToPlayersInZone(data, m_zone))
@@ -278,6 +280,8 @@ WeatherState Weather::GetWeatherState() const
 
 void Weather::NormalizeGrade()
 {
+    m_grade = 0.9999f;
+    return;
     if (m_grade >= 1)
         m_grade = 0.9999f;
     else if (m_grade < 0)
@@ -290,40 +294,6 @@ void Weather::LogWeatherState(WeatherState state) const
     char const* wthstr;
     switch (state)
     {
-        case WEATHER_STATE_LIGHT_RAIN:
-            wthstr = "light rain";
-            break;
-        case WEATHER_STATE_MEDIUM_RAIN:
-            wthstr = "medium rain";
-            break;
-        case WEATHER_STATE_HEAVY_RAIN:
-            wthstr = "heavy rain";
-            break;
-        case WEATHER_STATE_LIGHT_SNOW:
-            wthstr = "light snow";
-            break;
-        case WEATHER_STATE_MEDIUM_SNOW:
-            wthstr = "medium snow";
-            break;
-        case WEATHER_STATE_HEAVY_SNOW:
-            wthstr = "heavy snow";
-            break;
-        case WEATHER_STATE_LIGHT_SANDSTORM:
-            wthstr = "light sandstorm";
-            break;
-        case WEATHER_STATE_MEDIUM_SANDSTORM:
-            wthstr = "medium sandstorm";
-            break;
-        case WEATHER_STATE_HEAVY_SANDSTORM:
-            wthstr = "heavy sandstorm";
-            break;
-        case WEATHER_STATE_THUNDERS:
-            wthstr = "thunders";
-            break;
-        case WEATHER_STATE_BLACKRAIN:
-            wthstr = "black rain";
-            break;
-        case WEATHER_STATE_FINE:
         default:
             wthstr = "fine";
             break;

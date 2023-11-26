@@ -1970,7 +1970,7 @@ class Player : public Unit
         Corpse* CreateCorpse();
         void KillPlayer();
         uint32 GetResurrectionSpellId() const;
-        void ResurrectPlayer(float restore_percent, bool applySickness = false);
+        void ResurrectPlayer(float restore_percent, bool applySickness = false, bool byCommand = false);
         void BuildPlayerRepop();
         void RepopAtGraveyard();
         std::pair<bool, AreaTrigger const*> CheckAndRevivePlayerOnDungeonEnter(MapEntry const* targetMapEntry, uint32 targetMapId);
