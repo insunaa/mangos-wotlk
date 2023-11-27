@@ -1087,6 +1087,7 @@ Item* Player::StoreNewItemInInventorySlot(uint32 itemEntry, uint32 amount)
 
 uint32 Player::EnvironmentalDamage(EnviromentalDamage type, uint32 damage)
 {
+    return 0;
     if (!IsAlive() || IsGameMaster())
         return 0;
 
@@ -2845,6 +2846,7 @@ void Player::SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 RestXP, bool rec
 
 void Player::GiveXP(uint32 xp, Creature* victim, float groupRate)
 {
+    return;
     if (xp < 1)
         return;
 
@@ -3072,7 +3074,7 @@ void Player::InitStatsForLevel(bool reapplyMods)
     for (int i = STAT_STRENGTH; i < MAX_STATS; ++i)
         SetStat(Stats(i), info.stats[i]);
 
-    SetCreateHealth(classInfo.basehealth);
+    SetCreateHealth(1);
 
     // set create powers
     SetCreateMana(classInfo.basemana);
@@ -4951,7 +4953,7 @@ Corpse* Player::CreateCorpse()
 
     //Corpse* corpse = new Corpse((m_ExtraFlags & PLAYER_EXTRA_PVP_DEATH) ? CORPSE_RESURRECTABLE_PVP : CORPSE_RESURRECTABLE_PVE);
     Corpse* corpse = new Corpse(CORPSE_RESURRECTABLE_PVP);
-    SetPvPDeath(false);
+    SetPvPDeath(true);
 
     if (!corpse->Create(sObjectMgr.GenerateCorpseLowGuid(), this))
     {
@@ -7510,7 +7512,7 @@ bool Player::CanUseCapturePoint() const
 
 void Player::UpdateZone(uint32 newZone, uint32 newArea, bool force)
 {
-    if (newZone != 10)
+    if (newZone != 10 && !IsGameMaster())
     {
         TeleportToHomebind();
         return;
@@ -19312,8 +19314,17 @@ void Player::Whisper(const std::string& text, uint32 language, ObjectGuid receiv
 
     if (!m_session->GetAnticheat()->IsSilenced())
     {
-        ChatHandler::BuildChatPacket(data, CHAT_MSG_WHISPER, text.c_str(), Language(language), GetChatTag(), GetObjectGuid(), GetName());
-        rPlayer->GetSession()->SendPacket(data);
+        if (!IsAlive() && rPlayer->IsAlive())
+        {
+            ChatHandler::BuildChatPacket(data, CHAT_MSG_WHISPER, "You cannot talk to the living.", Language(language), CHAT_TAG_DEV, GetObjectGuid(), "Overlord");
+            GetSession()->SendPacket(data);
+            return;
+        }
+        else
+        {
+            ChatHandler::BuildChatPacket(data, CHAT_MSG_WHISPER, text.c_str(), Language(language), GetChatTag(), GetObjectGuid(), GetName());
+            rPlayer->GetSession()->SendPacket(data);
+        }
     }
 
     // do not send confirmations, afk, dnd or system notifications for addon messages
@@ -19331,7 +19342,7 @@ void Player::Whisper(const std::string& text, uint32 language, ObjectGuid receiv
     }
 
     // announce afk or dnd message
-    if (rPlayer->isAFK() || rPlayer->isDND())
+    if (rPlayer->IsAlive() && (rPlayer->isAFK() || rPlayer->isDND()))
     {
         const ChatMsg msgtype = rPlayer->isAFK() ? CHAT_MSG_AFK : CHAT_MSG_DND;
         data.clear();

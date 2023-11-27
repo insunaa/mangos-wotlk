@@ -754,8 +754,13 @@ void Channel::SendMessage(WorldPacket const& data, ObjectGuid sender) const
 {
     for (PlayerList::const_iterator i = m_players.begin(); i != m_players.end(); ++i)
         if (Player* plr = sObjectMgr.GetPlayer(i->first))
+        {
+            Player* snd = plr->GetMap()->GetPlayer(sender);
+            if (snd && !snd->IsAlive() && plr->IsAlive() && !plr->IsGameMaster())
+                continue;
             if (!sender || !plr->GetSocial()->HasIgnore(sender))
                 plr->GetSession()->SendPacket(data);
+        }
 }
 
 void Channel::Voice(ObjectGuid /*guid1*/, ObjectGuid /*guid2*/) const

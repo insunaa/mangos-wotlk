@@ -4556,7 +4556,8 @@ void Spell::SendSpellStart() const
         data << uint32(mechanicImmunityMask);               // used for SetCastImmunities
     }
 
-    m_trueCaster->SendMessageToSet(data, true);
+    //m_trueCaster->SendMessageToSet(data, true);
+    m_trueCaster->SendMessageToSetInRange(data, 25.f, true);
 }
 
 void Spell::SendSpellGo()
@@ -4674,7 +4675,8 @@ void Spell::SendSpellGo()
     }
 
     if (!sendDestLoc)
-        m_trueCaster->SendMessageToSet(data, true);
+        //m_trueCaster->SendMessageToSet(data, true);
+        m_trueCaster->SendMessageToSetInRange(data, 25.f, true);
     else
     {
         WorldPacket destLocData(SMSG_NOTIFY_DEST_LOC_SPELL_CAST);

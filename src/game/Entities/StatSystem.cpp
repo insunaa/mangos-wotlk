@@ -219,6 +219,8 @@ float Player::GetManaBonusFromIntellect() const
 
 void Player::UpdateMaxHealth()
 {
+    SetMaxHealth(1);
+    return;
     UnitMods unitMod = UNIT_MOD_HEALTH;
 
     float value = GetModifierValue(unitMod, BASE_VALUE) + GetCreateHealth();

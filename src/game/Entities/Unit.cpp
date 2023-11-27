@@ -838,6 +838,12 @@ void Unit::FallSuicide()
 
 uint32 Unit::DealDamage(Unit* dealer, Unit* victim, uint32 damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellInfo, bool durabilityLoss, Spell* spell)
 {
+    if (!dealer->HasAura(47241))
+    {
+        if (!spellInfo || spellInfo->Id != 48801)
+            return 0;
+    }
+
     // remove affects from attacker at any non-DoT damage (including 0 damage)
     if (damagetype != DOT && damagetype != INSTAKILL)
     {
@@ -9162,6 +9168,12 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
     // forbidden to seen (while Removing corpse)
     if (m_Visibility == VISIBILITY_REMOVE_CORPSE)
         return false;
+
+    if (IsCorpse())
+        return true;
+
+    if (IsAlive() && !u->IsAlive())
+        return true;
 
     Map& _map = *u->GetMap();
     // Grid dead/alive checks

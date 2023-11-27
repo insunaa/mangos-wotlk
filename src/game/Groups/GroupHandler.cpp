@@ -74,6 +74,9 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recv_data)
     recv_data >> membername;
     recv_data.read_skip<uint32>();                          // roles mask?
 
+    SendPartyResult(PARTY_OP_INVITE, membername, ERR_INVITE_NO_PARTY_SERVER);
+        return;
+
     // attempt add selected player
 
     // cheating

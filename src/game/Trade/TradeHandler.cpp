@@ -523,7 +523,7 @@ void WorldSession::HandleBeginTradeOpcode(WorldPacket& /*recvPacket*/)
         return;
 
     TradeStatusInfo info;
-    info.Status = TRADE_STATUS_OPEN_WINDOW;
+    info.Status = TRADE_STATUS_TRADE_REJECTED;
     my_trade->GetTrader()->GetSession()->SendTradeStatus(info);
     SendTradeStatus(info);
 }
@@ -554,6 +554,11 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
         return;
 
     TradeStatusInfo info;
+
+    info.Status = TRADE_STATUS_TRADE_REJECTED;
+    SendTradeStatus(info);
+    return;
+
     if (!GetPlayer()->IsAlive())
     {
         info.Status = TRADE_STATUS_YOU_DEAD;
