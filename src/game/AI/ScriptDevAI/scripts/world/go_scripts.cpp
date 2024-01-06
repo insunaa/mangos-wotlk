@@ -1205,6 +1205,355 @@ struct go_ai_ectoplasmic_distiller_trap : public GameObjectAI
     }
 };
 
+enum MurderQuests
+{
+    QUEST_SPIDERWEBS     = 60000,
+    QUEST_DEMONIC_RUNES  = 60001,
+    QUEST_PUMPKINS       = 60002,
+    QUEST_LAMPS          = 60003,
+    QUEST_FIREWOOD       = 60004,
+    QUEST_SILVER_ORE     = 60005,
+    QUEST_HOLY_WATER     = 60006,
+    QUEST_SKELETON_BONES = 60007,
+    SPELL_METAMORPHOSIS  = 47241,
+    OBJ_COBWEBS          = 500000,
+    OBJ_DEMONIC_RUNE     = 500001,
+    OBJ_RIPE_PUMPKIN     = 500002,
+    OBJ_FIREWOOD         = 500003,
+    OBJ_SILVER_VEIN      = 500004,
+    OBJ_HOLY_WATER       = 500005,
+    OBJ_PILE_OF_BONES    = 500006,
+    OBJ_LANTERN          = 500007,
+    ITEM_EXORCISER      = 50442,
+    ITEM_HOLY_DUST      = 29735,
+    ITEM_GHOST_REVEALER = 22115,
+    ITEM_COBWEB         = 3182,
+    ITEM_DEMONIC_RUNE   = 22682,
+    ITEM_PUMPKIN        = 4656,
+    ITEM_FIREWOOD       = 13872,
+    ITEM_SILVER_ORE     = 2775,
+    ITEM_HOLY_WATER     = 24284,
+    ITEM_BONES          = 19070,
+};
+
+static const uint32 murderQuests[] = {QUEST_SPIDERWEBS, QUEST_DEMONIC_RUNES, QUEST_PUMPKINS, QUEST_LAMPS, QUEST_FIREWOOD, QUEST_SILVER_ORE, QUEST_HOLY_WATER, QUEST_SKELETON_BONES};
+
+bool GossipHello_go_murdertown_board(Player* pPlayer, GameObject* pGo)
+{
+    if (pPlayer->HasSpell(SPELL_METAMORPHOSIS))
+        return true;
+
+    QuestMenu& qm = pPlayer->GetPlayerMenu()->GetQuestMenu();
+    qm.ClearMenu();
+
+    for (uint32 quest : murderQuests)
+    {
+        if (pPlayer->IsActiveQuest(quest))
+        {
+            uint8 icon = pPlayer->CanCompleteQuest(quest) ? 2 : 4;
+            qm.AddMenuItem(quest, icon);
+            pPlayer->SendPreparedQuest(pGo->GetObjectGuid());
+            return true;
+        }
+    }
+
+    qm.AddMenuItem(murderQuests[urand(0,7)], 2);
+    pPlayer->SendPreparedQuest(pGo->GetObjectGuid());
+    return true;
+}
+
+bool GossipHello_go_murdertown_questobj(Player* pPlayer, GameObject* pGo)
+{
+    if (pPlayer->HasSpell(SPELL_METAMORPHOSIS))
+    {
+        pPlayer->GetPlayerMenu()->CloseGossip();
+        return true;
+    }
+
+    if(pGo->GetCooldown())
+    {
+        pPlayer->GetPlayerMenu()->CloseGossip();
+        return true;
+    }
+
+    switch (pGo->GetEntry())
+    {
+        case OBJ_COBWEBS:
+            if (pPlayer->IsActiveQuest(QUEST_SPIDERWEBS))
+            {
+                pPlayer->StoreNewItemInInventorySlot(ITEM_COBWEB, 1);
+                pGo->SetCooldown(30);
+            }
+            break;
+        case OBJ_DEMONIC_RUNE:
+            if (pPlayer->IsActiveQuest(QUEST_DEMONIC_RUNES))
+            {
+                pPlayer->StoreNewItemInInventorySlot(ITEM_DEMONIC_RUNE, 1);
+                pGo->SetCooldown(30);
+            }
+            break;
+        case OBJ_RIPE_PUMPKIN:
+            if (pPlayer->IsActiveQuest(QUEST_PUMPKINS))
+            {
+                pPlayer->StoreNewItemInInventorySlot(ITEM_PUMPKIN, 1);
+                pGo->SetCooldown(30);
+            }
+            break;
+        case OBJ_FIREWOOD:
+            if (pPlayer->IsActiveQuest(QUEST_FIREWOOD))
+            {
+                pPlayer->StoreNewItemInInventorySlot(ITEM_FIREWOOD, 1);
+                pGo->SetCooldown(30);
+            }
+            break;
+        case OBJ_SILVER_VEIN:
+            if (pPlayer->IsActiveQuest(QUEST_SILVER_ORE))
+            {
+                pPlayer->StoreNewItemInInventorySlot(ITEM_SILVER_ORE, 1);
+                pGo->SetCooldown(30);
+            }
+            break;
+        case OBJ_HOLY_WATER:
+            if (pPlayer->IsActiveQuest(QUEST_HOLY_WATER))
+            {
+                pPlayer->StoreNewItemInInventorySlot(ITEM_HOLY_WATER, 1);
+                pGo->SetCooldown(30);
+            }
+            break;
+        case OBJ_PILE_OF_BONES:
+            if (pPlayer->IsActiveQuest(QUEST_SKELETON_BONES))
+            {
+                pPlayer->StoreNewItemInInventorySlot(ITEM_BONES, 1);
+                pGo->SetCooldown(30);
+            }
+            break;
+        case OBJ_LANTERN:
+            if (pPlayer->IsActiveQuest(QUEST_LAMPS))
+            {
+                pPlayer->CastSpell(nullptr, 60535, TRIGGERED_NONE);
+                pPlayer->CastedCreatureOrGO(OBJ_LANTERN, pGo->GetObjectGuid(), 60535);
+                pGo->SetCooldown(30);
+            }
+            break;
+        default:
+            break;
+    }
+    pPlayer->GetPlayerMenu()->CloseGossip();
+    return true;
+}
+
+bool GossipHello_go_murdertown_meeting(Player* pPlayer, GameObject* pGo)
+{
+    if(pGo->GetCooldown())
+    {
+        pPlayer->GetPlayerMenu()->CloseGossip();
+        pPlayer->SendMessageToPlayer("The next Meeting can be called in " + std::to_string(pGo->GetCooldown()) + " seconds.");
+        return true;
+    }
+    pGo->MonsterText({"An Emergency Meeting has been called!"}, CHAT_TYPE_BOSS_EMOTE, LANG_UNIVERSAL, nullptr);
+    for (auto& playerRef : pGo->GetMap()->GetPlayers())
+    {
+        if (playerRef.getSource()->IsAlive())
+        {
+            playerRef.getSource()->TeleportToHomebind();
+        }
+    }
+    pGo->SetCooldown(180);
+    Creature* executioner = pGo->GetMap()->GetCreature(5);
+    if (!executioner || !executioner->AI())
+        return true;
+    executioner->AI()->ResetTimer(0, 180s); // 180s is correct, 18s is test
+    executioner->AI()->ResetTimer(1, 150s);
+    return true;
+}
+
+bool GossipHello_npc_village_executioner(Player* pPlayer, Creature* pCreature)
+{
+    pPlayer->PrepareGossipMenu(pCreature);
+    ObjectGuid vote = pPlayer->GetVote();
+    for (auto& playerRef :pCreature->GetMap()->GetPlayers())
+    {
+        std::string message;
+        if (playerRef.getSource()->GetObjectGuid() == vote)
+            message = ">> " + std::string(playerRef.getSource()->GetName()) + " <<";
+        else
+            message = std::string(playerRef.getSource()->GetName());
+        pPlayer->GetPlayerMenu()->GetGossipMenu().AddMenuItem(GOSSIP_ICON_CHAT, message, 0, playerRef.getSource()->GetObjectGuid().GetCounter(), "", 0);
+    }
+    pPlayer->GetPlayerMenu()->GetGossipMenu().AddMenuItem(GOSSIP_ICON_CHAT, "Pass", 0, -1, "", 0);
+    pPlayer->SendPreparedGossip(pCreature);
+    return true;
+}
+
+bool GossipSelect_npc_village_executioner(Player* pPlayer, Creature* pCreature, uint32 /*sender*/, uint32 uiAction)
+{
+    auto* map = pCreature->GetMap();
+    if (!uiAction)
+        return true;
+    if (uiAction == -1)
+    {
+        pPlayer->SetVote(ObjectGuid());
+        pPlayer->CLOSE_GOSSIP_MENU();
+        return true;
+    }
+    Player* player = map->GetPlayer(ObjectGuid(HIGHGUID_PLAYER, uiAction));
+    if (!player)
+        return true;
+    pPlayer->SetVote(player->GetObjectGuid());
+
+    pPlayer->CLOSE_GOSSIP_MENU();
+    return true;
+}
+
+struct npc_village_executionerAI : ScriptedAI
+{
+    enum ExecutionerActions
+    {
+        END_EMERGENCY_MEETING,
+        ANNOUNCE_REMAINING_TIME,
+        CHECK_WIN_CONDITION,
+    };
+    npc_village_executionerAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        AddCustomAction(END_EMERGENCY_MEETING, true, [&]()
+        {
+            auto* map = m_creature->GetMap();
+            std::unordered_map<ObjectGuid, uint8> voteCount;
+            for (auto& playerRef : map->GetPlayers())
+            {
+                Player* ptrPlayer = playerRef.getSource();
+                ptrPlayer->NearTeleportTo(-10552.53, -1160.66, 27.91, 3.12);
+                if (ptrPlayer->GetVote() == ObjectGuid())
+                    continue;
+                if (voteCount.find(ptrPlayer->GetVote()) != voteCount.end())
+                    voteCount[ptrPlayer->GetVote()]++;
+                else
+                    voteCount[ptrPlayer->GetVote()] = 1;
+            }
+            ObjectGuid highest;
+            uint8 highestVotes = 0;
+            bool tie = false;
+            for (auto [guid, count] : voteCount)
+            {
+                if (count > highestVotes)
+                {
+                    highest = guid;
+                    highestVotes = count;
+                    tie = false;
+                }
+                else if (count == highestVotes)
+                {
+                    tie = true;
+                }
+            }
+            if (!tie)
+                map->GetPlayer(highest)->Suicide();
+            ResetTimer(CHECK_WIN_CONDITION, 5s);
+        });
+        AddCustomAction(ANNOUNCE_REMAINING_TIME, true, [&]()
+        {
+            m_creature->MonsterText({"The meeting ends in 30s!"}, CHAT_TYPE_BOSS_EMOTE, LANG_UNIVERSAL, nullptr);
+        });
+        AddCustomAction(CHECK_WIN_CONDITION, true, [&]()
+        {
+            auto* map = m_creature->GetMap();
+            bool villagerWin = true;
+            bool demonWin = true;
+            for (auto& playerRef : map->GetPlayers())
+            {
+                auto* ptrPlayer = playerRef.getSource();
+                if (ptrPlayer->IsAlive() && ptrPlayer->HasSpell(SPELL_METAMORPHOSIS))
+                    villagerWin = false;
+                if (ptrPlayer->IsAlive() && !ptrPlayer->HasSpell(SPELL_METAMORPHOSIS))
+                    demonWin = false;
+            }
+            if (villagerWin)
+                m_creature->MonsterText({"The villagers have survived all demons and win!"}, CHAT_TYPE_BOSS_EMOTE, LANG_UNIVERSAL, nullptr);
+            if (demonWin)
+                m_creature->MonsterText({"The demons have murdered all villagers and win!"}, CHAT_TYPE_BOSS_EMOTE, LANG_UNIVERSAL, nullptr);
+        });
+        Reset();
+    }
+};
+
+/*
+UPDATE npc_vendor SET condition_id=60000 WHERE entry=36864;
+UPDATE creature_template SET faction=35 WHERE entry=27211;
+UPDATE item_template SET BuyPrice=20000,spellcharges_1=-1 WHERE entry=22115;
+UPDATE spell_template SET DurationIndex=1 WHERE id=27616;
+DELETE FROM gameobject_template WHERE entry BETWEEN 500000 AND 500010;
+INSERT INTO gameobject_template (entry, type, displayId, name, flags, size, ScriptName) VALUES
+(500000, 2, 9047, 'Cobweb', 32, 0.03, 'go_murdertown_questobj'),
+(500001, 2, 6714, 'Demonic Rune', 32, 1.0, 'go_murdertown_questobj'),
+(500002, 2, 60, 'Ripe Pumpkin', 32, 1.0, 'go_murdertown_questobj'),
+(500003, 2, 1248, 'Firewood', 32, 1.0, 'go_murdertown_questobj'),
+(500004, 2, 314, 'Silver Vein', 32, 0.7, 'go_murdertown_questobj'),
+(500005, 2, 445, 'Basin of Holy Water', 32, 1.0, 'go_murdertown_questobj'),
+(500006, 2, 293, 'Pile of Bones', 32, 1.0, 'go_murdertown_questobj'),
+(500007, 2, 6038, 'Lantern', 32, 1.0, 'go_murdertown_questobj'),
+(500008, 2, 8675, 'EMERGENCY!', 32, 1.0, 'go_murdertown_meeting');
+UPDATE item_template SET name='Demonic Rune',class=12,subclass=0,BuyPrice=0,SellPrice=0,ItemLevel=1,RequiredLevel=1,spellid_1=0 WHERE entry=22682;
+UPDATE item_template SET name='Cobweb',class=12,subclass=0,BuyPrice=0,SellPrice=0,ItemLevel=1,RequiredLevel=1,spellid_1=0 WHERE entry=3182;
+UPDATE item_template SET name='Ripe Pumpkin',class=12,subclass=0,BuyPrice=0,SellPrice=0,ItemLevel=1,RequiredLevel=1,spellid_1=0 WHERE entry=4656;
+UPDATE item_template SET name='Silver Ore',class=12,subclass=0,BuyPrice=0,SellPrice=0,ItemLevel=1,RequiredLevel=1,spellid_1=0 WHERE entry=2775;
+UPDATE item_template SET name='Holy Water',class=12,subclass=0,BuyPrice=0,SellPrice=0,ItemLevel=1,RequiredLevel=1,description='A vial containing a sample of holy water.' WHERE entry=24284;
+UPDATE item_template SET name='Skeleton Bones',class=12,subclass=0,BuyPrice=0,SellPrice=0,ItemLevel=1,RequiredLevel=1,spellid_1=0 WHERE entry=19070;
+DELETE FROM quest_template WHERE entry BETWEEN 60000 AND 60010;
+INSERT INTO quest_template (entry, Method, ZoneOrSort, MinLevel, MaxLevel, QuestLevel, SpecialFlags, Title, Details, Objectives, OfferRewardText, RequestItemsText, CompletedText, ReqItemId1, ReqItemCount1, RewOrReqMoney) VALUES
+(60000, 2, 42, 1, 255, 1, 1, 'Webs of Binding', 'To effectively bind demons to the physical realm a strong binding material is found. Collect cobwebs from the Rotting Orchard.',
+'Bring 8 Cobwebs to Darkshire.', 'You have shown your integrity. Take the attached reward.', 'The webs aren''t collecting themselves.', 'Return to the Hero''s Board in Darkshire.',
+3182, 8, 10000),
+(60001, 2, 42, 1, 255, 1, 1, 'Demonic Runes', 'Demonic Cultists have scattered Runestones all across Darkshire to do their evil deeds. Collect them so they may be destroyed.',
+'Bring 10 Demonic Runes to the Hero''s Board.', 'You have shown your integrity. Take the attached reward.', 'Those Runes aren''t collecting themselves.', 'Return to the Hero''s Board in Darkshire.',
+22682, 10, 10000),
+(60002, 2, 42, 1, 255, 1, 1, 'Ripe Pumpkins', 'The citizens of Darkshire grow hungry. Harvest 5 Ripe Pumpkins and bring them to Darkshire.',
+'Bring 5 Ripe Pumpkins to the Hero''s Board.', 'You have shown your integrity. Take the attached reward.', 'Those Pumpkins aren''t collecting themselves.', 'Return to the Hero''s Board in Darkshire.',
+4656, 5, 10000),
+(60003, 2, 42, 1, 255, 1, 1, 'Light for Darkshire', 'The demonic storm has reduced the visibility in Darkshire. Light up some lamps to help everyone see better.',
+'Light 7 Lamps in the area of Darkshire.', 'You have shown your integrity. Take the attached reward.', 'Those Lamps aren''t lighting themselves.', 'Return to the Hero''s Board in Darkshire.',
+4656, 7, 10000),
+(60004, 2, 42, 1, 255, 1, 1, 'Firewood for Darkshire', 'The demonic storm has brought with it a freezing cold. Gather some Firewood in Brightwood Grove.',
+'Bring 10 pieces of Firewood to the Hero''s Board.', 'You have shown your integrity. Take the attached reward.', 'Those stacks of wood aren''t collecting themselves.', 'Return to the Hero''s Board in Darkshire.',
+13872, 10, 10000),
+(60005, 2, 42, 1, 255, 1, 1, 'Silver Ore for Holy Dust', 'Darkshire''s supplies of Holy Dust have run low. Gather some Silver Ore in the Roland''s Doom mine.',
+'Bring 5 pieces of Silver Ore to the Hero''s Board.', 'You have shown your integrity. Take the attached reward.', 'Those ores aren''t collecting themselves.', 'Return to the Hero''s Board in Darkshire.',
+2775, 5, 10000),
+(60006, 2, 42, 1, 255, 1, 1, 'Holy Water for Holy Dust', 'Darkshire''s supplies of Holy Dust have run low. Gather some Holy Water in the area around Darkshire. It''s hidden well, so look carefully.',
+'Bring 1 vial of Holy Water to the Hero''s Board.', 'You have shown your integrity. Take the attached reward.', 'This Holy Water isn''t finding itself.', 'Return to the Hero''s Board in Darkshire.',
+24284, 1, 10000),
+(60007, 2, 42, 1, 255, 1, 1, 'Skeleton Bones', 'A powerful necromancer has gathered the remains of a mighty hero. Find the hero''s remains so that they will not be desecrated.',
+'Bring 1 set of Bones to the Hero''s Board.', 'You have shown your integrity. Take the attached reward.', 'Hurry, the Hero deserves better than this.', 'Return to the Hero''s Board in Darkshire.',
+19070, 1, 10000);
+
+DELETE FROM gameobject_questrelation WHERE id=175307;
+INSERT INTO gameobject_questrelation VALUES
+(175307, 60000),
+(175307, 60001),
+(175307, 60002),
+(175307, 60003),
+(175307, 60004),
+(175307, 60005),
+(175307, 60006),
+(175307, 60007);
+
+DELETE FROM gameobject_involvedrelation WHERE id=175307;
+INSERT INTO gameobject_involvedrelation VALUES
+(175307, 60000),
+(175307, 60001),
+(175307, 60002),
+(175307, 60003),
+(175307, 60004),
+(175307, 60005),
+(175307, 60006),
+(175307, 60007);
+
+UPDATE quest_template SET ReqItemId1=0,ReqItemCount1=0,ReqCreatureOrGOId1=-500007,ReqCreatureOrGOCount1=7,ReqSpellCast1=60535 WHERE entry=60003;
+
+UPDATE gameobject_template SET type=2,data1=0 WHERE entry=500007;
+
+UPDATE creature_template SET ScriptName='npc_village_executioner' WHERE entry=27211;
+*/
+
 void AddSC_go_scripts()
 {
     Script* pNewScript = new Script;
@@ -1320,5 +1669,27 @@ void AddSC_go_scripts()
     pNewScript = new Script;
     pNewScript->Name = "go_ectoplasmic_distiller_trap";
     pNewScript->GetGameObjectAI = &GetNewAIInstance<go_ai_ectoplasmic_distiller_trap>;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_murdertown_board";
+    pNewScript->pGossipHelloGO = &GossipHello_go_murdertown_board;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_murdertown_questobj";
+    pNewScript->pGossipHelloGO = &GossipHello_go_murdertown_questobj;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_murdertown_meeting";
+    pNewScript->pGossipHelloGO = &GossipHello_go_murdertown_meeting;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_village_executioner";
+    pNewScript->pGossipHello = &GossipHello_npc_village_executioner;
+    pNewScript->pGossipSelect = &GossipSelect_npc_village_executioner;
+    pNewScript->GetAI = &GetNewAIInstance<npc_village_executionerAI>;
     pNewScript->RegisterSelf();
 }

@@ -66,6 +66,14 @@ bool ChatHandler::load_command_table = true;
 
 ChatCommand* ChatHandler::getCommandTable()
 {
+    static ChatCommand gameCommandTable[] =
+    {
+        {"start", SEC_ADMINISTRATOR, true, &ChatHandler::HandleGameStartCommand, "", nullptr},
+        {"reset", SEC_ADMINISTRATOR, true, &ChatHandler::HandleGameResetCommand, "", nullptr},
+        {"stop", SEC_ADMINISTRATOR, true, &ChatHandler::HandleGameStopCommand, "", nullptr},
+        { nullptr, 0, false, nullptr, "", nullptr }
+    };
+
     static ChatCommand accountSetCommandTable[] =
     {
         { "addon",          SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleAccountSetAddonCommand,     "", nullptr },
@@ -970,6 +978,8 @@ ChatCommand* ChatHandler::getCommandTable()
 
     static ChatCommand commandTable[] =
     {
+
+        { "game",        SEC_PLAYER,         true,  nullptr,                                           "", gameCommandTable },
         { "account",        SEC_PLAYER,         true,  nullptr,                                           "", accountCommandTable  },
         { "achievement",    SEC_ADMINISTRATOR,  true,  nullptr,                                           "", achievementCommandTable },
         { "anticheat",      SEC_GAMEMASTER,     true,  nullptr,                                           "", anticheatCommandTable},

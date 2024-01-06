@@ -511,6 +511,8 @@ Player::Player(WorldSession* session): Unit(), m_taxiTracker(*this), m_mover(thi
 
     m_valuesCount = PLAYER_END;
 
+    m_votesFor = ObjectGuid();
+
     SetActiveObjectState(true);                             // player is always active object
 
     m_session = session;
@@ -21045,7 +21047,16 @@ bool Player::IsVisibleInGridForPlayer(Player* pl) const
 
     // Live player see live player or dead player with not realized corpse
     if (pl->IsAlive() || pl->m_deathTimer > 0)
-        return IsAlive() || m_deathTimer > 0;
+    {
+        if (!IsAlive() && pl->HasAura(27616))
+        {
+            return true;
+        }
+        else
+        {
+            return IsAlive() || m_deathTimer > 0;
+        }
+    }
 
     // Ghost see other friendly ghosts, that's for sure
     if (!(IsAlive() || m_deathTimer > 0) && CanCooperate(pl))

@@ -735,6 +735,10 @@ class ChatHandler
         bool HandleDebugMovement(char* args);
         bool HandlePrintMovement(char* args);
 
+        bool HandleGameStartCommand(char* args);
+        bool HandleGameResetCommand(char* args);
+        bool HandleGameStopCommand(char* args);
+
         bool HandleCooldownListCommand(char* args);
         bool HandleCooldownClearCommand(char* args);
         bool HandleCooldownClearClientSideCommand(char* args);

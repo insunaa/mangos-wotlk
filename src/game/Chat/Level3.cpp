@@ -1627,6 +1627,158 @@ bool ChatHandler::HandleUnLearnCommand(char* args)
     return true;
 }
 
+enum MurderTownCustom
+{
+    ITEM_EXORCISER      = 50442,
+    ITEM_HOLY_DUST      = 29735,
+    ITEM_GHOST_REVEALER = 22115,
+    ITEM_COBWEB         = 3182,
+    ITEM_DEMONIC_RUNE   = 22682,
+    ITEM_PUMPKIN        = 4656,
+    ITEM_FIREWOOD       = 13872,
+    ITEM_SILVER_ORE     = 2775,
+    ITEM_HOLY_WATER     = 24284,
+    ITEM_BONES          = 19070,
+    SPELL_METAMORPHOSIS = 47241,
+    FLAG_TRACK_HUMANS   = 64,
+};
+
+enum MurderQuests
+{
+    QUEST_SPIDERWEBS     = 60000,
+    QUEST_DEMONIC_RUNES  = 60001,
+    QUEST_PUMPKINS       = 60002,
+    QUEST_LAMPS          = 60003,
+    QUEST_FIREWOOD       = 60004,
+    QUEST_SILVER_ORE     = 60005,
+    QUEST_HOLY_WATER     = 60006,
+    QUEST_SKELETON_BONES = 60007,
+};
+
+const uint32 murderQuests[] = {QUEST_SPIDERWEBS, QUEST_DEMONIC_RUNES, QUEST_PUMPKINS, QUEST_LAMPS, QUEST_FIREWOOD, QUEST_SILVER_ORE, QUEST_HOLY_WATER, QUEST_SKELETON_BONES};
+const uint32 murderTownItems[] = {ITEM_EXORCISER, ITEM_HOLY_DUST, ITEM_GHOST_REVEALER, ITEM_COBWEB, ITEM_DEMONIC_RUNE, ITEM_PUMPKIN, ITEM_FIREWOOD, ITEM_SILVER_ORE, ITEM_HOLY_WATER, ITEM_BONES};
+const uint32 murderTownSpells[] = {SPELL_METAMORPHOSIS};
+
+void CancelQuestsHelper(Player* player)
+{
+    for (uint8 slot = 0; slot < MAX_QUEST_LOG_SIZE; slot++)
+    {
+        if (uint32 quest = player->GetQuestSlotQuestId(slot))
+        {
+            if (!player->TakeQuestSourceItem(quest, true))
+                return;                                     // can't un-equip some items, reject quest cancel
+
+            if (const Quest* pQuest = sObjectMgr.GetQuestTemplate(quest))
+            {
+                if (pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAG_TIMED))
+                    player->RemoveTimedQuest(quest);
+
+                for (int i = 0; i < QUEST_SOURCE_ITEM_IDS_COUNT; ++i)
+                {
+                    if (pQuest->ReqSourceId[i])
+                    {
+                        ItemPrototype const* iProto = ObjectMgr::GetItemPrototype(pQuest->ReqSourceId[i]);
+                        if (iProto && iProto->Bonding == BIND_QUEST_ITEM)
+                            player->DestroyItemCount(pQuest->ReqSourceId[i], pQuest->ReqSourceCount[i], true, false, true);
+                    }
+                }
+            }
+            player->SetQuestStatus(quest, QUEST_STATUS_NONE);
+        }
+        player->SetQuestSlot(slot, 0);
+    }
+}
+
+void GameHelper(Player* player)
+{
+    for (uint32 item : murderTownItems)
+    {
+        while (uint32 count = player->GetItemCount(item))
+            player->DestroyItemCount(player->GetItemByEntry(item), count, true);
+    }
+    for (uint32 spell : murderTownSpells)
+    {
+        player->RemoveAurasDueToSpell(spell);
+        player->removeSpell(spell);
+        player->RemoveFlag(PLAYER_TRACK_CREATURES, FLAG_TRACK_HUMANS);
+    }
+    CancelQuestsHelper(player);
+    player->SetMoney(10000);
+}
+
+bool ChatHandler::HandleGameStartCommand(char* /*args*/)
+{
+    Player* player = m_session->GetPlayer();
+    if (!player)
+        return false;
+
+    auto* map = player->GetMap();
+
+    uint8 playerCount = map->GetPlayersCountExceptGMs();
+    if (playerCount == 0)
+        return false;
+    uint8 demonCount = playerCount / 4;
+    uint8 demonMap[playerCount];
+    memset(&demonMap, 0, playerCount * sizeof(uint8));
+    while (demonCount > 0)
+    {
+        uint8 rand = urand(0, playerCount - 1);
+        while (demonMap[rand])
+            rand = urand(0, playerCount - 1);
+        demonMap[rand] = 1;
+        --demonCount;
+    }
+    uint8 counter = 0;
+    for (auto& playerRef : map->GetPlayers())
+    {
+        Player* ptrPlayer = playerRef.getSource();
+        GameHelper(ptrPlayer);
+        if (counter < sizeof(demonMap) && demonMap[counter])
+        {
+            ptrPlayer->learnSpell(SPELL_METAMORPHOSIS, false);
+            ptrPlayer->SetFlag(PLAYER_TRACK_CREATURES, FLAG_TRACK_HUMANS);
+        }
+        ptrPlayer->NearTeleportTo(-10552.53, -1160.66, 27.91, 3.12);
+        ++counter;
+    }
+    return true;
+}
+
+bool ChatHandler::HandleGameResetCommand(char* /*args*/)
+{
+    Player* player = m_session->GetPlayer();
+    if (!player)
+        return false;
+
+    auto* map = player->GetMap();
+    for (auto& playerRef : map->GetPlayers())
+    {
+        playerRef.getSource()->ResurrectPlayer(100.f, false, true);
+        GameHelper(playerRef.getSource());
+        playerRef.getSource()->TeleportToHomebind();
+        playerRef.getSource()->SetVote(ObjectGuid());
+    }
+    map->GetGameObject(9000451)->SetCooldown(0);
+    return true;
+}
+
+bool ChatHandler::HandleGameStopCommand(char* /*args*/)
+{
+    Player* player = m_session->GetPlayer();
+    if (!player)
+        return false;
+
+    auto* map = player->GetMap();
+    for (auto& playerRef : map->GetPlayers())
+    {
+        GameHelper(playerRef.getSource());
+        playerRef.getSource()->TeleportToHomebind();
+    }
+    map->GetGameObject(9000451)->SetCooldown(0);
+    return true;
+}
+
+
 bool ChatHandler::HandleCooldownListCommand(char* /*args*/)
 {
     Unit* target = getSelectedUnit();

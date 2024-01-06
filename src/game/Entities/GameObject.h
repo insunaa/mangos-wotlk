@@ -961,6 +961,7 @@ class GameObject : public WorldObject
         HighGuid GetParentHigh() const override { return HIGHGUID_GAMEOBJECT; }
 
         void SetCooldown(uint32 cooldown); // seconds
+        uint32 GetCooldown() { return std::max(0, int32(m_cooldownTime  - time(nullptr))); };
 
         void SetGameObjectGroup(GameObjectGroup* group);
         void ClearGameObjectGroup();

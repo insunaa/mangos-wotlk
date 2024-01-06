@@ -1082,6 +1082,9 @@ class Player : public Unit
         {
             return TeleportTo(loc.mapid, loc.coord_x, loc.coord_y, loc.coord_z, loc.orientation, options);
         }
+        ObjectGuid m_votesFor;
+        void SetVote(ObjectGuid guid) { m_votesFor = guid; }
+        ObjectGuid GetVote() { return m_votesFor; }
 
         bool TeleportToBGEntryPoint();
 

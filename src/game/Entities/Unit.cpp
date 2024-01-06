@@ -838,7 +838,7 @@ void Unit::FallSuicide()
 
 uint32 Unit::DealDamage(Unit* dealer, Unit* victim, uint32 damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellInfo, bool durabilityLoss, Spell* spell)
 {
-    if (!dealer->HasAura(47241))
+    if (!dealer->HasAura(47241) && damagetype != INSTAKILL)
     {
         if (!spellInfo || spellInfo->Id != 48801)
             return 0;
@@ -9206,12 +9206,14 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
     // Any units far than max visible distance for viewer or not in our map are not visible too
     if (!at_same_transport) // distance for show player/pet/creature (no transport case)
     {
-
-        if (u->HasAura(19883))
+        if (u->IsPlayer() && u->HasFlag(PLAYER_TRACK_CREATURES, 64))
             return true;
         else if (!IsWithinDistInMap(viewPoint, u->GetVisibilityData().GetVisibilityDistanceFor((WorldObject *)this), is3dDistance))
             return false;
     }
+
+    if (!IsAlive() && u->HasAura(27616))
+        return true;
 
     // when restriction not set, visible to all
     if (!IsOnlyVisibleTo(u->GetObjectGuid()))
