@@ -1,0 +1,1 @@
+ALTER TABLE realmd_db_version RENAME COLUMN required_14064_01_realmd_platform TO required_14083_01_realmd_joindate_datetime;
