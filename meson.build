@@ -107,6 +107,36 @@ if get_option('BUILD_METRICS')
   add_project_arguments('-DBUILD_METRICS', language: 'cpp')
 endif
 
+if get_option('BUILD_PLAYERBOTS')
+  if get_option('BUILD_PLAYERBOTS')
+    add_project_arguments('-DENABLE_PLAYERBOTS', language: 'cpp')
+  endif
+
+  #if get_option('BUILD_ELUNA')
+  #  add_project_arguments('-DBUILD_ELUNA -DCLASSIC -DCMANGOS', language: 'cpp')
+  #endif
+
+  if 'CMaNGOS' in meson.project_name()
+    add_project_arguments('-DCMANGOS', language: 'cpp')
+  elif 'MaNGOS' in meson.project_name()
+    add_project_arguments('-DMANGOS', language: 'cpp')
+  endif
+
+  if 'Classic' in meson.project_name()
+    add_project_arguments('-DMANGOSBOT_ZERO', language: 'cpp')
+  endif
+  if 'TBC' in meson.project_name()
+    add_project_arguments('-DMANGOSBOT_ONE', language: 'cpp')
+  endif
+  if 'WotLK' in meson.project_name()
+    add_project_arguments('-DMANGOSBOT_TWO', language: 'cpp')
+  endif
+
+  if get_option('BUILD_MODULES')
+    add_project_arguments('-DENABLE_MODULES', language: 'cpp')
+  endif
+endif
+
 if get_option('BUILD_DOCS')
   subdir('doc')
 endif
@@ -131,6 +161,8 @@ subdir('dep')
 if get_option('BUILD_GAME_SERVER') or get_option('BUILD_LOGIN_SERVER') or get_option('BUILD_EXTRACTORS')
   subdir('src')
 endif
+
+subdir('src/modules/PlayerBots')
 
 if get_option('BUILD_EXTRACTORS')
   extractor_script_file = files('contrib/extractor_scripts/ExtractResources.sh')
