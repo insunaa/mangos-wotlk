@@ -4109,6 +4109,9 @@ bool ChatHandler::HandleNpcInfoCommand(char* /*args*/)
     PSendSysMessage(LANG_NPCINFO_LEVEL, target->GetLevel());
     PSendSysMessage(LANG_NPCINFO_PHASEMASK, target->GetPhaseMask());
     PSendSysMessage(LANG_NPCINFO_HEALTH, target->GetCreateHealth(), target->GetMaxHealth(), target->GetHealth());
+    PSendSysMessage("Strength: %.1f, Agility: %.1f, Stamina: %.1f, Intellect: %.1f, Spirit: %.1f",
+        target->GetStat(STAT_STRENGTH), target->GetStat(STAT_AGILITY), target->GetStat(STAT_STAMINA), target->GetStat(STAT_INTELLECT), target->GetStat(STAT_SPIRIT));
+    PSendSysMessage("AttackPower: %.1f, OH AttackPower: %.1f, RangedAP: %.1f", target->GetTotalAttackPowerValue(BASE_ATTACK), target->GetTotalAttackPowerValue(OFF_ATTACK), target->GetTotalAttackPowerValue(RANGED_ATTACK));
     PSendSysMessage(LANG_NPCINFO_FLAGS, target->GetUInt32Value(UNIT_FIELD_FLAGS), target->GetUInt32Value(UNIT_DYNAMIC_FLAGS), target->GetCreatureInfo()->ExtraFlags);
     PSendSysMessage(LANG_COMMAND_RAWPAWNTIMES, defRespawnDelayStr.c_str(), curRespawnDelayStr.c_str());
     PSendSysMessage("Corpse decay remaining time: %s", curCorpseDecayStr.c_str());
