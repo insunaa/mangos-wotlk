@@ -849,10 +849,41 @@ void Player::_RemoveAllStatBonuses()
 ########                         ########
 #######################################*/
 
-bool Creature::UpdateStats(Stats /*stat*/)
-{
-    return true;
-}
+bool Creature::UpdateStats(Stats stat)
+ {
+    if (stat > STAT_SPIRIT)
+        return false;
+
+    float value  = GetTotalStatValue(stat);
+
+    int32 oldValue = GetStat(stat);
+    SetStat(stat, int32(value));
+
+    switch (stat)
+    {
+        case STAT_STRENGTH:
+            break;
+        case STAT_AGILITY:
+            UpdateArmor();
+            break;
+        case STAT_STAMINA:
+            UpdateMaxHealth();
+            break;
+        case STAT_INTELLECT:
+            UpdateMaxPower(POWER_MANA);
+            UpdateArmor();
+            break;
+        case STAT_SPIRIT:
+            break;
+        default:
+            break;
+    }
+    // Need update (exist AP from stat auras)
+    UpdateAttackPowerAndDamage();
+    UpdateAttackPowerAndDamage(true);
+
+     return true;
+ }
 
 bool Creature::UpdateAllStats()
 {

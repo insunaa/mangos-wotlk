@@ -1339,7 +1339,7 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
             health = cCLS->BaseHealth;
         // health
         if (cinfo->HealthMultiplier > 0)
-            healthMultiplier = cinfo->HealthMultiplier;
+            healthMultiplier = std::max(1.f / (health + Unit::GetHealthBonusFromStamina((cCLS->Stamina))), cinfo->HealthMultiplier);
 
         if (cinfo->PowerMultiplier >= 0)
             mana = cCLS->BaseMana;
