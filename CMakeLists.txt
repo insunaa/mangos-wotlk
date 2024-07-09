@@ -18,6 +18,7 @@
 # Minimum required cmake version to run the build
 cmake_minimum_required(VERSION 3.9)
 cmake_policy(SET CMP0069 NEW)
+#cmake_policy(SET CMP0144 OLD)
 
 # Will cache object files if ccache is available
 # Must be set at top of cmake outside of project header
@@ -193,8 +194,8 @@ if(WIN32 AND NOT "$ENV{BOOST_ROOT}" STREQUAL "")
 endif()
 
 # Be sure to search only static lib
-add_definitions(-DBOOST_ALL_NO_LIB)
-set(Boost_USE_STATIC_LIBS ON)
+#add_definitions(-DBOOST_ALL_NO_LIB)
+#set(Boost_USE_STATIC_LIBS ON)
 set(Boost_NO_BOOST_CMAKE ON)   # should fix build for boost 1.71
 #set(Boost_DEBUG ON)
 
