@@ -975,7 +975,7 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
                 // reset vehicle faction
                 (static_cast<Creature*>(vehicle))->SetFactionTemporary(m_originalFaction, TEMPFACTION_NONE);
 
-                vehicle->AI()->SetReactState(REACT_AGGRESSIVE);
+                vehicle->AI()->SetReactState(REACT_DEFENSIVE);
                 
             }
 
