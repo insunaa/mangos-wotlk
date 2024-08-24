@@ -267,7 +267,8 @@ Unit::Unit() :
     m_ignoreRangedTargets(false),
     m_auraUpdateMask(0),
     m_combatManager(this),
-    m_isMountOverriden(false), m_overridenMountId(0)
+    m_isMountOverriden(false), m_overridenMountId(0),
+    m_assistIgnoreLos(false)
 {
     m_objectType |= TYPEMASK_UNIT;
     m_objectTypeId = TYPEID_UNIT;
@@ -9034,7 +9035,7 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
         if (InstanceData* mapInstance = GetInstanceData())
             mapInstance->OnCreatureEnterCombat(creature);
 
-        creature->CallAssistance();
+        creature->CallAssistance(enemy);
 
         creature->SetCanCheckForHelp(false);
         creature->m_events.AddEvent(new UnitLambdaEvent(*creature, [](Unit& unit)

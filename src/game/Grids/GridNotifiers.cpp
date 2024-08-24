@@ -336,7 +336,7 @@ bool MaNGOS::AnyAssistCreatureInRangeCheck::operator()(Creature* u)
         return false;
 
     // only if see assisted creature
-    if (!i_funit->IsWithinLOSInMap(u))
+    if (!i_funit->CanIgnoreLOSOnAssistCall() && !i_funit->IsWithinLOSInMap(u))
         return false;
 
     return true;

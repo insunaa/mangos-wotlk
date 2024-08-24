@@ -2636,6 +2636,9 @@ class Unit : public WorldObject
         void SetRootVehicle(const ObjectGuid& guid) { m_rootVehicle = guid; }
         const ObjectGuid& GetRootVehicle() const { return m_rootVehicle; }
 
+        void SetCanIgnoreLOSOnAssistCall(bool value) { m_assistIgnoreLos = value; }
+        bool CanIgnoreLOSOnAssistCall() const { return m_assistIgnoreLos; }
+
     protected:
         bool MeetsSelectAttackingRequirement(Unit* target, SpellEntry const* spellInfo, uint32 selectFlags, SelectAttackingTargetParams params, int32 unitConditionId) const;
 
@@ -2746,6 +2749,8 @@ class Unit : public WorldObject
         // base speeds set by model/template
         float m_baseSpeedWalk;
         float m_baseSpeedRun;
+
+        bool m_assistIgnoreLos;
 
         // Protected unit guid fields getters/setters
         // Charm: temporary pet unit guid
