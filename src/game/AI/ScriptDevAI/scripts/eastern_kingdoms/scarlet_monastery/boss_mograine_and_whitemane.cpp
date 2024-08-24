@@ -115,6 +115,7 @@ struct boss_scarlet_commander_mograineAI : public CombatAI
         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
         SetDeathPrevention(true);
         SetCombatScriptStatus(false);
+        m_creature->SetCanIgnoreLOSOnAssistCall(true);
     }
 
     uint32 GetSubsequentActionTimer(uint32 id)
@@ -145,8 +146,6 @@ struct boss_scarlet_commander_mograineAI : public CombatAI
     {
         DoScriptText(SAY_MO_AGGRO, m_creature);
         DoCastSpellIfCan(m_creature, SPELL_RETRIBUTIONAURA);
-
-        MograineCallForHelp();
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
@@ -232,24 +231,6 @@ struct boss_scarlet_commander_mograineAI : public CombatAI
                 ResetTimer(MOGRAINE_ACTION_REVIVED, 2000u);
 
                 m_bHeal = true;
-            }
-        }
-    }
-
-    void MograineCallForHelp()
-    {
-        std::vector<uint32> entries = {NPC_SCARLET_ABBOT, NPC_SCARLET_CENTURION, NPC_SCARLET_CHAMPION, NPC_SCARLET_CHAPLAIN, NPC_SCARLET_MONK, NPC_SCARLET_WIZARD};
-        for (uint32 entry : entries)
-        {
-            CreatureList scarletTrash;
-            GetCreatureListWithEntryInGrid(scarletTrash, m_creature, entry, 80.f);
-            for (Creature* creature : scarletTrash)
-            {
-                if (creature && creature->IsAlive())
-                {
-                    creature->SetInCombatWithZone();
-                    creature->AI()->AttackClosestEnemy();
-                }
             }
         }
     }
