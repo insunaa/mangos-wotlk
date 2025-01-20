@@ -341,6 +341,11 @@ class ChatHandler
         bool HandleDebugDbscriptSourced(char* args);
         bool HandleDebugDbscriptGuided(char* args);
 
+        bool HandleDebugServerTransfer(char* args);
+        bool HandleDebugSuspendComms(char* args);
+        bool HandleDebugResumeComms(char* args);
+        bool HandleDebugTestLogin(char* args);
+
         bool HandleSD2HelpCommand(char* args);
         bool HandleSD2ScriptCommand(char* args);
 

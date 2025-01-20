@@ -171,11 +171,15 @@ bool WorldSocket::OnOpen()
     packet << m_seed;
 
     BigNumber seed1;
-    seed1.SetRand(16 * 8);
+    const uint8 seed1bytes[16] { 0xCC, 0x98, 0xAE, 0x04, 0xE8, 0x97, 0xEA, 0xCA, 0x12, 0xDD, 0xC0, 0x93, 0x42, 0x91, 0x53, 0x57 };
+    seed1.SetBinary(seed1bytes, 16);
+    //seed1.SetRand(16 * 8);
     packet.append(seed1.AsByteArray(16).data(), 16);               // new encryption seeds
 
     BigNumber seed2;
-    seed2.SetRand(16 * 8);
+    const uint8 seed2bytes[16] { 0xC2, 0xB3, 0x72, 0x3C, 0xC6, 0xAE, 0xD9, 0xB5, 0x34, 0x3C, 0x53, 0xEE, 0x2F, 0x43, 0x67, 0xCE };
+    seed2.SetBinary(seed2bytes, 16);
+    //seed2.SetRand(16 * 8);
     packet.append(seed2.AsByteArray(16).data(), 16);               // new encryption seeds
 
     SendPacket(packet);
@@ -260,6 +264,13 @@ bool WorldSocket::ProcessIncomingData()
                         }
 
                         if (!self->HandleAuthSession(*pct))
+                        {
+                            self->Close();
+                            return;
+                        }
+                        break;
+                    case CMSG_AUTH_CONTINUED_SESSION:
+                        if (!self->HandleAuthContinuedSession(*pct))
                         {
                             self->Close();
                             return;
@@ -406,7 +417,7 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
     v.SetHexStr(fields[5].GetString());
     s.SetHexStr(fields[6].GetString());
-    m_s = s;
+    //m_s = s;
 
     const char* sStr = s.AsHexStr();                        // Must be freed by OPENSSL_free()
     const char* vStr = v.AsHexStr();                        // Must be freed by OPENSSL_free()
@@ -447,6 +458,8 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         expansion = std::min(playerAddonLevel, currentServerExpansion);
 
     K.SetHexStr(fields[2].GetString());
+
+    m_s = K;
 
     time_t mutetime = time_t (fields[8].GetUInt64());
 
@@ -633,6 +646,277 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
             SendPacket(addonPacket);
 
         sWorld.AddSession(m_session);
+    }
+
+    return true;
+}
+
+bool WorldSocket::HandleAuthContinuedSession(WorldPacket& recvPacket)
+{
+    std::string account, os;
+    uint8 digest[20];
+    Sha1Hash sha1;
+    BigNumber v, s, g, N, K;
+    LocaleConstant locale;
+
+    recvPacket >> account;
+    recvPacket.read_skip<uint64>();
+    recvPacket.read(digest, 20);
+
+    DEBUG_LOG("WorldSocket::HandleAuthContinuedSession: account %s",
+              account.c_str());
+        std::string safe_account = account; // Duplicate, else will screw the SHA hash verification below
+    LoginDatabase.escape_string(safe_account);
+    // No SQL injection, username escaped.
+
+    auto queryResult =
+        LoginDatabase.PQuery("SELECT "
+                             "a.id, "                    //0
+                             "gmlevel, "                 //1
+                             "sessionkey, "              //2
+                             "lockedIp, "                //3
+                             "locked, "                  //4
+                             "v, "                       //5
+                             "s, "                       //6
+                             "expansion, "               //7
+                             "mutetime, "                //8
+                             "locale, "                  //9
+                             "os, "                      //10
+                             "flags, "                   //11
+                             "platform "                 //12
+                             "FROM account a "
+                             "WHERE username = '%s'",
+                             safe_account.c_str());
+
+    // Stop if the account is not found
+    if (!queryResult)
+    {
+        WorldPacket packet(SMSG_AUTH_RESPONSE, 1);
+        packet << uint8(AUTH_UNKNOWN_ACCOUNT);
+
+        SendPacket(packet);
+
+        sLog.outError("WorldSocket::HandleAuthContinuedSession: Sent Auth Response (unknown account).");
+        return false;
+    }
+
+
+    Field* fields = queryResult->Fetch();
+
+    N.SetHexStr("894B645E89E1535BBDAD5B8B290650530801B18EBFBF5E8FAB3C82872A3E9BB7");
+    g.SetDword(7);
+
+    v.SetHexStr(fields[5].GetString());
+    s.SetHexStr(fields[6].GetString());
+    //m_s = s;
+
+    const char* sStr = s.AsHexStr();                        // Must be freed by OPENSSL_free()
+    const char* vStr = v.AsHexStr();                        // Must be freed by OPENSSL_free()
+
+    DEBUG_LOG("WorldSocket::HandleAuthContinuedSession: (s,v) check s: %s v: %s",
+              sStr,
+              vStr);
+
+    OPENSSL_free((void*) sStr);
+    OPENSSL_free((void*) vStr);
+
+    ///- Re-check ip locking (same check as in realmd).
+    if (fields[4].GetUInt8() == 1)  // if ip is locked
+    {
+        if (strcmp(fields[3].GetString(), GetRemoteAddress().c_str()))
+        {
+            WorldPacket packet(SMSG_AUTH_RESPONSE, 1);
+            packet << uint8(AUTH_FAILED);
+            SendPacket(packet);
+
+            BASIC_LOG("WorldSocket::HandleAuthContinuedSession: Sent Auth Response (Account IP differs).");
+            return false;
+        }
+    }
+
+    uint32 id = fields[0].GetUInt32();
+    uint32 security = fields[1].GetUInt16();
+    if (security > SEC_ADMINISTRATOR)                       // prevent invalid security settings in DB
+        security = SEC_ADMINISTRATOR;
+
+    uint8 maxServerExpansion = sWorld.getConfig(CONFIG_UINT32_EXPANSION);
+    uint8 currentServerExpansion = sWorldState.GetExpansion();
+    uint8 playerAddonLevel = fields[7].GetUInt8();
+    uint8 expansion;
+    if (security >= SEC_GAMEMASTER)
+        expansion = std::min(playerAddonLevel, maxServerExpansion);
+    else
+        expansion = std::min(playerAddonLevel, currentServerExpansion);
+
+    K.SetHexStr(fields[2].GetString());
+
+    m_s = K;
+
+    time_t mutetime = time_t (fields[8].GetUInt64());
+
+    locale = GetLocaleByName(fields[9].GetString());
+
+    os = fields[10].GetString();
+
+    uint32 accountFlags = fields[11].GetUInt32();
+	std::string platform = fields[12].GetString();
+
+    // Re-check account ban (same check as in realmd)
+    auto banresult =
+        LoginDatabase.PQuery("SELECT 1 FROM account_banned WHERE account_id = %u AND active = 1 AND (expires_at > " _UNIXTIME_ " OR expires_at = banned_at)"
+                             "UNION "
+                             "SELECT 1 FROM ip_banned WHERE (expires_at = banned_at OR expires_at > " _UNIXTIME_ ") AND ip = '%s'",
+                             id, GetRemoteAddress().c_str());
+
+    if (banresult) // if account banned
+    {
+        WorldPacket packet(SMSG_AUTH_RESPONSE, 1);
+        packet << uint8(AUTH_BANNED);
+        SendPacket(packet);
+
+        sLog.outError("WorldSocket::HandleAuthContinuedSession: Sent Auth Response (Account banned).");
+        return false;
+    }
+
+    // Check locked state for server
+    AccountTypes allowedAccountType = sWorld.GetPlayerSecurityLimit();
+
+    if (allowedAccountType > SEC_PLAYER && AccountTypes(security) < allowedAccountType)
+    {
+        WorldPacket packet(SMSG_AUTH_RESPONSE, 1);
+        packet << uint8(AUTH_UNAVAILABLE);
+
+        SendPacket(packet);
+
+        BASIC_LOG("WorldSocket::HandleAuthContinuedSession: User tries to login but his security level is not enough");
+        return false;
+    }
+
+    // Check that Key and account name are the same on client and server
+    Sha1Hash sha;
+
+    uint32 t = 0;
+    uint32 seed = m_seed;
+
+    sha.UpdateData(account);
+    sha.UpdateBigNumbers(&K, nullptr);
+    sha.UpdateData((uint8*) & seed, 4);
+    sha.Finalize();
+
+    if (memcmp(sha.GetDigest(), digest, 20))
+    {
+        WorldPacket packet(SMSG_AUTH_RESPONSE, 1);
+        packet << uint8(AUTH_FAILED);
+
+        SendPacket(packet);
+
+        sLog.outError("WorldSocket::HandleAuthContinuedSession: Sent Auth Response (authentification failed), account ID: %u.", id);
+        return false;
+    }
+
+    const std::string& address = GetRemoteAddress();
+
+    DEBUG_LOG("WorldSocket::HandleAuthContinuedSession: Client '%s' authenticated successfully from %s.",
+              account.c_str(),
+              address.c_str());
+
+    ClientOSType clientOS;
+    if (os == "Win")
+        clientOS = CLIENT_OS_WIN;
+    else if (os == "OSX")
+        clientOS = CLIENT_OS_MAC;
+    else
+    {
+        sLog.outError("WorldSocket::HandleAuthContinuedSession: Unrecognized OS '%s' for account '%s' from %s", os.c_str(), account.c_str(), address.c_str());
+        return false;
+    }
+
+    // Update the last_ip in the database
+    // No SQL injection, username escaped.
+    static SqlStatementID updAccount;
+
+    SqlStatement stmt = LoginDatabase.CreateStatement(updAccount, "INSERT INTO account_logons(accountId,ip,loginTime,loginSource) VALUES(?,?," _NOW_ ",?)");
+    stmt.PExecute(id, address.c_str(), std::to_string(realmID).c_str());
+
+    m_crypt.Init(&K);
+
+    m_session = sWorld.FindSession(id);
+
+    ClientPlatformType clientPlatform;
+    if (platform == "x86")
+        clientPlatform = CLIENT_PLATFORM_X86;
+    else if (platform == "PPC" && clientOS == CLIENT_OS_MAC)
+        clientPlatform = CLIENT_PLATFORM_PPC;
+    else
+    {
+        sLog.outError("WorldSocket::HandleAuthContinuedSession: Unrecognized platform '%s' for account '%s' from %s", platform.c_str(), account.c_str(), address.c_str());
+        return false;
+    }
+
+    if (m_session)
+    {
+        DEBUG_LOG("WorldSocket::HandleAuthContinuedSession reconnecting for account '%s' from %s", account.c_str(), address.c_str());
+
+        // defer operation to session thread context to avoid any race conditions
+        auto self = shared_from_this();
+        m_session->GetMessager().AddMessage([self, clientOS, clientPlatform, account, address = address, K, id, recvPacket = recvPacket](WorldSession* session)
+        {
+            DEBUG_LOG("WorldSocket::HandleAuthContinuedSession reconnect loading data for account '%s' from %s", account.c_str(), address.c_str());
+            session->SetOS(clientOS);
+            session->SetPlatform(clientPlatform);
+
+            std::unique_ptr<SessionAnticheatInterface> anticheat = sAnticheatLib->NewSession(session, K);
+
+            // session->SendAuthOk();
+
+            WorldPacket authPkt(SMSG_RESUME_COMMS, 0);
+            session->SendPacket(authPkt);
+
+            DEBUG_LOG("WorldSocket::HandleAuthContinuedSession assigning anticheat for '%s' from %s", account.c_str(), address.c_str());
+            session->AssignAnticheat(std::move(anticheat));
+        });
+    }
+    else
+    {
+        uint32 otherRaf = 0;
+        bool isRecruiter = false;
+        {
+            std::unique_ptr<QueryResult> result(LoginDatabase.PQuery("SELECT referrer, referred FROM account_raf WHERE referrer=%u OR referred=%u", id, id));
+            if (result)
+            {
+                Field* fields = result->Fetch();
+                uint32 recruiter = fields[0].GetUInt32();
+                if (id == recruiter)
+                {
+                    isRecruiter = true;
+                    otherRaf = fields[1].GetUInt32();
+                }
+                else
+                    otherRaf = recruiter;
+            }
+        }
+
+        // new session
+        if (!(m_session = new WorldSession(id, this, AccountTypes(security), expansion, mutetime, locale, account, accountFlags, otherRaf, isRecruiter)))
+            return false;
+
+        m_session->LoadGlobalAccountData();
+        m_session->LoadTutorialsData();
+        m_session->SetOS(clientOS);
+        m_session->SetPlatform(clientPlatform);
+        m_session->InitializeAnticheat(K);
+
+        //m_session->SendAuthOk();
+        WorldPacket authPkt(SMSG_RESUME_COMMS, 0);
+        m_session->SendPacket(authPkt);
+
+        sWorld.AddSession(m_session);
+
+        uint64 hardcodedCharacterIDForTestingOnly = 14;
+
+        WorldPacket pkt(CMSG_PLAYER_LOGIN, 8);
+        pkt << uint64(hardcodedCharacterIDForTestingOnly);
+        m_session->HandlePlayerLoginOpcode(pkt);
     }
 
     return true;

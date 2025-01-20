@@ -1324,7 +1324,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x50F*/ { "SMSG_SUSPEND_COMMS",                           STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x510*/ { "CMSG_SUSPEND_COMMS_ACK",                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x511*/ { "SMSG_RESUME_COMMS",                            STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x512*/ { "CMSG_AUTH_CONTINUED_SESSION",                  STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
+    /*0x512*/ { "CMSG_AUTH_CONTINUED_SESSION",                  STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_EarlyProccess            },
     /*0x513*/ { "CMSG_DROP_NEW_CONNECTION",                     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x514*/ { "SMSG_SEND_ALL_COMBAT_LOG",                     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x515*/ { "SMSG_OPEN_LFG_DUNGEON_FINDER",                 STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },

@@ -1199,16 +1199,19 @@ void WorldSession::SendTransferAborted(uint32 mapid, uint8 reason, uint8 arg) co
 
 void WorldSession::SendRedirectClient(std::string& ip, uint16 port) const
 {
-    const uint32 ip2 = static_cast<uint32>(boost::asio::ip::make_address_v4(ip).to_uint());
+    //const uint32 ip2 = static_cast<uint32>(boost::asio::ip::make_address_v4(ip).to_uint());
+    auto addr = boost::asio::ip::make_address_v4(ip).to_bytes();
     WorldPacket pkt(SMSG_CONNECT_TO, 4 + 2 + 4 + 20);
 
-    pkt << uint32(ip2);                                     // inet_addr(ipstr)
+    //pkt << ip2;                                     // inet_addr(ipstr)
+    pkt.append(addr.data(), 4);
     pkt << uint16(port);                                    // port
 
-    pkt << uint32(0);                                       // unknown
+    pkt << uint32(0);                                       // token
 
-    HMACSHA1 sha1(40, m_socket->GetSessionKey().AsByteArray().data());
-    sha1.UpdateData((uint8*)&ip2, 4);
+    HMACSHA1 sha1(40, m_socket->GetSessionKey().AsByteArray(0, true).data());
+    //sha1.UpdateData((uint8*)&ip2, 4);
+    sha1.UpdateData(addr.data(), 4);
     sha1.UpdateData((uint8*)&port, 2);
     sha1.Finalize();
     pkt.append(sha1.GetDigest(), 20);                       // hmacsha1(ip+port) w/ sessionkey as seed

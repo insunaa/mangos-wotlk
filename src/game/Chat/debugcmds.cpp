@@ -1818,6 +1818,66 @@ bool ChatHandler::HandleDebugPacketLog(char* args)
     return true;
 }
 
+bool ChatHandler::HandleDebugServerTransfer(char* args)
+{
+    //WorldSession* session = GetSession();
+    WorldSession* session = sWorld.FindSession(5);
+    if (!session)
+    {
+        sLog.outError("Session Not Found");
+        return false;
+    }
+    std::string address("127.0.0.1");
+    uint16 port = 8086;
+    sLog.outError("Redirecting to: %s:%d", address.c_str(), port);
+    session->SendRedirectClient(address, port);
+    //HandleDebugSuspendComms(args);
+    return true;
+}
+
+
+bool ChatHandler::HandleDebugTestLogin(char* args)
+{
+
+    WorldSession* session = sWorld.FindSession(5);
+    if (!session)
+    {
+        sLog.outError("Session Not Found");
+        return false;
+    }
+    WorldPacket pkt(CMSG_PLAYER_LOGIN, 8);
+    pkt << uint64(11);
+    session->HandlePlayerLoginOpcode(pkt);
+    return true;
+}
+
+bool ChatHandler::HandleDebugSuspendComms(char* args)
+{
+    auto sess = sWorld.FindSession(5);
+    if (!sess)
+    {
+        sLog.outError("Session Not Found");
+        return false;
+    }
+    WorldPacket pkt(SMSG_SUSPEND_COMMS, 4);
+    pkt << 89;
+    sess->SendPacket(pkt);
+    return true;
+}
+
+bool ChatHandler::HandleDebugResumeComms(char* args)
+{
+    auto sess = sWorld.FindSession(5);
+    if (!sess)
+    {
+        sLog.outError("Session Not Found");
+        return false;
+    }
+    WorldPacket pkt(SMSG_RESUME_COMMS, 0);
+    sess->SendPacket(pkt);
+    return true;
+}
+
 bool ChatHandler::HandleDebugDbscript(char* args)
 {
     Unit* target = getSelectedUnit();

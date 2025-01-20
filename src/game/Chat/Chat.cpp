@@ -312,6 +312,10 @@ ChatCommand* ChatHandler::getCommandTable()
         { "dbscriptsourced", SEC_ADMINISTRATOR, true,  &ChatHandler::HandleDebugDbscriptSourced,            "", nullptr },
         { "dbscriptguided", SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleDebugDbscriptGuided,             "", nullptr },
         { "lfg",            SEC_ADMINISTRATOR,  true,  nullptr,                                             "", debugLfgCommandTable },
+        { "servertransfer", SEC_ADMINISTRATOR, true, &ChatHandler::HandleDebugServerTransfer, "", nullptr },
+        { "suspend", SEC_ADMINISTRATOR, true, &ChatHandler::HandleDebugSuspendComms, "", nullptr },
+        { "resume", SEC_ADMINISTRATOR, true, &ChatHandler::HandleDebugResumeComms, "", nullptr },
+        { "testlogin", SEC_ADMINISTRATOR, true, &ChatHandler::HandleDebugTestLogin, "", nullptr },
         { nullptr,          0,                  false, nullptr,                                             "", nullptr }
     };
 

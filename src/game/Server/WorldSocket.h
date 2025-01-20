@@ -115,6 +115,9 @@ class WorldSocket : public MaNGOS::AsyncSocket<WorldSocket>
         /// Called by ProcessIncoming() on CMSG_AUTH_SESSION.
         bool HandleAuthSession(WorldPacket& recvPacket);
 
+        /// Called by ProcessIncoming() on CMSG_AUTH_CONTINUED_SESSION
+        bool HandleAuthContinuedSession(WorldPacket& recvPacket);
+
         /// Called by ProcessIncoming() on CMSG_PING.
         bool HandlePing(WorldPacket& recvPacket);
 
