@@ -25044,15 +25044,18 @@ AreaLockStatus Player::GetAreaTriggerLockStatus(AreaTrigger const* at, Difficult
         return AREA_LOCKSTATUS_OK;
 
     // Level Requirements
-    if (GetLevel() < at->requiredLevel && !sWorld.getConfig(CONFIG_BOOL_INSTANCE_IGNORE_LEVEL))
+    if (mapDiff)
     {
-        miscRequirement = mapDiff->Id;
-        return AREA_LOCKSTATUS_TOO_LOW_LEVEL;
-    }
-    if (!isRegularTargetMap && !sWorld.getConfig(CONFIG_BOOL_INSTANCE_IGNORE_LEVEL) && GetLevel() < uint32(maxLevelForExpansion[mapEntry->Expansion()]))
-    {
-        miscRequirement = mapDiff->Id;
-        return AREA_LOCKSTATUS_TOO_LOW_LEVEL;
+        if (GetLevel() < at->requiredLevel && !sWorld.getConfig(CONFIG_BOOL_INSTANCE_IGNORE_LEVEL))
+        {
+            miscRequirement = mapDiff->Id;
+            return AREA_LOCKSTATUS_TOO_LOW_LEVEL;
+        }
+        if (!isRegularTargetMap && !sWorld.getConfig(CONFIG_BOOL_INSTANCE_IGNORE_LEVEL) && GetLevel() < uint32(maxLevelForExpansion[mapEntry->Expansion()]))
+        {
+            miscRequirement = mapDiff->Id;
+            return AREA_LOCKSTATUS_TOO_LOW_LEVEL;
+        }
     }
 
     // Raid Requirements
